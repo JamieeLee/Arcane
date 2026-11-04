@@ -736,10 +736,16 @@ local function UpdatePlateHealthText(frame, source)
 		text:SetPoint("CENTER", frame.arcanePlatesOverlay, "CENTER", 0, 0);
 		frame.arcanePlatesHealthText = text;
 		frame.arcanePlatesHealthTextSize = size;
+		frame.arcanePlatesHealthTextWidth = frame.arcanePlatesOverlayWidth + 20;
 	elseif frame.arcanePlatesHealthTextSize ~= (frame.arcanePlatesBossGuardian and 10 or 8) then
 		local size = frame.arcanePlatesBossGuardian and 10 or 8;
 		C.SetFace(frame.arcanePlatesHealthText, C.FONT, size, "OUTLINE");
 		frame.arcanePlatesHealthTextSize = size;
+	end
+	local width = frame.arcanePlatesOverlayWidth + 20;
+	if frame.arcanePlatesHealthTextWidth ~= width then
+		frame.arcanePlatesHealthText:SetWidth(width);
+		frame.arcanePlatesHealthTextWidth = width;
 	end
 	local _, maximum = source:GetMinMaxValues();
 	local value = source:GetValue();
