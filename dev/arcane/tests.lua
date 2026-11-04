@@ -120,12 +120,22 @@ SIM.Advance(2, 1 / 30)
 M.Fire("CHAT_MSG_ADDON", "AZSUNITS")
 local bossPlate, bossBar, bossName = M.MakeNameplate("Sir Zeliek")
 frames(30)
+print("Tiny Plates boss diagnostic:",
+	"name=" .. tostring(bossPlate.arcanePlatesPlateName),
+	"special=" .. tostring(bossPlate.arcanePlatesBossGuardian),
+	"category=" .. tostring(bossPlate.arcanePlatesAppliedCategory),
+	"source=" .. tostring(bossPlate.arcanePlatesSourceBar ~= nil),
+	"overlay=" .. tostring(bossPlate.arcanePlatesOverlay ~= nil),
+	"bar=" .. tostring(bossPlate.arcanePlatesHealthBar ~= nil),
+	"nativeShown=" .. tostring(bossBar:IsShown()),
+	"debuffRow=" .. tostring(bossPlate.arcanePlatesDebuffRow ~= nil))
+for i = 1, table.getn(M.chat) do print("Tiny Plates chat:", M.chat[i]) end
 check(not bossBar:IsShown() and bossPlate.arcanePlatesOverlay and bossPlate.arcanePlatesOverlay:IsShown()
 	and bossPlate.arcanePlatesHealthBar and bossPlate.arcanePlatesHealthBar.rimL,
 	"boss and guardian plates use full-size Arcane layered health bars")
 check(bossPlate.arcanePlatesBossGuardianLabel and bossPlate.arcanePlatesBossGuardianLabel:IsShown(),
 	"boss and guardian names use the dedicated Arcane label")
-check(bossPlate.arcanePlatesBossGuardianLabel:GetFont() == Arcane.FONT,
+check(bossPlate.arcanePlatesBossGuardianLabel and bossPlate.arcanePlatesBossGuardianLabel:GetFont() == Arcane.FONT,
 	"boss and guardian names use Arcane's shared FRIZQT face")
 check(bossPlate.arcanePlatesDebuffRow and bossPlate.arcanePlatesDebuffRow:IsShown(),
 	"boss and guardian debuffs are shown below the plate")
@@ -166,7 +176,7 @@ if nameplatesPart then
 	check(tinyBar:IsShown() and tinyName:IsShown() and tinyPlate:GetWidth() == 120,
 		"turning Tiny Plates off restores regular native size, bar and name")
 	check(bossBar:IsShown() and bossName:IsShown()
-		and not bossPlate.arcanePlatesDebuffRow:IsShown(),
+		and (not bossPlate.arcanePlatesDebuffRow or not bossPlate.arcanePlatesDebuffRow:IsShown()),
 		"turning Tiny Plates off restores boss names and removes custom debuffs")
 	check(M.cvars.nameplateShowEnemies == "1", "turning Tiny Plates off leaves V's CVar untouched")
 	nameplatesPart.set(true)
