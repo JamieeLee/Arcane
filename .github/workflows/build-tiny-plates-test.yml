@@ -35,7 +35,7 @@ jobs:
       - name: Check Lua syntax
         run: |
           find Arcane -name '*.lua' -print0 | xargs -0 -n1 luac5.1 -p
-          luac5.1 -p dev/arcane/tests.lua
+          luac5.1 -p dev/arcane/tiny_plates_tests.lua
       - name: Run Arcane mock regression suite
         working-directory: dev
         run: lua5.1 arcane/tiny_plates_tests.lua . ../Arcane
