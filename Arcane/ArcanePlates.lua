@@ -359,6 +359,232 @@ local function UpdateBossGuardianLabel(frame)
 	holder:Show();
 end
 
+local function ContainsStatusBar(frame)
+	local children = { frame:GetChildren() };
+	for i = 1, table.getn(children) do
+		if ( children[i]:GetObjectType() == "StatusBar" or ContainsStatusBar(children[i]) ) then
+			return true;
+		end
+	end
+	return false;
+end
+
+local function FindStyledVisual(frame, source)
+	local children = { frame:GetChildren() };
+	for i = 1, table.getn(children) do
+		local child = children[i];
+		local width, height = child:GetWidth(), child:GetHeight();
+		if ( child ~= source and child ~= frame.arcanePlatesOverlay
+				and child:GetObjectType() ~= "StatusBar"
+				and width and height and width >= 30 and width <= 200
+				and height >= 5 and height <= 60 and ContainsStatusBar(child) ) then
+			return child;
+		end
+	end
+	return nil;
+end
+
+local function FindNameFontString(frame, name)
+	local fallback;
+	local regions = { frame:GetRegions() };
+	for i = 1, table.getn(regions) do
+		local region = regions[i];
+		if ( region and region:GetObjectType() == "FontString" ) then
+			local text = region:GetText();
+			if ( text == name ) then return region; end
+			if ( not fallback and text and text ~= "" ) then fallback = region; end
+		end
+	end
+	local children = { frame:GetChildren() };
+	for i = 1, table.getn(children) do
+		local found = FindNameFontString(children[i], name);
+		if ( found and found:GetText() == name ) then return found; end
+		if ( not fallback and found ) then fallback = found; end
+	end
+	return fallback;
+end
+
+local function ApplyBossGuardianLabelFont(frame)
+	local label = frame.arcanePlatesBossGuardianLabel;
+	if not label then return end
+	C.SetFace(label, C.FONT, 11, "OUTLINE");
+	C.TextColor(label, 1, 0.86, 0.78);
+end
+
+local DEBUFF_ICON_SIZE = 16;
+local DEBUFF_ICON_GAP = 2;
+local MAX_DEBUFF_ICONS = 10;
+
+local function CreateDebuffIcon(row, index)
+	local icon = CreateFrame("Frame", nil, row);
+	icon:SetWidth(DEBUFF_ICON_SIZE);
+	icon:SetHeight(DEBUFF_ICON_SIZE);
+	icon:SetPoint("LEFT", row, "LEFT", (index - 1) * (DEBUFF_ICON_SIZE + DEBUFF_ICON_GAP), 0);
+	icon.texture = icon:CreateTexture(nil, "ARTWORK");
+	icon.texture:SetAllPoints(icon);
+	icon.texture:SetTexCoord(0.07, 0.93, 0.07, 0.93);
+	icon.overlay = CreateFrame("Frame", nil, icon);
+	icon.overlay:SetAllPoints(icon);
+	icon.overlay:SetFrameLevel(icon:GetFrameLevel() + 1);
+	local borderColor = { 0.05, 0.05, 0.05, 1 };
+	icon.borderTop = icon.overlay:CreateTexture(nil, "OVERLAY");
+	icon.borderTop:SetTexture("Interface\\Buttons\\WHITE8X8");
+	icon.borderTop:SetVertexColor(unpack(borderColor));
+	icon.borderTop:SetPoint("TOPLEFT", icon, "TOPLEFT", 0, 0);
+	icon.borderTop:SetPoint("TOPRIGHT", icon, "TOPRIGHT", 0, 0);
+	icon.borderTop:SetHeight(1);
+	icon.borderBottom = icon.overlay:CreateTexture(nil, "OVERLAY");
+	icon.borderBottom:SetTexture("Interface\\Buttons\\WHITE8X8");
+	icon.borderBottom:SetVertexColor(unpack(borderColor));
+	icon.borderBottom:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 0, 0);
+	icon.borderBottom:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 0, 0);
+	icon.borderBottom:SetHeight(1);
+	icon.borderLeft = icon.overlay:CreateTexture(nil, "OVERLAY");
+	icon.borderLeft:SetTexture("Interface\\Buttons\\WHITE8X8");
+	icon.borderLeft:SetVertexColor(unpack(borderColor));
+	icon.borderLeft:SetPoint("TOPLEFT", icon, "TOPLEFT", 0, 0);
+	icon.borderLeft:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 0, 0);
+	icon.borderLeft:SetWidth(1);
+	icon.borderRight = icon.overlay:CreateTexture(nil, "OVERLAY");
+	icon.borderRight:SetTexture("Interface\\Buttons\\WHITE8X8");
+	icon.borderRight:SetVertexColor(unpack(borderColor));
+	icon.borderRight:SetPoint("TOPRIGHT", icon, "TOPRIGHT", 0, 0);
+	icon.borderRight:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 0, 0);
+	icon.borderRight:SetWidth(1);
+	icon.stacks = icon.overlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall");
+	icon.stacks:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 1, -1);
+	icon.stacks:SetTextColor(1, 1, 1, 1);
+	icon.stacks:SetShadowColor(0, 0, 0, 1);
+	icon.stacks:SetShadowOffset(1, -1);
+	local stackFont, stackHeight = icon.stacks:GetFont();
+	if ( stackFont and stackHeight ) then icon.stacks:SetFont(stackFont, stackHeight, "OUTLINE"); end
+	icon.duration = icon.overlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall");
+	icon.duration:SetPoint("TOPLEFT", icon, "TOPLEFT", 1, -1);
+	icon.duration:SetTextColor(1, 1, 1, 1);
+	icon.duration:SetShadowColor(0, 0, 0, 1);
+	icon.duration:SetShadowOffset(1, -1);
+	local durationFont, durationHeight = icon.duration:GetFont();
+	if ( durationFont and durationHeight ) then
+		icon.duration:SetFont(durationFont, durationHeight * 0.8, "OUTLINE");
+	end
+	return icon;
+end
+
+local function FindBossGuardianUnit(frame, name)
+	local candidates = name and bossGuardianUnitsByName[name];
+	if ( not candidates or table.getn(candidates) == 0 ) then return nil; end
+	local bar = frame.arcanePlatesBossGuardianBar;
+	local currentHealthRatio;
+	if ( bar ) then
+		local value = bar:GetValue();
+		local minimum, maximum = bar:GetMinMaxValues();
+		if ( value and minimum and maximum and maximum > minimum ) then
+			currentHealthRatio = (value - minimum) / (maximum - minimum);
+		end
+	end
+	if ( not currentHealthRatio ) then return candidates[1]; end
+	local best, bestDifference;
+	for i = 1, table.getn(candidates) do
+		local candidate = candidates[i];
+		if ( candidate.hpm and candidate.hpm > 0 and candidate.hp ) then
+			local difference = math.abs(candidate.hp / candidate.hpm - currentHealthRatio);
+			if ( not bestDifference or difference < bestDifference ) then
+				best, bestDifference = candidate, difference;
+			end
+		end
+	end
+	return best or candidates[1];
+end
+
+local function UpdateBossGuardianDebuffs(frame)
+	local name = frame.arcanePlatesPlateName
+	local unit = FindBossGuardianUnit(frame, name)
+	local row = frame.arcanePlatesDebuffRow
+	if not row then
+		row = CreateFrame("Frame", nil, frame)
+		row:SetHeight(DEBUFF_ICON_SIZE)
+		row:SetFrameLevel(frame:GetFrameLevel() + 5)
+		frame.arcanePlatesDebuffRow = row
+	end
+	if unit and unit.id then frame.arcanePlatesDebuffUnitID = unit.id end
+	local unitID = frame.arcanePlatesDebuffUnitID
+	if not unitID then row:Hide(); return end
+	-- Prefer the already cached boss/guardian unit snapshot to avoid an extra
+	-- API call on every plate update. Query by ID only when the snapshot has no data.
+	local debuffs = unit and unit.debuffs
+	if type(debuffs) ~= "table" and type(AZS_GetDebuffs) == "function" then
+		local ok, value = pcall(AZS_GetDebuffs, unitID)
+		if ok and type(value) == "table" then debuffs = value end
+	end
+	if type(debuffs) ~= "table" then
+		row:Hide()
+		return
+	end
+
+	-- Debuff structure only changes when the game's revision changes. Reuse icons and
+	-- skip texture/stack writes until the actual content changes; durations tick separately.
+	local signatureParts = {}
+	local count = math.min(table.getn(debuffs), MAX_DEBUFF_ICONS)
+	for i = 1, count do
+		local d = debuffs[i]
+		if d then
+			signatureParts[i] = tostring(d.icon or "") .. ":" .. tostring(d.stacks or 0)
+				.. ":" .. tostring(d.permanent and 1 or 0) .. ":" .. tostring(d.ends or "")
+		end
+	end
+	local signature = table.concat(signatureParts, "|")
+	local changed = frame.arcanePlatesDebuffSignature ~= signature
+	frame.arcanePlatesDebuffSignature = signature
+	local iconIndex = 0
+	for i = 1, count do
+		local debuff = debuffs[i]
+		if debuff then
+			iconIndex = iconIndex + 1
+			local icons = frame.arcanePlatesDebuffIcons
+			if not icons then icons = {}; frame.arcanePlatesDebuffIcons = icons end
+			local icon = icons[iconIndex]
+			if not icon then
+				icon = CreateDebuffIcon(row, iconIndex)
+				icons[iconIndex] = icon
+				changed = true
+			end
+			if changed then
+				local texture = debuff.icon
+				if not texture or texture == "" then texture = "Interface\\Icons\\INV_Misc_QuestionMark" end
+				icon.texture:SetTexture(texture)
+				if debuff.stacks and debuff.stacks > 1 then icon.stacks:SetText(debuff.stacks)
+				else icon.stacks:SetText("") end
+			end
+			local remaining = debuff.remaining
+			if not remaining and debuff.ends and type(AZS_GetRunTime) == "function" then
+				local ok, runTime = pcall(AZS_GetRunTime)
+				if ok and runTime and debuff.ends >= 0 then remaining = debuff.ends - runTime end
+			end
+			local durationText
+			if debuff.permanent then durationText = "∞"
+			elseif type(remaining) == "number" and remaining >= 0 then durationText = math.ceil(remaining)
+			else durationText = "" end
+			if icon.duration.arcaneText ~= durationText then
+				icon.duration.arcaneText = durationText
+				icon.duration:SetText(durationText)
+			end
+			if not icon:IsShown() then icon:Show() end
+			if not icon.overlay:IsShown() then icon.overlay:Show() end
+		end
+	end
+	local icons = frame.arcanePlatesDebuffIcons or {}
+	for i = iconIndex + 1, table.getn(icons) do if icons[i]:IsShown() then icons[i]:Hide() end end
+	if iconIndex == 0 then row:Hide(); return end
+	local width = iconIndex * DEBUFF_ICON_SIZE + (iconIndex - 1) * DEBUFF_ICON_GAP
+	if row:GetWidth() ~= width then row:SetWidth(width) end
+	local bar = frame.arcanePlatesOverlay or frame.arcanePlatesBossGuardianBar or frame.arcanePlatesStyledVisual or frame
+	local point, relativeTo, relativePoint, x, y = row:GetPoint()
+	if point ~= "TOP" or relativeTo ~= bar or relativePoint ~= "BOTTOM" or x ~= 0 or y ~= -3 then
+		row:ClearAllPoints()
+		row:SetPoint("TOP", bar, "BOTTOM", 0, -3)
+	end
+	if not row:IsShown() then row:Show() end
+end
 local function HideNativePlate(frame, keep)
 	local regions = { frame:GetRegions() };
 	for i = 1, table.getn(regions) do
