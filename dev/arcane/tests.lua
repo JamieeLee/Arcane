@@ -745,6 +745,7 @@ do
 			if o.__kind == "FontString" and o.__text == label and under(o, rootFrame) then return o.__parent end
 		end
 	end
+	M.Slash("")
 	local function partRow(key)
 		if not ArcaneOptions then M.Slash("") end
 		for _, row in ipairs(ArcaneOptions.rows or {}) do
