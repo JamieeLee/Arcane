@@ -38,7 +38,7 @@ jobs:
           luac5.1 -p dev/arcane/tests.lua
       - name: Run Arcane mock regression suite
         working-directory: dev
-        run: lua5.1 arcane/tests.lua . ../Arcane
+        run: lua5.1 arcane/tiny_plates_tests.lua . ../Arcane
       - name: Validate and package addon
         run: python tools/package.py --output dist/Arcane-Tiny-Plates-Arcane-Style-test.zip
       - name: Upload installable test ZIP
