@@ -690,15 +690,6 @@ local function CollectStatusBars(frame, list)
 	return list;
 end
 
-local function CollectStatusBars(frame, list)
-	local children = { frame:GetChildren() };
-	for i = 1, table.getn(children) do
-		if ( children[i]:GetObjectType() == "StatusBar" ) then table.insert(list, children[i]); end
-		CollectStatusBars(children[i], list);
-	end
-	return list;
-end
-
 local function HideShrunkPlate(frame)
 	if ( frame.arcanePlatesBossGuardianLabel ) then frame.arcanePlatesBossGuardianLabel:Hide(); end
 	HideShrunkNameLabel(frame);
@@ -808,6 +799,17 @@ local function CreatePlateOverlay(frame)
 		CollectStatusBars(frame.arcanePlatesStyledVisual, bars);
 		for i = 1, table.getn(bars) do
 			if ( bars[i]:GetWidth() > 0 and bars[i]:GetHeight() > 0 ) then
+				frame.arcanePlatesSourceBar = bars[i];
+				break;
+			end
+		end
+	end
+	if ( not frame.arcanePlatesSourceBar ) then
+		local bars = {};
+		CollectStatusBars(frame, bars);
+		for i = 1, table.getn(bars) do
+			if ( bars[i] ~= frame.arcanePlatesOverlay
+					and bars[i]:GetWidth() > 0 and bars[i]:GetHeight() > 0 ) then
 				frame.arcanePlatesSourceBar = bars[i];
 				break;
 			end
