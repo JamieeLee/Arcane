@@ -37,6 +37,8 @@ M.hud.clock, M.hud.bosses, M.hud.build = true, true, true
 M.Load(DIR)
 frames(30)
 problems("Arcane load")
+check(ArcaneDB.nameplates.showHealthText == true,
+	"health numbers are enabled by default without changing the bar presentation")
 
 -- Regular enemy plates: half size, Arcane bar art, shared font, optional name and V behavior.
 M.cvars.nameplateShowEnemies = "1"
