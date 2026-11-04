@@ -327,27 +327,6 @@ local function HideMatchingNameText(frame, name, keep)
 	end
 end
 
-local function ShowNameText(frame)
-	if ( frame.arcanePlatesNameRegion and frame.arcanePlatesPlateName ) then
-		local text = frame.arcanePlatesNameRegion:GetText();
-		if ( not text or text == "" ) then
-			frame.arcanePlatesNameRegion:SetText(frame.arcanePlatesPlateName);
-		end
-	end
-	local regions = { frame:GetRegions() };
-	for i = 1, table.getn(regions) do
-		local region = regions[i];
-		if ( region and region:GetObjectType() == "FontString" ) then
-			local text = region:GetText();
-			if ( ( not text or text == "" ) and frame.arcanePlatesPlateName ) then
-				region:SetText(frame.arcanePlatesPlateName);
-			end
-			region:SetAlpha(1);
-			region:Show();
-		end
-	end
-end
-
 local function UpdateBossGuardianLabel(frame)
 	local name = frame.arcanePlatesPlateName;
 	if ( not name or name == "" ) then
@@ -372,19 +351,6 @@ local function UpdateBossGuardianLabel(frame)
 	label:SetText(name);
 	label:SetAlpha(1);
 	label:Show();
-end
-
-local function HideFontStrings(frame)
-	local regions = { frame:GetRegions() };
-	for i = 1, table.getn(regions) do
-		local region = regions[i];
-		if ( region and region:GetObjectType() == "FontString" ) then
-			region:SetAlpha(0);
-			region:Hide();
-		end
-	end
-	local children = { frame:GetChildren() };
-	for i = 1, table.getn(children) do HideFontStrings(children[i]); end
 end
 
 local function ContainsStatusBar(frame)
@@ -613,21 +579,6 @@ local function UpdateBossGuardianDebuffs(frame)
 	end
 	if not row:IsShown() then row:Show() end
 end
-local function EnsureOverlayBorder(frame, overlay)
-	if ( frame.arcanePlatesOverlayBorder ) then return; end
-	local border = CreateFrame("Frame", nil, overlay);
-	border:SetPoint("TOPLEFT", overlay, "TOPLEFT", -3, 3);
-	border:SetPoint("BOTTOMRIGHT", overlay, "BOTTOMRIGHT", 3, -3);
-	border:SetFrameLevel(overlay:GetFrameLevel() + 1);
-	border:SetBackdrop({
-		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-		edgeSize = 7.5,
-		insets = { left = 3, right = 3, top = 3, bottom = 3 },
-	});
-	border:SetBackdropBorderColor(1, 1, 1, 1);
-	frame.arcanePlatesOverlayBorder = border;
-end
-
 local function HideNativePlate(frame, keep)
 	local regions = { frame:GetRegions() };
 	for i = 1, table.getn(regions) do
@@ -724,44 +675,12 @@ local function UpdateNamePlaceholder(frame)
 		frame.arcanePlatesBossGuardianLabel);
 end
 
--- Custom bar colors. The color the game/SDUI last set is remembered per bar so it can be restored
--- when the override is turned off or a recycled plate changes category.
+-- The menu may replace the default enemy red with a saved three-stop color.
 local function BarColor(category)
 	if type(C.ArcanePlatesBarColor) == "function" then return C.ArcanePlatesBarColor(category) end
 	return nil
 end
 
-local function ColorsDiffer(r1, g1, b1, r2, g2, b2)
-	return math.abs((r1 or 0) - r2) > 0.01 or math.abs((g1 or 0) - g2) > 0.01
-		or math.abs((b1 or 0) - b2) > 0.01;
-end
-
-ApplyBarOverride = function(bar, color)
-	if not bar or not bar.SetStatusBarColor then return end
-	if color then
-		local r, g, b, a = bar:GetStatusBarColor()
-		local applied = bar.arcanePlatesAppliedColor
-		if not applied or ColorsDiffer(r, g, b, applied[1], applied[2], applied[3]) then
-			bar.arcanePlatesOriginalColor = { r or 1, g or 1, b or 1, a }
-		end
-		if ColorsDiffer(r, g, b, color[1], color[2], color[3]) then
-			if a ~= nil then bar:SetStatusBarColor(color[1], color[2], color[3], a)
-			else bar:SetStatusBarColor(color[1], color[2], color[3]) end
-		end
-		bar.arcanePlatesAppliedColor = { color[1], color[2], color[3] }
-	else
-		local original = bar.arcanePlatesOriginalColor
-		if bar.arcanePlatesAppliedColor and original then
-			if original[4] ~= nil then
-				bar:SetStatusBarColor(original[1], original[2], original[3], original[4])
-			else
-				bar:SetStatusBarColor(original[1], original[2], original[3])
-			end
-		end
-		bar.arcanePlatesAppliedColor = nil
-		bar.arcanePlatesOriginalColor = nil
-	end
-end
 local function CollectStatusBars(frame, list)
 	local children = { frame:GetChildren() };
 	for i = 1, table.getn(children) do
@@ -771,29 +690,13 @@ local function CollectStatusBars(frame, list)
 	return list;
 end
 
--- Covers SDUI's styled visual and the native health bar; our overlay copies the native bar.
-local function ApplyPlateBarColor(frame, color)
-	local bars = frame.arcanePlatesColorBars
-	if not bars then
-		bars = {}
-		local styled = frame.arcanePlatesStyledVisual
-		if styled then CollectStatusBars(styled, bars) end
-		local source = frame.arcanePlatesSourceBar
-		if not source then
-			local children = { frame:GetChildren() }
-			for i = 1, table.getn(children) do
-				if children[i]:GetObjectType() == "StatusBar" then source = children[i]; break end
-			end
-		end
-		if source then table.insert(bars, source) end
-		frame.arcanePlatesColorBars = bars
+local function CollectStatusBars(frame, list)
+	local children = { frame:GetChildren() };
+	for i = 1, table.getn(children) do
+		if ( children[i]:GetObjectType() == "StatusBar" ) then table.insert(list, children[i]); end
+		CollectStatusBars(children[i], list);
 	end
-	frame.arcanePlatesColoredBars = frame.arcanePlatesColoredBars or {}
-	for i = 1, table.getn(bars) do
-		local bar = bars[i]
-		ApplyBarOverride(bar, color)
-		if color then frame.arcanePlatesColoredBars[bar] = true else frame.arcanePlatesColoredBars[bar] = nil end
-	end
+	return list;
 end
 
 local function HideShrunkPlate(frame)
