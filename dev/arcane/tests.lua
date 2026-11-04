@@ -745,7 +745,6 @@ do
 			if o.__kind == "FontString" and o.__text == label and under(o, rootFrame) then return o.__parent end
 		end
 	end
-	Arcane.ToggleHub()
 	local function partRow(key)
 		if not ArcaneOptions then M.Slash("") end
 		for _, row in ipairs(ArcaneOptions.rows or {}) do
@@ -1948,6 +1947,7 @@ do
 		local l, b, r, t = M.Rect(a)
 		check(l >= 0 and b >= 0 and r <= SW and t <= SH, "the remaining Arcane minimap button stays on screen")
 	end
+	if not ArcaneOptions then Arcane.ToggleHub() end
 	local function partRow(key)
 		for _, row in ipairs(ArcaneOptions.rows or {}) do
 			if row.info and row.info.key == key then return row end
