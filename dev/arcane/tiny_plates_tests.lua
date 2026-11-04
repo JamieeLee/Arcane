@@ -104,6 +104,40 @@ check(bossPlate.arcanePlatesBossGuardianLabel and bossPlate.arcanePlatesBossGuar
 check(bossPlate.arcanePlatesDebuffRow and bossPlate.arcanePlatesDebuffRow:IsShown(),
 	"guardian debuffs remain visible below the replacement bar")
 
+-- Health numbers are independently toggleable; the colored health bars stay on.
+Arcane.arcanePlatesOptions()
+local healthToggle
+local optionChildren = { ArcanePlatesOptions:GetChildren() }
+for i = 1, table.getn(optionChildren) do
+	if optionChildren[i].arcanePlatesOptionKey == "showHealthText" then
+		healthToggle = optionChildren[i]
+		break
+	end
+end
+check(healthToggle ~= nil and healthToggle:GetChecked(),
+	"Tiny Plates settings expose Show health numbers, enabled by default")
+if healthToggle then
+	healthToggle:SetChecked(nil)
+	healthToggle:Click()
+	frames(10)
+	check(ArcaneDB.nameplates.showHealthText == false
+		and tinyPlate.arcanePlatesHealthText and not tinyPlate.arcanePlatesHealthText:IsShown()
+		and bossPlate.arcanePlatesHealthText and not bossPlate.arcanePlatesHealthText:IsShown(),
+	"turning health numbers off hides the text on regular and boss plates")
+	check(tinyPlate.arcanePlatesOverlay:IsShown() and bossPlate.arcanePlatesOverlay:IsShown()
+		and tinyPlate.arcanePlatesHealthBar.fillA and bossPlate.arcanePlatesHealthBar.fillA,
+	"turning health numbers off leaves both colored health bars visible")
+	healthToggle:SetChecked(1)
+	healthToggle:Click()
+	frames(10)
+	check(ArcaneDB.nameplates.showHealthText == true
+		and tinyPlate.arcanePlatesHealthText:IsShown()
+		and bossPlate.arcanePlatesHealthText:IsShown(),
+	"turning health numbers back on restores the text without rebuilding the bars")
+	check(tinyPlate.arcanePlatesOverlay:IsShown() and bossPlate.arcanePlatesOverlay:IsShown(),
+	"re-enabling health numbers does not alter bar visibility")
+end
+
 -- Native restore, including both original plate types.
 local nameplatesPart
 for i = 1, table.getn(Arcane.parts) do
