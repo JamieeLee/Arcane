@@ -473,9 +473,9 @@ end
 local function FindBossGuardianUnit(frame, name)
 	local candidates = name and bossGuardianUnitsByName[name];
 	if ( not candidates or table.getn(candidates) == 0 ) then return nil; end
-	local bar = frame.arcanePlatesBossGuardianBar;
+	local bar = frame.arcanePlatesSourceBar;
 	local currentHealthRatio;
-	if ( bar ) then
+	if ( bar and bar.GetValue and bar.GetMinMaxValues ) then
 		local value = bar:GetValue();
 		local minimum, maximum = bar:GetMinMaxValues();
 		if ( value and minimum and maximum and maximum > minimum ) then
