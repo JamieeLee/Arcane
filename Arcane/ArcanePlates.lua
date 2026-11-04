@@ -720,6 +720,34 @@ local function PlateColorStops(category)
 	};
 end
 
+local function PlateHealthText(value, maximum)
+	local hp = math.floor((value or 0) + 0.5);
+	local hpm = math.floor((maximum or 0) + 0.5);
+	if hpm >= 100000 then return C.Short(hp) .. " / " .. C.Short(hpm) end
+	return C.Commas(hp) .. " / " .. C.Commas(hpm);
+end
+
+local function UpdatePlateHealthText(frame, source)
+	if not frame.arcanePlatesHealthText then
+		local special = frame.arcanePlatesBossGuardian and true or false;
+		local size = special and 10 or 8;
+		local text = C.Text(frame.arcanePlatesHealthBar.top, C.FONT, size, "OUTLINE",
+			"CENTER", frame.arcanePlatesOverlayWidth + 20);
+		text:SetPoint("CENTER", frame.arcanePlatesOverlay, "CENTER", 0, 0);
+		frame.arcanePlatesHealthText = text;
+		frame.arcanePlatesHealthTextSize = size;
+	elseif frame.arcanePlatesHealthTextSize ~= (frame.arcanePlatesBossGuardian and 10 or 8) then
+		local size = frame.arcanePlatesBossGuardian and 10 or 8;
+		C.SetFace(frame.arcanePlatesHealthText, C.FONT, size, "OUTLINE");
+		frame.arcanePlatesHealthTextSize = size;
+	end
+	local _, maximum = source:GetMinMaxValues();
+	local value = source:GetValue();
+	local text = PlateHealthText(value, maximum);
+	C.SetText(frame.arcanePlatesHealthText, text);
+	if not frame.arcanePlatesHealthText:IsShown() then frame.arcanePlatesHealthText:Show() end;
+end
+
 local function ApplyPlateStyle(frame)
 	local special = IsBossOrGuardianPlate(frame);
 	local category = special and "boss" or "regular";
@@ -749,6 +777,7 @@ local function ApplyPlateStyle(frame)
 	end
 	local stops = PlateColorStops(category);
 	C.BarColors(bar, stops[1], stops[2], stops[3]);
+	UpdatePlateHealthText(frame, source);
 	bar.snap = true;
 	if ( not overlay:IsShown() ) then overlay:Show(); end
 	HideNativePlate(frame, nil);
@@ -928,6 +957,7 @@ local function SyncOverlayValues()
 			local value = source:GetValue() or 0;
 			local ratio = range > 0 and C.Clamp((value - minimum) / range, 0, 1) or 0;
 			C.BarStep(bar, ratio, dt, now);
+			UpdatePlateHealthText(frame, source);
 			if ( frame.arcanePlatesBarThemeStamp ~= C.palStamp ) then
 				C.BarTheme(bar, C.Pal());
 				frame.arcanePlatesBarThemeStamp = C.palStamp;
