@@ -5,7 +5,7 @@ A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethu
 ## What's in it
 
 - **Boss timer:** a themed countdown to each boss, with the run's time.
-- **Tiny Plates:** regular enemy nameplates shrink to half size, with Arcane's shared FRIZQT typography and layered enemy-red health bars; bosses and guardians keep their full size with the same styling and their debuffs below.
+- **Tiny Plates:** regular enemy nameplates shrink to half size, with Arcane's shared FRIZQT typography, readable health values and layered enemy-red bars; bosses and guardians keep their full size with the same styling and their debuffs below.
 - **Boss and mini-boss bars:** red bars with real health numbers and the debuffs on them.
 - **Skulls:** a horned skull with red eyes floating over each boss, and a plainer one over each guardian, wherever it is on the screen, large when near and small when far.
 - **Your frame, your target and your party:** in class colors, portraits in metal rings.
