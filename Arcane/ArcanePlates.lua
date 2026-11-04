@@ -14,7 +14,6 @@ local debuffClock = 0
 local refreshPending = true
 local styleRevision = 0
 local scanFrame
-local ApplyBarOverride
 
 local function Opt(key)
 	if type(C.ArcanePlatesOption) == "function" then return C.ArcanePlatesOption(key) end
