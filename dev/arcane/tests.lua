@@ -85,6 +85,9 @@ check(tinyPlate.arcanePlatesOverlay and tinyPlate.arcanePlatesOverlay:IsShown(),
 check(tinyPlate.arcanePlatesHealthBar and tinyPlate.arcanePlatesHealthBar.fillA
 	and tinyPlate.arcanePlatesHealthBar.rimL,
 	"regular nameplates use Arcane's layered gradient health-bar artwork")
+check(tinyPlate.arcanePlatesHealthText and tinyPlate.arcanePlatesHealthText:GetFont() == Arcane.FONT
+	and tinyPlate.arcanePlatesHealthText:GetText() == "75 / 100",
+	"regular nameplates show health values in Arcane's shared font")
 check(not tinyBar:IsShown() and not tinyName:IsShown(),
 	"regular plates replace the native health bar and stock name")
 ArcaneDB.nameplates.showShrunkName = true
@@ -120,21 +123,14 @@ SIM.Advance(2, 1 / 30)
 M.Fire("CHAT_MSG_ADDON", "AZSUNITS")
 local bossPlate, bossBar, bossName = M.MakeNameplate("Sir Zeliek")
 frames(30)
-print("Tiny Plates boss diagnostic:",
-	"name=" .. tostring(bossPlate.arcanePlatesPlateName),
-	"special=" .. tostring(bossPlate.arcanePlatesBossGuardian),
-	"category=" .. tostring(bossPlate.arcanePlatesAppliedCategory),
-	"source=" .. tostring(bossPlate.arcanePlatesSourceBar ~= nil),
-	"overlay=" .. tostring(bossPlate.arcanePlatesOverlay ~= nil),
-	"bar=" .. tostring(bossPlate.arcanePlatesHealthBar ~= nil),
-	"nativeShown=" .. tostring(bossBar:IsShown()),
-	"debuffRow=" .. tostring(bossPlate.arcanePlatesDebuffRow ~= nil))
-for i = 1, table.getn(M.chat) do print("Tiny Plates chat:", M.chat[i]) end
 check(not bossBar:IsShown() and bossPlate.arcanePlatesOverlay and bossPlate.arcanePlatesOverlay:IsShown()
 	and bossPlate.arcanePlatesHealthBar and bossPlate.arcanePlatesHealthBar.rimL,
 	"boss and guardian plates use full-size Arcane layered health bars")
 check(bossPlate.arcanePlatesBossGuardianLabel and bossPlate.arcanePlatesBossGuardianLabel:IsShown(),
 	"boss and guardian names use the dedicated Arcane label")
+check(bossPlate.arcanePlatesHealthText and bossPlate.arcanePlatesHealthText:GetFont() == Arcane.FONT
+	and bossPlate.arcanePlatesHealthText:GetText() == "75 / 100",
+	"boss and guardian plates show health values in Arcane's shared font")
 check(bossPlate.arcanePlatesBossGuardianLabel and bossPlate.arcanePlatesBossGuardianLabel:GetFont() == Arcane.FONT,
 	"boss and guardian names use Arcane's shared FRIZQT face")
 check(bossPlate.arcanePlatesDebuffRow and bossPlate.arcanePlatesDebuffRow:IsShown(),
