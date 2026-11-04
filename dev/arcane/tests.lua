@@ -82,8 +82,23 @@ local tinyPlate, tinyBar, tinyName = M.MakeNameplate("Test Ghoul")
 frames(30)
 check(tinyPlate.arcanePlatesOverlay and tinyPlate.arcanePlatesOverlay:IsShown(),
 	"V-visible regular nameplates receive the half-size Arcane overlay")
+check(tinyPlate.arcanePlatesHealthBar and tinyPlate.arcanePlatesHealthBar.fillA
+	and tinyPlate.arcanePlatesHealthBar.rimL,
+	"regular nameplates use Arcane's layered gradient health-bar artwork")
 check(not tinyBar:IsShown() and not tinyName:IsShown(),
-	"regular plates use the compact bar and hide the stock name")
+	"regular plates replace the native health bar and stock name")
+ArcaneDB.nameplates.showShrunkName = true
+Arcane.ArcanePlatesRefresh(true)
+frames(10)
+local tinyLabel = tinyPlate.arcanePlatesShrunkLabelHolder and tinyPlate.arcanePlatesShrunkLabelHolder.text
+check(tinyLabel and tinyLabel:IsShown() and tinyLabel:GetText() == "Test Ghoul",
+	"the optional tiny-plate name uses Arcane's dedicated label")
+local tinyFace = tinyLabel and tinyLabel:GetFont()
+check(tinyFace == Arcane.FONT,
+	"tiny-plate names use Arcane's shared FRIZQT face")
+ArcaneDB.nameplates.showShrunkName = false
+Arcane.ArcanePlatesRefresh(true)
+frames(5)
 check(tinyPlate:IsVisible(), "Tiny Plates does not hide the game's nameplate frame")
 tinyPlate:Hide()
 frames(5)
@@ -105,10 +120,13 @@ SIM.Advance(2, 1 / 30)
 M.Fire("CHAT_MSG_ADDON", "AZSUNITS")
 local bossPlate, bossBar, bossName = M.MakeNameplate("Sir Zeliek")
 frames(30)
-check(bossBar:IsShown() and not bossPlate.arcanePlatesOverlay,
-	"boss and guardian plates retain their full-size native health bars")
+check(not bossBar:IsShown() and bossPlate.arcanePlatesOverlay and bossPlate.arcanePlatesOverlay:IsShown()
+	and bossPlate.arcanePlatesHealthBar and bossPlate.arcanePlatesHealthBar.rimL,
+	"boss and guardian plates use full-size Arcane layered health bars")
 check(bossPlate.arcanePlatesBossGuardianLabel and bossPlate.arcanePlatesBossGuardianLabel:IsShown(),
-	"boss and guardian names use the dedicated label")
+	"boss and guardian names use the dedicated Arcane label")
+check(bossPlate.arcanePlatesBossGuardianLabel:GetFont() == Arcane.FONT,
+	"boss and guardian names use Arcane's shared FRIZQT face")
 check(bossPlate.arcanePlatesDebuffRow and bossPlate.arcanePlatesDebuffRow:IsShown(),
 	"boss and guardian debuffs are shown below the plate")
 
@@ -155,7 +173,8 @@ if nameplatesPart then
 	frames(30)
 	check(tinyPlate.arcanePlatesOverlay:IsShown() and not tinyBar:IsShown(),
 		"turning Tiny Plates back on reapplies the compact regular style")
-	check(bossBar:IsShown(), "turning Tiny Plates back on keeps boss health bars native")
+	check(not bossBar:IsShown() and bossPlate.arcanePlatesOverlay:IsShown(),
+		"turning Tiny Plates back on reapplies the full-size Arcane boss bar")
 end
 check(ArcaneTimerFrame.__shown, "the timer shows in the run")
 check(findText(ArcaneBosses, "^Noth the Plaguebringer$") ~= nil, "a bar for the boss that's up: " .. table.concat(textsUnder(ArcaneBosses), " | "))
