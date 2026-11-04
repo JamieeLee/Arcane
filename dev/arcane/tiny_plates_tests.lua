@@ -81,7 +81,7 @@ bosses[1].state = "dead"
 SIM.Publish()
 M.guardians = { { id = 77, name = "Sir Zeliek", hp = 21500, hpm = 36000, awake = true } }
 M.debuffs = { ["Sir Zeliek"] = {
-	{ name = "Curse", icon = "Interface\\\\Icons\\\\Spell_Shadow_CurseOfMannoroth",
+	{ name = "Curse", icon = "Interface\\Icons\\Spell_Shadow_CurseOfMannoroth",
 		stacks = 2, ends = (M.runTime or 0) + 12 }
 } }
 SIM.Advance(2, 1 / 30)
