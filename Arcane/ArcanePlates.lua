@@ -728,6 +728,12 @@ local function PlateHealthText(value, maximum)
 end
 
 local function UpdatePlateHealthText(frame, source)
+	if not Opt("showHealthText") then
+		if frame.arcanePlatesHealthText and frame.arcanePlatesHealthText:IsShown() then
+			frame.arcanePlatesHealthText:Hide();
+		end
+		return;
+	end
 	if not frame.arcanePlatesHealthText then
 		local special = frame.arcanePlatesBossGuardian and true or false;
 		local size = special and 10 or 8;
@@ -1071,7 +1077,7 @@ end
 C.OnInit(function()
 	local d = C.DB("nameplates", {
 		showDebuffs = true, hideShrunkPlates = false, hideBossName = false,
-		showShrunkName = false, enabled = true,
+		showShrunkName = false, showHealthText = true, enabled = true,
 	})
 	active = d.enabled ~= false
 	scanFrame = CreateFrame("Frame", "ArcanePlatesDriver")
