@@ -2088,8 +2088,16 @@ end
 ------------------------------------------------------------------ 11s. the character window, dressed
 do
 	local function alpha(o) return o.__alpha or 1 end
+	local cp
+	for i = 1, table.getn(Arcane.parts) do if Arcane.parts[i].key == "character" then cp = Arcane.parts[i] end end
+	print("CHARDBG before", "db=" .. tostring(ArcaneDB.character and ArcaneDB.character.enabled), "part=" .. tostring(cp and cp.get()),
+		"driver=" .. tostring(ArcaneCharacterDriver), "frame=" .. tostring(CharacterFrame:IsVisible()), "paper=" .. tostring(PaperDollFrame:IsVisible()),
+		"paperOnShow=" .. tostring(PaperDollFrame:GetScript("OnShow")), "frameOnShow=" .. tostring(CharacterFrame:GetScript("OnShow")))
 	CharacterFrame:Show()
 	frames(10)
+	print("CHARDBG after", "back=" .. tostring(ArcaneCharacterBack), "stats=" .. tostring(ArcaneCharacterStats),
+		"driver=" .. tostring(ArcaneCharacterDriver), "db=" .. tostring(ArcaneDB.character and ArcaneDB.character.enabled),
+		"paper=" .. tostring(PaperDollFrame:IsVisible()), "chatLast=" .. tostring(M.chat[table.getn(M.chat)]))
 	local bg, panel = ArcaneCharacterBack, ArcaneCharacterStats
 	check(bg and M.Visible(bg) and M.Visible(panel), "opened, the window is dressed: its body and the stats beside it")
 	check(ArcaneCharacterTalents == nil, "no talents strip (for later)")
