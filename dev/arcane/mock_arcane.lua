@@ -34,6 +34,8 @@ local function NewObject(kind, parent)
 	local obj = { __kind = kind, __parent = parent, __points = {}, __shown = true, __alpha = 1, __scale = 1,
 		__scripts = {}, __events = {}, __id = created }
 	setmetatable(obj, { __index = function(t, k)
+		-- Arcane is an addon-owned marker field on frames, not a client API method.
+		if k == "Arcane" then return nil end
 		local first = string.sub(k, 1, 1)
 		if first == string.upper(first) and string.find(first, "%a") then
 			local list = ENGINE_METHODS[kind]
