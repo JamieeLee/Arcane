@@ -2,7 +2,7 @@ name: Build and release Arcane UI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, "audit/character-suite-diagnostic"]
     paths:
       - "Arcane/**"
       - "tools/**"
