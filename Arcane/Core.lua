@@ -861,9 +861,6 @@ function C.PanelTheme(p, pal)
 	end
 end
 
-function C.PanelStep(p, now)
-	-- The medallions are static artwork; no animated dragon-eye glow is needed.
-end
 
 ------------------------------------------------------------------------ calling the game safely
 -- pcall without stray arguments: the game's strict functions (the meter API) count a passed nil
