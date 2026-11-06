@@ -624,7 +624,6 @@ local function Step(dt)
 	end
 	StepXP(dt, now)
 	StepDock(dt)
-	C.PanelStep(root.deco, real)
 
 	S.takeClock = S.takeClock - dt
 	if S.takeClock <= 0 then
