@@ -178,7 +178,7 @@ local function StepDock(dt)
 	if math.abs(w - target) < 0.3 then w = target end
 	if w ~= S.dock then
 		S.dock = w
-		local room = C.PANEL_ROOM or 0 -- each end's room for its dragon (Core)
+		local room = C.PANEL_ROOM or 0 -- each end's room for its medallion (Core)
 		root.panel:ClearAllPoints()
 		root.panel:SetPoint("TOPLEFT", root, "TOPLEFT", -room, 0)
 		root.panel:SetPoint("BOTTOMRIGHT", root, "BOTTOMRIGHT", w + room, 0)
