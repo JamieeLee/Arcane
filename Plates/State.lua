@@ -321,6 +321,13 @@ local function RegisterPlate(frame, knownPlates, orderedPlates)
 
 	if nameChanged then
 		frame.arcanePlatesPlateName = currentName
+		-- A pooled frame may receive a different native visual tree. Drop cached references so
+		-- the replacement bar is rebound to the new unit's actual StatusBar and name container.
+		frame.arcanePlatesSourceBar = nil
+		frame.arcanePlatesStyledVisual = nil
+		frame.arcanePlatesStyledOriginalScale = nil
+		frame.arcanePlatesSourceOriginalWidth = nil
+		frame.arcanePlatesSourceOriginalHeight = nil
 		frame.arcanePlatesDebuffUnitID = nil
 		frame.arcanePlatesDebuffSignature = nil
 		frame.arcanePlatesAppliedCategory = nil

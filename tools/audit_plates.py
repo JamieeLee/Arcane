@@ -2,7 +2,6 @@
 """Static ownership and regression guards for the Tiny Plates subsystem."""
 from pathlib import Path
 import re
-import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 TOC = (ROOT / "Arcane.toc").read_text(encoding="utf-8")
@@ -40,8 +39,12 @@ require("if state.shown then frame:Show()" not in state,
         "restoration must never re-show a pooled root nameplate")
 require("styled:ClearAllPoints()" not in state,
         "native restoration must not recenter replacement visuals")
-require("else\\n\\t\\tlocal regions" not in state,
-        "do not use blanket show-all fallback for unknown native state")
+require("regions[i]:Show()" not in state and "children[i]:Show()" not in state
+        and "SetAlpha(1)" not in state,
+        "do not use blanket show/alpha restoration when native state is unknown")
+require("frame.arcanePlatesSourceBar = nil" in state
+        and "frame.arcanePlatesStyledVisual = nil" in state,
+        "recycled plates must discard stale native-child references")
 require("bossGuardianNames = {}" in special and "bossGuardianUnitsByName = {}" in special,
         "boss identity indexes must be rebuilt together")
 require("debuffCache[unitID]" in special,
@@ -49,12 +52,10 @@ require("debuffCache[unitID]" in special,
 require("runTimeRead" in special,
         "run time should be queried at most once per plate update")
 require("local function ContainsStatusBar" not in visuals,
-        "duplicate recursive status-bar search must live in the state module")
+        "recursive status-bar search must have one implementation")
 require("P.State.RegisterPlate" in controller and "P.Visuals.Apply(frame)" in controller,
         "controller must delegate registration and presentation to their owning modules")
-require("frame.arcanePlatesStyleRevision = styleRevision" in controller,
-        "successful style applications must record their revision")
-require(re.search(r"if P\\.Visuals\\.Apply\\(frame\\) then[\\s\\S]+?frame\\.arcanePlatesStyleRevision = styleRevision", controller) is not None,
+require(re.search(r"if P\.Visuals\.Apply\(frame\) then[\s\S]+?frame\.arcanePlatesStyleRevision = styleRevision", controller) is not None,
         "style revision must be recorded only after application succeeds")
 require("if oldOnHide then oldOnHide() end" in options,
         "Tiny Plates settings must preserve the parent frame's existing OnHide handler")

@@ -4,8 +4,6 @@ C.Plates = C.Plates or {}
 local P = C.Plates
 P.Visuals = {}
 
-local DEBUFF_ICON_SIZE = 16
-
 local function FindStyledVisual(frame, source)
 	local children = { frame:GetChildren() }
 	for i = 1, table.getn(children) do
@@ -338,14 +336,16 @@ local function Apply(frame)
 	return ApplyPlateStyle(frame)
 end
 
+local lastOverlaySyncTime
+
 local function SyncOverlayValues(orderedPlates)
 	local now = GetTime()
 	local dt = 0.1
-	if P.Visuals.lastOverlaySyncTime then
-		dt = math.min(now - P.Visuals.lastOverlaySyncTime, 0.2)
+	if lastOverlaySyncTime then
+		dt = math.min(now - lastOverlaySyncTime, 0.2)
 	end
 	if dt <= 0 then dt = 0.1 end
-	P.Visuals.lastOverlaySyncTime = now
+	lastOverlaySyncTime = now
 	for i = 1, table.getn(orderedPlates) do
 		local frame = orderedPlates[i]
 		local bar = frame.arcanePlatesHealthBar
