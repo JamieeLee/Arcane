@@ -24,9 +24,7 @@ end
 
 -- Searches descendants because replacement UIs may put the name in a child frame.
 local function GetPlateName(frame, root)
-	local originalRoot = root == nil
 	root = root or frame
-	if originalRoot then frame.arcanePlatesNameRegion = nil end
 	local regions = { root:GetRegions() }
 	for i = 1, table.getn(regions) do
 		local region = regions[i]
@@ -150,22 +148,12 @@ local function ContainsStatusBar(frame)
 end
 
 local function IdentifyNameplate(frame)
-	local objectType = frame:GetObjectType()
-	if objectType ~= "Frame" and objectType ~= "Button" then return false end
+	-- Azeroth Survivors creates its native V-plates as anonymous Button children of WorldFrame.
+	-- Requiring their name and health bar keeps unrelated WorldFrame frames out of the registry.
+	if frame:GetObjectType() ~= "Button" then return false end
 	local width, height = frame:GetWidth(), frame:GetHeight()
 	if not width or not height or width <= 0 or height <= 0 then return false end
-	local regions = { frame:GetRegions() }
-	local hasBorder = false
-	for i = 1, table.getn(regions) do
-		local region = regions[i]
-		if region and region:GetObjectType() == "Texture"
-				and region:GetTexture() == "Interface\\Tooltips\\Nameplate-Border" then
-			hasBorder = true
-			break
-		end
-	end
-	local hasName = GetPlateName(frame) ~= nil
-	return hasName and (hasBorder or ContainsStatusBar(frame))
+	return GetPlateName(frame) ~= nil and ContainsStatusBar(frame)
 end
 
 local function HideNameText(frame)
