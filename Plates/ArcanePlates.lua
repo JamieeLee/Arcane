@@ -13,7 +13,6 @@ end
 -- when a pooled frame's name changes.
 local knownPlates = {}
 local orderedPlates = {}
-local active = true
 local scanClock = 0
 local SCAN_INTERVAL = 0.50
 local OVERLAY_INTERVAL = 0.10
@@ -120,7 +119,6 @@ local function RefreshAll()
 end
 
 local function RestoreAll()
-	active = false
 	for i = 1, table.getn(orderedPlates) do
 		local frame = orderedPlates[i]
 		if frame then
@@ -136,28 +134,6 @@ local function RestoreAll()
 	end
 end
 
-local function SetEnabled(on)
-	on = on and true or false
-	if active == on then
-		if active then RefreshAll() end
-		return
-	end
-	active = on
-	styleRevision = styleRevision + 1
-	for i = 1, table.getn(orderedPlates) do
-		orderedPlates[i].arcanePlatesAppliedCategory = nil
-		orderedPlates[i].arcanePlatesStyleRevision = -1
-	end
-	if active then
-		scanClock = 0
-		refreshPending = true
-		if scanFrame then scanFrame:Show() end
-	else
-		RestoreAll()
-		if scanFrame then scanFrame:Hide() end
-	end
-end
-
 C.ArcanePlatesRefresh = function(force)
 	styleRevision = styleRevision + 1
 	if force then RefreshAll() else refreshPending = true end
@@ -166,9 +142,11 @@ end
 C.OnInit(function()
 	local d = C.DB("nameplates", {
 		showDebuffs = true, hideShrunkPlates = false, hideBossName = false,
-		showShrunkName = false, showHealthText = true, enabled = true,
+		showShrunkName = false, showHealthText = true,
 	})
-	active = d.enabled ~= false
+	-- Tiny Plates is the UX's only enemy health-bar renderer, not an optional hub part.
+	-- Forget the old global toggle so a saved "off" value cannot leave enemies barless.
+	d["enabled"] = nil
 	scanFrame = CreateFrame("Frame", "ArcanePlatesDriver")
 	scanFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	scanFrame:RegisterEvent("CHAT_MSG_ADDON")
@@ -178,7 +156,6 @@ C.OnInit(function()
 		RefreshAll()
 	end)
 	scanFrame:SetScript("OnUpdate", function()
-		if not active then return end
 		local dt = arg1 or 0
 		if dt > 0.1 then dt = 0.1 end
 		if dt < 0 then dt = 0 end
@@ -215,22 +192,11 @@ C.OnInit(function()
 			end
 		end
 	end)
-	if not active then scanFrame:Hide() end
 end)
 
 C.OnWorld(function()
-	if active and scanFrame then RefreshAll(); scanFrame:Show() end
+	if scanFrame then RefreshAll(); scanFrame:Show() end
 end)
 
 C.OnLogout(function() RestoreAll() end)
 
-C.RegisterPart({
-	key = "nameplates", name = "Tiny Plates",
-	note = "Half-size regular nameplates, with full-size boss and guardian plates.",
-	get = function() return active end,
-	set = function(on)
-		local d = C.DB("nameplates")
-		d.enabled = on and true or false
-		SetEnabled(on)
-	end,
-})
