@@ -133,7 +133,14 @@ end
 local function ContainsStatusBar(frame)
 	local children = { frame:GetChildren() }
 	for i = 1, table.getn(children) do
-		if children[i]:GetObjectType() == "StatusBar" or ContainsStatusBar(children[i]) then
+		local child = children[i]
+		if child:GetObjectType() == "StatusBar" then
+			-- Require a plausible horizontal health bar, not an arbitrary nested meter.
+			local width, height = child:GetWidth(), child:GetHeight()
+			if width and height and width >= 20 and height >= 3 and width >= height * 2 then
+				return true
+			end
+		elseif ContainsStatusBar(child) then
 			return true
 		end
 	end
@@ -141,6 +148,10 @@ local function ContainsStatusBar(frame)
 end
 
 local function IdentifyNameplate(frame)
+	local objectType = frame:GetObjectType()
+	if objectType ~= "Frame" and objectType ~= "Button" then return false end
+	local width, height = frame:GetWidth(), frame:GetHeight()
+	if not width or not height or width <= 0 or height <= 0 then return false end
 	local regions = { frame:GetRegions() }
 	local hasBorder = false
 	for i = 1, table.getn(regions) do
@@ -234,13 +245,11 @@ local function RegisterPlate(frame, knownPlates, orderedPlates)
 		-- A recycled frame may contain new native regions/children. Capture those after
 		-- restoring the previous unit, while retaining the original objects' snapshots.
 		if type(frame.arcanePlatesNativeState) == "table" then
-			local states = frame.arcanePlatesNativeState
-			local seen, fresh = {}, {}
-			for i = 1, table.getn(states) do seen[states[i].object] = true end
+			-- The old unit's captured state has just been restored. Replace the snapshot
+			-- with this pooled unit's current tree instead of accumulating retired objects.
+			local fresh = {}
 			SaveObjectState(frame, fresh)
-			for i = 1, table.getn(fresh) do
-				if not seen[fresh[i].object] then table.insert(states, fresh[i]) end
-			end
+			frame.arcanePlatesNativeState = fresh
 		end
 	end
 
