@@ -47,10 +47,10 @@ def validate_tga_rle_32(path: Path) -> None:
     header = data[:18]
     width = int.from_bytes(header[12:14], "little")
     height = int.from_bytes(header[14:16], "little")
-    if (header[1] != 0 or header[2] != 10 or width != 512 or height != 512
+    if (header[1] != 0 or header[2] != 10 or width != height or width not in (256, 512)
             or header[16] != 32 or (header[17] & 0x0F) != 8
             or (header[17] & 0x20) == 0):
-        fail(f"Hybrid texture must be top-origin 512x512 32-bit alpha RLE TGA: Art/{path.name}")
+        fail(f"Texture must be top-origin 256x256 or 512x512 32-bit alpha RLE TGA: Art/{path.name}")
     offset = 18 + header[0]
     alpha_pixels = 0
     for _row in range(height):
