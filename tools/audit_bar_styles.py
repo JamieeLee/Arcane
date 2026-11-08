@@ -163,6 +163,15 @@ def main() -> None:
         fail("Bar.lua must register the two center diamonds for class coloring")
     if 'panel.endLeft or {}' not in styles or 'panel.endRight or {}' in styles:
         fail("Hybrid must replace only the left panel end and preserve the complete right endcap beneath the class crest")
+    if ("C.PANEL_MEDALLION = P_SIGIL * 1.40" not in core
+            or "PanelHybridArcanePaladin.tga" not in core
+            or "PanelHybridArcaneGem.tga" not in core
+            or "p.sigils, p.sigilsGem = {}, {}" not in core):
+        fail("Classic must create paired Paladin-gold Arcane medallions with amber gem layers")
+    if ("DEFAULT_GEM = THEMES.paladin.gem" not in styles
+            or "panel.sigilsGem" not in styles
+            or 'texture:SetPoint("CENTER", frame, side, x, DEFAULT_CENTER_Y)' not in styles):
+        fail("Classic medallions must retain the approved placement and amber gemstone tint")
     if "state.db.style = CLASSIC" not in styles:
         fail("Classic Arcane style must remain the default for existing saved variables")
     if 'C.DB("bar")' not in styles:
