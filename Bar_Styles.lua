@@ -17,7 +17,6 @@ local HYBRID_CENTER_Y = HYBRID_SIGIL * 18 / 400
 local DEFAULT_SIGIL = C.PANEL_MEDALLION or HYBRID_SIGIL
 local DEFAULT_CENTER_X = C.PANEL_MEDALLION_X or HYBRID_CENTER_X
 local DEFAULT_CENTER_Y = C.PANEL_MEDALLION_Y or HYBRID_CENTER_Y
-local DEFAULT_GEM = THEMES.paladin.gem
 local state = {
 	db = nil, class = nil, runId = nil, readClock = 0, stamp = 0,
 	palette = {}, paletteBase = nil, palettePalStamp = -1,
@@ -208,7 +207,7 @@ local function RestoreBasePanel(panel)
 			local x = right and -DEFAULT_CENTER_X or DEFAULT_CENTER_X
 			local texture = panel.sigils[i]
 			if texture then
-				texture:SetTexture(C.ART .. "PanelHybridArcanePaladin.tga")
+				texture:SetTexture(C.ART .. "PanelDefaultMedallion.tga")
 				texture:SetWidth(DEFAULT_SIGIL)
 				texture:SetHeight(DEFAULT_SIGIL)
 				texture:ClearAllPoints()
@@ -219,21 +218,6 @@ local function RestoreBasePanel(panel)
 					texture:SetTexCoord(0, 1, 0, 1)
 				end
 				C.Vis(texture, true)
-			end
-			local gem = panel.sigilsGem and panel.sigilsGem[i]
-			if gem then
-				gem:SetTexture(C.ART .. "PanelHybridArcaneGem.tga")
-				gem:SetWidth(DEFAULT_SIGIL)
-				gem:SetHeight(DEFAULT_SIGIL)
-				gem:ClearAllPoints()
-				gem:SetPoint("CENTER", frame, side, x, DEFAULT_CENTER_Y)
-				if right then
-					gem:SetTexCoord(1, 0, 0, 1)
-				else
-					gem:SetTexCoord(0, 1, 0, 1)
-				end
-				gem:SetVertexColor(DEFAULT_GEM[1], DEFAULT_GEM[2], DEFAULT_GEM[3], 1)
-				C.Vis(gem, true)
 			end
 		end
 	end
@@ -254,9 +238,6 @@ function M.Apply(panel)
 	panel.barStyleMode, panel.barStyleClass = mode, key
 	RestoreBasePanel(panel)
 	if mode == CLASSIC then return end
-	if panel.sigilsGem then
-		for i = 1, table.getn(panel.sigilsGem) do C.Vis(panel.sigilsGem[i], false) end
-	end
 	EnsureClassEmblems(panel)
 	if mode == HYBRID then
 		EnsureHybridArcane(panel)
@@ -296,11 +277,6 @@ function M.Theme(panel, pal)
 	local mode = Mode()
 	if mode == CLASSIC then
 		C.PanelTheme(panel, pal)
-		if panel.sigilsGem then
-			for i = 1, table.getn(panel.sigilsGem) do
-				panel.sigilsGem[i]:SetVertexColor(DEFAULT_GEM[1], DEFAULT_GEM[2], DEFAULT_GEM[3], 1)
-			end
-		end
 		return
 	end
 	local theme = CurrentTheme()
