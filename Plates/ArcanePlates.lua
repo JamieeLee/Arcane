@@ -128,7 +128,6 @@ local function RestoreAll()
 			if frame.arcanePlatesBossGuardianLabel then frame.arcanePlatesBossGuardianLabel:Hide() end
 			if frame.arcanePlatesBossGuardianLabelHolder then frame.arcanePlatesBossGuardianLabelHolder:Hide() end
 			if frame.arcanePlatesShrunkLabelHolder then frame.arcanePlatesShrunkLabelHolder:Hide() end
-			frame.arcanePlatesHiddenByOption = nil
 			frame.arcanePlatesNativeRestored = true
 		end
 	end
@@ -141,12 +140,12 @@ end
 
 C.OnInit(function()
 	local d = C.DB("nameplates", {
-		showDebuffs = true, hideShrunkPlates = false, hideBossName = false,
+		showDebuffs = true, hideBossName = false,
 		showShrunkName = false, showHealthText = true,
 	})
-	-- Tiny Plates is the UX's only enemy health-bar renderer, not an optional hub part.
-	-- Forget the old global toggle so a saved "off" value cannot leave enemies barless.
+	-- Tiny Plates is always active while Arcane is loaded; remove its retired global toggle.
 	d["enabled"] = nil
+	d["hideShrunkPlates"] = nil
 	scanFrame = CreateFrame("Frame", "ArcanePlatesDriver")
 	scanFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	scanFrame:RegisterEvent("CHAT_MSG_ADDON")
