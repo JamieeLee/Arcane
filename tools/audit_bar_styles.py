@@ -163,7 +163,11 @@ def main() -> None:
         fail("Bar.lua must register the two center diamonds for class coloring")
     if 'panel.endLeft or {}' not in styles or 'panel.endRight or {}' in styles:
         fail("Hybrid must replace only the left panel end and preserve the complete right endcap beneath the class crest")
-    if ("C.PANEL_MEDALLION = P_SIGIL * 1.40" not in core
+    if ("local HYBRID_MEDALLION_SIZE = P_SIGIL * 1.40" not in core
+            or "C.PANEL_MEDALLION = HYBRID_MEDALLION_SIZE * 401 / 388 * 1.025" not in core
+            or "C.PANEL_MEDALLION_X = HYBRID_MEDALLION_SIZE * 0.10" not in core
+            or "+ (6 * C.PANEL_MEDALLION - 0.5 * HYBRID_MEDALLION_SIZE) / 512" not in core
+            or "C.PANEL_MEDALLION_Y = -8" not in core
             or "PanelDefaultMedallion.tga" not in core
             or "PanelDefaultMedallion.tga" not in styles
             or "p.sigilsGem" in core + styles):
