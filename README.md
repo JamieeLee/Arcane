@@ -49,3 +49,22 @@ The release asset is named `ArcaneV0.5.zip`. There is no local package-build scr
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
 ## Commands
+
+| Command | What it does |
+| --- | --- |
+| `/Arcane` | Opens the options (or click the **A** on the minimap's edge) |
+| `/Arcane move`, `/Arcane lock` | Frees the frames to drag them, then locks them |
+| `/Arcane reset` | Puts every frame back in its place |
+| `/Arcane language <code>` | Picks the language (`auto` follows the game) |
+| `/Arcane timer ...`, `/Arcane numbers ...` | The boss timer's and damage numbers' own settings |
+| `/Arcane <part> on/off` | Turns a part on or off |
+| `/Arcane talents` | Opens the talent window |
+| `/Arcane probe` | Prints what the game gives addons, for reporting what's missing |
+
+## Credits
+
+Arcane is developed as an independent project. Project history and retained upstream attribution are documented in [ATTRIBUTION.md](ATTRIBUTION.md). The bundled fonts in `Fonts/` are modified from Lora and Noto Sans CJK; their SIL Open Font License notices are retained in [`Fonts/LICENSE.txt`](Fonts/LICENSE.txt).
+
+## Project files
+
+The source modules are at the repository root. Artwork is in [`Art/`](Art/), bundled fonts and their license are in [`Fonts/`](Fonts/), and the repository preview is in [`docs/images/`](docs/images/).
