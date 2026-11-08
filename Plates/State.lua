@@ -105,7 +105,8 @@ local function RestorePoints(frame, points)
 	frame:ClearAllPoints()
 	for i = 1, table.getn(points) do
 		local p = points[i]
-		frame:SetPoint(p.point, p.relativeTo, p.relativePoint, p.x, p.y)
+		frame:SetPoint(p.point, p.relativeTo or frame:GetParent(),
+			p.relativePoint or p.point, p.x, p.y)
 	end
 end
 

@@ -75,7 +75,13 @@ require("Hide regular plates" in options
 require("SetEnabled(false)" not in controller,
         "a rendering error must not disable the only enemy health-bar renderer")
 require("SafeCall(\"plate discovery\", RegisterPlate, frame)" in controller
-        and "SafeCall(\"plate \" .. tostring(frame), ApplyKnownPlate, frame, updateDebuffs)" in controller,
+        and 'local scope = "plate " .. tostring(frame)' in controller
+        and "SafeCall(scope, ApplyKnownPlate, frame, updateDebuffs)" in controller,
         "plate discovery and rendering errors must be isolated per frame")
+hide_at = visuals.find('if not special and P.Option("hideShrunkPlates") then')
+restore_at = visuals.find("if frame.arcanePlatesHiddenByOption then")
+rebuild_at = visuals.find("if not CreatePlateOverlay(frame) then return false end")
+require(hide_at >= 0 and restore_at > hide_at and rebuild_at > restore_at,
+        "unhide must restore native pieces before rebuilding the Arcane bar")
 
 print("Tiny Plates ownership and regression audits passed.")
