@@ -35,7 +35,6 @@ local function GetPlateName(frame, root)
 			local name = NormalizeName(region:GetText())
 			-- Purely numeric text is a level indicator, not a name.
 			if name and not string.find(name, "^%d+$") then
-				if originalRoot then frame.arcanePlatesNameRegion = region end
 				return name
 			end
 		end
@@ -130,17 +129,20 @@ local function RestoreNativeState(frame)
 	frame.arcanePlatesNativeRestored = true
 end
 
+local function IsHealthStatusBar(bar)
+	if not bar or bar:GetObjectType() ~= "StatusBar" then return false end
+	local width, height = bar:GetWidth(), bar:GetHeight()
+	-- The game plate has one wide horizontal health bar. Exclude incidental meter bars.
+	return width and height and width >= 20 and height >= 3 and width >= height * 2
+end
+
 local function ContainsStatusBar(frame)
 	local children = { frame:GetChildren() }
 	for i = 1, table.getn(children) do
 		local child = children[i]
-		if child:GetObjectType() == "StatusBar" then
-			-- Require a plausible horizontal health bar, not an arbitrary nested meter.
-			local width, height = child:GetWidth(), child:GetHeight()
-			if width and height and width >= 20 and height >= 3 and width >= height * 2 then
-				return true
-			end
-		elseif ContainsStatusBar(child) then
+		if IsHealthStatusBar(child) then
+			return true
+		elseif child:GetObjectType() ~= "StatusBar" and ContainsStatusBar(child) then
 			return true
 		end
 	end
@@ -215,8 +217,12 @@ end
 local function CollectStatusBars(frame, list)
 	local children = { frame:GetChildren() }
 	for i = 1, table.getn(children) do
-		if children[i]:GetObjectType() == "StatusBar" then table.insert(list, children[i]) end
-		CollectStatusBars(children[i], list)
+		local child = children[i]
+		if IsHealthStatusBar(child) then
+			table.insert(list, child)
+		elseif child:GetObjectType() ~= "StatusBar" then
+			CollectStatusBars(child, list)
+		end
 	end
 	return list
 end
@@ -279,6 +285,7 @@ P.State.IsOwnObject = IsOwnObject
 P.State.CaptureNativeState = CaptureNativeState
 P.State.RestoreNativeState = RestoreNativeState
 P.State.ContainsStatusBar = ContainsStatusBar
+P.State.IsHealthStatusBar = IsHealthStatusBar
 P.State.IdentifyNameplate = IdentifyNameplate
 P.State.HideNameText = HideNameText
 P.State.HideMatchingNameText = HideMatchingNameText
