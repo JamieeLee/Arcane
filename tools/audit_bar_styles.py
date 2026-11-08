@@ -40,46 +40,46 @@ def count_chunk_level_locals(text: str) -> int:
 
 
 def validate_tga_rle_32(path: Path) -> None:
-    """Fully decode row-bounded 32-bit alpha RLE TGA data used by Hybrid."""
+    """Fully decode row-bounded 32-bit alpha RLE TGA data used by the Classic default and Hybrid styles."""
     data = path.read_bytes()
     if len(data) < 18:
-        fail(f"Hybrid TGA is truncated: Art/{path.name}")
+        fail(f"Medallion TGA is truncated: Art/{path.name}")
     header = data[:18]
     width = int.from_bytes(header[12:14], "little")
     height = int.from_bytes(header[14:16], "little")
-    if (header[1] != 0 or header[2] != 10 or width != height or width not in (256, 512)
+    if (header[1] != 0 or header[2] != 10 or width != height or width not in (128, 256, 512)
             or header[16] != 32 or (header[17] & 0x0F) != 8
             or (header[17] & 0x20) == 0):
-        fail(f"Texture must be top-origin 256x256 or 512x512 32-bit alpha RLE TGA: Art/{path.name}")
+        fail(f"Texture must be top-origin 128x128, 256x256 or 512x512 32-bit alpha RLE TGA: Art/{path.name}")
     offset = 18 + header[0]
     alpha_pixels = 0
     for _row in range(height):
         row_pixels = 0
         while row_pixels < width:
             if offset >= len(data):
-                fail(f"Hybrid TGA RLE data ends early: Art/{path.name}")
+                fail(f"Medallion TGA RLE data ends early: Art/{path.name}")
             packet = data[offset]
             offset += 1
             count = (packet & 0x7F) + 1
             if row_pixels + count > width:
-                fail(f"Hybrid TGA RLE packet crosses a row: Art/{path.name}")
+                fail(f"Medallion TGA RLE packet crosses a row: Art/{path.name}")
             if packet & 0x80:
                 if offset + 4 > len(data):
-                    fail(f"Hybrid TGA RLE run is truncated: Art/{path.name}")
+                    fail(f"Medallion TGA RLE run is truncated: Art/{path.name}")
                 alpha_pixels += count if data[offset + 3] else 0
                 offset += 4
             else:
                 byte_count = count * 4
                 if offset + byte_count > len(data):
-                    fail(f"Hybrid TGA raw packet is truncated: Art/{path.name}")
+                    fail(f"Medallion TGA raw packet is truncated: Art/{path.name}")
                 alpha_pixels += sum(1 for i in range(offset + 3, offset + byte_count, 4)
                                     if data[i])
                 offset += byte_count
             row_pixels += count
     if offset != len(data):
-        fail(f"Hybrid TGA has unexpected trailing bytes: Art/{path.name}")
+        fail(f"Medallion TGA has unexpected trailing bytes: Art/{path.name}")
     if alpha_pixels == 0:
-        fail(f"Hybrid TGA has no visible pixels: Art/{path.name}")
+        fail(f"Medallion TGA has no visible pixels: Art/{path.name}")
 
 
 def main() -> None:
@@ -197,9 +197,9 @@ def main() -> None:
                  "PanelHybridArcaneWarlock.tga"):
         path = ROOT / "Art" / name
         if not path.is_file():
-            fail(f"Missing Hybrid Arcane art: Art/{name}")
+            fail(f"Missing Arcane medallion art: Art/{name}")
         validate_tga_rle_32(path)
-    print("PASS: all nine Hybrid base/gem/class medallion textures fully decode as 512x512 alpha TGAs")
+    print("PASS: the Classic default and all nine Hybrid base/gem/class medallion textures fully decode as 128x128, 256x256 or 512x512 alpha TGAs")
 
     for name in ("Core.lua", "Bar.lua", "Bar_Styles.lua", "Bar_Styles_Data.lua"):
         count = count_chunk_level_locals(source(name))
