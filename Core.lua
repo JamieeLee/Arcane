@@ -846,7 +846,12 @@ end
 -- rail and extends outward, leaving the slots clear while making the bar unmistakably Arcane.
 local P_RAIL, P_CORNER, P_SIGIL = 8, 16, 122
 C.PANEL_RAIL, C.PANEL_CORNER, C.PANEL_SIGIL = P_RAIL, P_CORNER, P_SIGIL
--- Keep the same endcap footprint as the previous artwork so the bar's overall layout stays stable.
+-- The high-resolution Paladin-gold medallion uses the same 400px cutout in a 512px TGA
+-- as Hybrid. Keep its established size and edge-centered placement for the Classic pair.
+C.PANEL_MEDALLION = P_SIGIL * 1.40
+C.PANEL_MEDALLION_X = C.PANEL_MEDALLION * 0.10
+C.PANEL_MEDALLION_Y = C.PANEL_MEDALLION * 18 / 400
+-- Keep the original endcap clearance; the new medallions fit inside that reserved room.
 local P_OUT, P_FOOT = P_SIGIL * 0.40, P_SIGIL * 25 / 370
 C.PANEL_ROOM = math.floor(P_SIGIL - P_OUT + 6)
 -- Arcane UI's gold, taken from the user's bar picture (dev/art/source/bar_reference.webp).
@@ -894,15 +899,24 @@ function C.Panel(frame, sigils)
 		table.insert(sideEnds, d)
 	end
 	if sigils then
-		p.sigils = {}
+		p.sigils, p.sigilsGem = {}, {}
 		for i, side in ipairs({ "LEFT", "RIGHT" }) do
-			local k = (side == "LEFT") and -1 or 1
-			local t = C.Tex(frame, "OVERLAY", C.ART .. "PanelSigil")
-			t:SetWidth(P_SIGIL)
-			t:SetHeight(P_SIGIL)
-			t:SetPoint("BOTTOM" .. side, frame, "BOTTOM" .. side, k * P_OUT, -P_FOOT)
-			if k > 0 then t:SetTexCoord(1, 0, 0, 1) end
+			local right = side == "RIGHT"
+			local x = right and -C.PANEL_MEDALLION_X or C.PANEL_MEDALLION_X
+			local t = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcanePaladin.tga")
+			t:SetWidth(C.PANEL_MEDALLION)
+			t:SetHeight(C.PANEL_MEDALLION)
+			t:SetPoint("CENTER", frame, side, x, C.PANEL_MEDALLION_Y)
+			if right then t:SetTexCoord(1, 0, 0, 1) end
 			p.sigils[i] = t
+			-- Keep the amber gemstone on its own layer so the approved gold stays crisp.
+			local gem = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcaneGem.tga")
+			gem:SetWidth(C.PANEL_MEDALLION)
+			gem:SetHeight(C.PANEL_MEDALLION)
+			gem:SetPoint("CENTER", frame, side, x, C.PANEL_MEDALLION_Y)
+			if right then gem:SetTexCoord(1, 0, 0, 1) end
+			gem:SetVertexColor(1.00, 0.85, 0.40, 1)
+			p.sigilsGem[i] = gem
 		end
 	end
 	return p
