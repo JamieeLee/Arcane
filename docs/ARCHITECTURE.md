@@ -44,3 +44,14 @@ Use a shared helper when the behavior and its contract are genuinely the same. D
 ## Next candidates for smaller modules
 
 The largest feature files are still candidates for later, isolated extractions: `Timer/Timer.lua`, `Plates/ArcanePlates.lua`, `Windows/Meter.lua` and `Windows/Character.lua`. Each currently owns a coherent feature but contains multiple internal responsibilities. Split those by data intake, presentation, interaction and lifecycle only when the boundaries can be kept explicit and the live client can verify the result.
+
+## Tiny Plates
+
+Tiny Plates is split by responsibility rather than by individual helper:
+- `Plates/State.lua` owns native plate discovery, snapshots, anchor restoration and safe visibility changes.
+- `Plates/SpecialTargets.lua` owns boss/guardian identity and debuff presentation.
+- `Plates/Visuals.lua` owns replacement bars, labels and plate styling.
+- `Plates/ArcanePlates.lua` owns scanning, cadence, enable/disable and lifecycle.
+- `Plates/ArcanePlatesOptions.lua` owns the settings UI and saved option access.
+
+The controller delegates to these modules in TOC order. State restoration deliberately avoids changing root plate visibility or rewriting replacement UI child geometry it does not own.

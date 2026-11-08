@@ -211,7 +211,10 @@ local function BuildPanel(parent)
 	panel:SetFrameStrata(parent and parent:GetFrameStrata() or "DIALOG")
 	panel:Hide()
 	if parent then
+		-- Preserve any existing hub cleanup before closing this child settings panel.
+		local oldOnHide = parent:GetScript("OnHide")
 		parent:SetScript("OnHide", function()
+			if oldOnHide then oldOnHide() end
 			if panel then panel:Hide() end
 		end)
 	end
