@@ -208,8 +208,7 @@ local function CreatePlateOverlay(frame)
 	if not frame.arcanePlatesSourceBar then
 		local children = { frame:GetChildren() }
 		for i = 1, table.getn(children) do
-			if children[i]:GetObjectType() == "StatusBar"
-					and children[i]:GetWidth() > 0 and children[i]:GetHeight() > 0 then
+			if P.State.IsHealthStatusBar(children[i]) then
 				frame.arcanePlatesSourceBar = children[i]
 				break
 			end
