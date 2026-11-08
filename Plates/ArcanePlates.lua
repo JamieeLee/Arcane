@@ -8,6 +8,9 @@ P.Option = function(key)
 	return false
 end
 
+-- Azeroth Survivors keeps a stable WorldFrame plate pool and reuses its Button frames for
+-- successive units. Retain the frame registry; State.RegisterPlate resets unit-specific state
+-- when a pooled frame's name changes.
 local knownPlates = {}
 local orderedPlates = {}
 local active = true

@@ -43,7 +43,7 @@ Use a shared helper when the behavior and its contract are genuinely the same. D
 
 ## Next candidates for smaller modules
 
-The largest feature files are still candidates for later, isolated extractions: `Timer/Timer.lua`, `Plates/ArcanePlates.lua`, `Windows/Meter.lua` and `Windows/Character.lua`. Each currently owns a coherent feature but contains multiple internal responsibilities. Split those by data intake, presentation, interaction and lifecycle only when the boundaries can be kept explicit and the live client can verify the result.
+The largest remaining feature files are candidates for later, isolated extractions: `Timer/Timer.lua`, `Windows/Meter.lua` and `Windows/Character.lua`. Each owns a coherent feature but may still contain internal responsibilities worth separating when the boundaries are clear. Split those by data intake, presentation, interaction and lifecycle only when the boundaries can be kept explicit and the live client can verify the result.
 
 ## Tiny Plates
 
