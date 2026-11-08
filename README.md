@@ -1,12 +1,12 @@
 # Arcane UI
 
-**Current release: v0.4**
+**Current release: v0.5**
 
 A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethus.pl)), the World of Warcraft 1.12 roguelike. Everything is drawn in one look (dark glass, a gold rail, the timer's metal) and steps aside while you pick your cards.
 
 ## Preview
 
-![Arcane UI running in Azeroth Survivors](docs/images/arcane-ui-v0.2.png)
+![Arcane UI running in Azeroth Survivors](docs/images/arcane-ui-v0.5.webp)
 
 ## What's in it
 
@@ -40,7 +40,7 @@ Every part can be turned on or off, sized and moved.
 
 The addon's Lua modules, `Arcane.toc`, `Art/` and `Fonts/` are stored at the **repository root**. The repository itself is not the install folder. For a release ZIP, place those addon files and folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The release asset is named `ArcaneV0.4.zip`. There is no local package-build script, but GitHub Actions runs the Numbers architecture audit, compiles the Lua chunks with Lua 5.1, and creates a test ZIP for matching pull requests to `main`. Those checks do not replace a live test in the client's Lua 5.0 runtime.
+The release asset is named `ArcaneV0.5.zip`. There is no local package-build script, but GitHub Actions runs the Numbers architecture audit, compiles the Lua chunks with Lua 5.1, and creates a test ZIP for matching pull requests to `main`. Those checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
@@ -49,22 +49,3 @@ The release asset is named `ArcaneV0.4.zip`. There is no local package-build scr
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
 ## Commands
-
-| Command | What it does |
-| --- | --- |
-| `/Arcane` | Opens the options (or click the **A** on the minimap's edge) |
-| `/Arcane move`, `/Arcane lock` | Frees the frames to drag them, then locks them |
-| `/Arcane reset` | Puts every frame back in its place |
-| `/Arcane language <code>` | Picks the language (`auto` follows the game) |
-| `/Arcane timer ...`, `/Arcane numbers ...` | The boss timer's and damage numbers' own settings |
-| `/Arcane <part> on/off` | Turns a part on or off |
-| `/Arcane talents` | Opens the talent window |
-| `/Arcane probe` | Prints what the game gives addons, for reporting what's missing |
-
-## Credits
-
-Arcane is developed as an independent project. Project history and retained upstream attribution are documented in [ATTRIBUTION.md](ATTRIBUTION.md). The bundled fonts in `Fonts/` are modified from Lora and Noto Sans CJK; their SIL Open Font License notices are retained in [`Fonts/LICENSE.txt`](Fonts/LICENSE.txt).
-
-## Project files
-
-The source modules are at the repository root. Artwork is in [`Art/`](Art/), bundled fonts and their license are in [`Fonts/`](Fonts/), and the repository preview is in [`docs/images/`](docs/images/).
