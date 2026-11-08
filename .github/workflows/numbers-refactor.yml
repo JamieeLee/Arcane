@@ -45,7 +45,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes lua5.1 zip unzip
 
-      - name: Generate class and default Paladin-gold medallion variants
+      - name: Generate class-specific Hybrid medallion variants
         run: python tools/build_hybrid_medallion_variants.py
 
       - name: Audit TOC order and module ownership
