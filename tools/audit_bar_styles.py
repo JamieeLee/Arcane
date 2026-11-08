@@ -164,14 +164,12 @@ def main() -> None:
     if 'panel.endLeft or {}' not in styles or 'panel.endRight or {}' in styles:
         fail("Hybrid must replace only the left panel end and preserve the complete right endcap beneath the class crest")
     if ("C.PANEL_MEDALLION = P_SIGIL * 1.40" not in core
-            or "PanelHybridArcanePaladin.tga" not in core
-            or "PanelHybridArcaneGem.tga" not in core
-            or "p.sigils, p.sigilsGem = {}, {}" not in core):
-        fail("Classic must create paired Paladin-gold Arcane medallions with amber gem layers")
-    if ("DEFAULT_GEM = THEMES.paladin.gem" not in styles
-            or "panel.sigilsGem" not in styles
-            or 'texture:SetPoint("CENTER", frame, side, x, DEFAULT_CENTER_Y)' not in styles):
-        fail("Classic medallions must retain the approved placement and amber gemstone tint")
+            or "PanelDefaultMedallion.tga" not in core
+            or "PanelDefaultMedallion.tga" not in styles
+            or "p.sigilsGem" in core + styles):
+        fail("Classic must use the exact supplied artwork as one untinted texture on each end")
+    if 'texture:SetPoint("CENTER", frame, side, x, DEFAULT_CENTER_Y)' not in styles:
+        fail("Classic medallions must retain the approved placement and scale")
     if "state.db.style = CLASSIC" not in styles:
         fail("Classic Arcane style must remain the default for existing saved variables")
     if 'C.DB("bar")' not in styles:
@@ -192,7 +190,7 @@ def main() -> None:
             fail(f"Invalid or empty BLP texture: Art/{name}")
     print(f"PASS: all {len(assets)} class emblems, rails, glass and Classic sigil textures are valid BLP2 assets")
 
-    for name in ("PanelHybridArcane.tga", "PanelHybridArcaneGem.tga",
+    for name in ("PanelDefaultMedallion.tga", "PanelHybridArcane.tga", "PanelHybridArcaneGem.tga",
                  "PanelHybridArcaneWarrior.tga", "PanelHybridArcanePaladin.tga",
                  "PanelHybridArcaneRogue.tga", "PanelHybridArcanePriest.tga",
                  "PanelHybridArcaneShaman.tga", "PanelHybridArcaneMage.tga",
