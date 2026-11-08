@@ -96,8 +96,9 @@ require("frame.arcanePlatesHealthTextValue" in visuals
 require("width >= 20 and height >= 3 and width >= height * 2" in state
         and "P.State.IsHealthStatusBar(children[i])" in visuals,
         "discovery and rendering must use the same plausible horizontal health-bar signature")
-require("objectType ~= \"Frame\" and objectType ~= \"Button\"" in state,
-        "unrelated WorldFrame object types must not be registered as plates")
+require('if frame:GetObjectType() ~= "Button" then return false end' in state
+        and 'if objectType ~= "Button" then return end' in controller,
+        "only the game's native WorldFrame plate buttons should enter the registry")
 require("local fresh = {}" in state
         and "frame.arcanePlatesNativeState = fresh" in state,
         "recycled plate snapshots must replace stale child references instead of growing forever")
