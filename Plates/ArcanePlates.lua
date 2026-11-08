@@ -62,8 +62,8 @@ local function ApplyKnownPlate(frame, updateDebuffs)
 	if frame.arcanePlatesAppliedCategory ~= category
 			or frame.arcanePlatesStyleRevision ~= styleRevision then
 		if P.Visuals.Apply(frame) then
-			-- A hidden regular plate is a completed presentation state too. Record only
-			-- successful transitions so an incomplete overlay remains eligible for retry.
+			-- Commit the revision only after all replacement visuals were created and applied.
+			-- An incomplete native plate stays eligible for retry on the next scan.
 			frame.arcanePlatesAppliedCategory = category
 			frame.arcanePlatesStyleRevision = styleRevision
 		else
