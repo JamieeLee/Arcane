@@ -249,7 +249,4 @@ end
 
 C.arcanePlatesOptions = C.ArcanePlatesToggleOptions
 
-C.OnInit(function()
-	-- Remove the retired presentation switch from older saved settings.
-	DB().hideShrunkPlates = nil
-end)
+C.OnInit(function() DB() end)
