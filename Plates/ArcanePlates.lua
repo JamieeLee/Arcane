@@ -8,9 +8,9 @@ P.Option = function(key)
 	return false
 end
 
--- Azeroth Survivors keeps a stable WorldFrame plate pool and reuses its Button frames for
--- successive units. Retain the frame registry; State.RegisterPlate resets unit-specific state
--- when a pooled frame's name changes.
+-- Azeroth Survivors creates anonymous Button children under WorldFrame, hides retired plates,
+-- and reuses free pool slots. Keep one registry entry per pooled button; do not prune frames
+-- merely because V hid them. State.RegisterPlate resets per-unit data when a slot is reused.
 local knownPlates = {}
 local orderedPlates = {}
 local scanClock = 0
@@ -53,8 +53,8 @@ end
 local function ApplyKnownPlate(frame, updateDebuffs)
 	if not frame or not frame.GetObjectType then return end
 	local objectType = frame:GetObjectType()
-	-- Azeroth Survivors creates anonymous Buttons under WorldFrame as well as Frames.
-	if objectType ~= "Frame" and objectType ~= "Button" then return end
+	-- The native plate pool is made of anonymous Buttons under WorldFrame.
+	if objectType ~= "Button" then return end
 	if not frame.IsVisible or not frame:IsVisible() then return end
 
 	local special = P.Special.IsBossOrGuardianPlate(frame)
