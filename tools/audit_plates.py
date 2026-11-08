@@ -72,25 +72,38 @@ require("arcanePlatesStackOriginalWidth" not in visuals
         and "frame:ClearAllPoints()" not in visuals,
         "Tiny Plates visuals must not rewrite game-owned plate root geometry")
 
-require("frame.arcanePlatesHiddenByOption = true" in visuals,
-        "hiding regular plates must record an explicit reversible hidden state")
-require("if frame.arcanePlatesHiddenByOption then" in visuals
-        and "P.State.RestoreNativeState(frame)" in visuals
-        and "CreatePlateOverlay(frame)" in visuals,
-        "unchecking hide regular plates must restore native pieces and rebuild the Arcane overlay")
-require("Hide regular plates" in options
-        and "Unchecking restores the Arcane health bars" in options,
-        "the option must explain that it restores Tiny Plates, not a stock renderer")
-require("SetEnabled(false)" not in controller,
-        "a rendering error must not disable the only enemy health-bar renderer")
-require("SafeCall(\"plate discovery\", RegisterPlate, frame)" in controller
-        and 'local scope = "plate " .. tostring(frame)' in controller
-        and "SafeCall(scope, ApplyKnownPlate, frame, updateDebuffs)" in controller,
-        "plate discovery and rendering errors must be isolated per frame")
-hide_at = visuals.find('if not special and P.Option("hideShrunkPlates") then')
-restore_at = visuals.find("if frame.arcanePlatesHiddenByOption then")
-rebuild_at = visuals.find("if not CreatePlateOverlay(frame) then return false end")
-require(hide_at >= 0 and restore_at > hide_at and rebuild_at > restore_at,
-        "unhide must restore native pieces before rebuilding the Arcane bar")
+require("hideShrunkPlates" not in controller
+        and "hideShrunkPlates" not in visuals
+        and "hideShrunkPlates" not in options,
+        "Tiny Plates must not have a second hide switch beside the game's V control")
+require("Hide regular plates" not in options,
+        "the settings panel must not offer a fake stock-plate fallback")
+require("C.RegisterPart" not in controller and "SetEnabled" not in controller
+        and "local active" not in controller,
+        "Tiny Plates is a required Arcane renderer, not a separately toggleable part")
+require("C.NewBar(frame, width, height, true)" in visuals
+        and "frame.arcanePlatesOverlay = bar.frame" in visuals,
+        "the Arcane replacement bar must remain a child of the native plate so V visibility is inherited")
+require("frame.arcanePlatesHiddenByOption" not in controller
+        and "frame.arcanePlatesHiddenByOption" not in visuals,
+        "retired per-option plate masking state must be removed")
+require("local oldOnHide = parent:GetScript" not in options,
+        "the options panel should rely on parent-child visibility, not replace the hub OnHide script")
+require("frame.arcanePlatesHealthTextValue" in visuals
+        and "frame.arcanePlatesHealthTextMaximum" in visuals,
+        "health numbers should only be reformatted when the health values change")
+require("width >= 20 and height >= 3 and width >= height * 2" in state,
+        "fallback nameplate detection must require a plausible horizontal health bar")
+require("objectType ~= \"Frame\" and objectType ~= \"Button\"" in state,
+        "unrelated WorldFrame object types must not be registered as plates")
+require("local fresh = {}" in state
+        and "frame.arcanePlatesNativeState = fresh" in state,
+        "recycled plate snapshots must replace stale child references instead of growing forever")
+require("C.OnLogout(function() RestoreAll() end)" in controller,
+        "native plate state must still be restored on logout")
+require("frame.arcanePlatesStyleRevision = styleRevision" in controller,
+        "a plate style revision must only be recorded after the style application succeeds")
+require("C.NewBar(frame, width, height, true)" in visuals,
+        "Tiny Plates must continue using Arcane's shared bar renderer")
 
 print("Tiny Plates ownership and regression audits passed.")
