@@ -846,11 +846,17 @@ end
 -- rail and extends outward, leaving the slots clear while making the bar unmistakably Arcane.
 local P_RAIL, P_CORNER, P_SIGIL = 8, 16, 122
 C.PANEL_RAIL, C.PANEL_CORNER, C.PANEL_SIGIL = P_RAIL, P_CORNER, P_SIGIL
--- The high-resolution Paladin-gold medallion uses the same 400px cutout in a 512px TGA
--- as Hybrid. Keep its established size and edge-centered placement for the Classic pair.
-C.PANEL_MEDALLION = P_SIGIL * 1.40
-C.PANEL_MEDALLION_X = C.PANEL_MEDALLION * 0.10
-C.PANEL_MEDALLION_Y = C.PANEL_MEDALLION * 18 / 400
+-- Keep the slightly enlarged Classic artwork, but use the exact Hybrid left-medallion
+-- anchor offsets. The right Classic medallion mirrors the same anchor from the right edge.
+local HYBRID_MEDALLION_SIZE = P_SIGIL * 1.40
+C.PANEL_MEDALLION = HYBRID_MEDALLION_SIZE * 401 / 388 * 1.025
+-- Match visible artwork centers, not just the square texture origins.
+-- Default art alpha center: (250, 256); Hybrid art alpha center: (255.5, 279).
+C.PANEL_MEDALLION_X = HYBRID_MEDALLION_SIZE * 0.10
+	+ (6 * C.PANEL_MEDALLION - 0.5 * HYBRID_MEDALLION_SIZE) / 512
+-- The default art is vertically centered; Hybrid's visible art sits 23px lower.
+-- WoW's positive Y offset moves up, so cancel that difference here.
+C.PANEL_MEDALLION_Y = -8
 -- Keep the original endcap clearance; the new medallions fit inside that reserved room.
 local P_OUT, P_FOOT = P_SIGIL * 0.40, P_SIGIL * 25 / 370
 C.PANEL_ROOM = math.floor(P_SIGIL - P_OUT + 6)
