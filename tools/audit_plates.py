@@ -106,5 +106,9 @@ require(re.search(r"if P\\.Visuals\\.Apply\\(frame\\) then[\\s\\S]+?frame\\.arca
         "a plate style revision must only be recorded after the style application succeeds")
 require("C.NewBar(frame, width, height, true)" in visuals,
         "Tiny Plates must continue using Arcane's shared bar renderer")
+require("SetBinding" not in controller and "SetBinding" not in visuals,
+        "Tiny Plates must not replace or intercept the game's V key binding")
+require("reuses free pool slots" in controller,
+        "the registry lifecycle must document the game's native bounded frame pool")
 
 print("Tiny Plates ownership and regression audits passed.")
