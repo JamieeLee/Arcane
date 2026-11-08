@@ -61,8 +61,8 @@ require("P.State.RegisterPlate" in controller and "P.Visuals.Apply(frame)" in co
         "controller must delegate registration and presentation to their owning modules")
 require(re.search(r"if P\.Visuals\.Apply\(frame\) then[\s\S]+?frame\.arcanePlatesStyleRevision = styleRevision", controller) is not None,
         "style revision must be recorded only after application succeeds")
-require("if oldOnHide then oldOnHide() end" in options,
-        "Tiny Plates settings must preserve the parent frame's existing OnHide handler")
+require('CreateFrame("Frame", "ArcanePlatesOptions", parent or UIParent)' in options,
+        "the settings panel must inherit visibility through its parent frame instead of replacing parent scripts")
 require("HasStatusBar" not in state,
         "duplicate HasStatusBar helper should be consolidated into ContainsStatusBar")
 
