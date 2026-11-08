@@ -92,8 +92,9 @@ require("local oldOnHide = parent:GetScript" not in options,
 require("frame.arcanePlatesHealthTextValue" in visuals
         and "frame.arcanePlatesHealthTextMaximum" in visuals,
         "health numbers should only be reformatted when the health values change")
-require("width >= 20 and height >= 3 and width >= height * 2" in state,
-        "fallback nameplate detection must require a plausible horizontal health bar")
+require("width >= 20 and height >= 3 and width >= height * 2" in state
+        and "P.State.IsHealthStatusBar(children[i])" in visuals,
+        "discovery and rendering must use the same plausible horizontal health-bar signature")
 require("objectType ~= \"Frame\" and objectType ~= \"Button\"" in state,
         "unrelated WorldFrame object types must not be registered as plates")
 require("local fresh = {}" in state
@@ -101,7 +102,7 @@ require("local fresh = {}" in state
         "recycled plate snapshots must replace stale child references instead of growing forever")
 require("C.OnLogout(function() RestoreAll() end)" in controller,
         "native plate state must still be restored on logout")
-require("frame.arcanePlatesStyleRevision = styleRevision" in controller,
+require(re.search(r"if P\\.Visuals\\.Apply\\(frame\\) then[\\s\\S]+?frame\\.arcanePlatesStyleRevision = styleRevision", controller) is not None,
         "a plate style revision must only be recorded after the style application succeeds")
 require("C.NewBar(frame, width, height, true)" in visuals,
         "Tiny Plates must continue using Arcane's shared bar renderer")
