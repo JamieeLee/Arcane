@@ -55,3 +55,6 @@ Tiny Plates is split by responsibility rather than by individual helper:
 - `Plates/ArcanePlatesOptions.lua` owns the settings UI and saved option access.
 
 The controller delegates to these modules in TOC order. State restoration deliberately avoids changing root plate visibility or rewriting replacement UI child geometry it does not own. The regular-plate hide setting is a reversible presentation toggle: unchecking it restores the captured native child state and reapplies Arcane's Tiny Plates overlay; it does not switch to a separate stock renderer.
+
+
+Tiny Plates does not own the `WorldFrame` plate root's dimensions, scale or projected position. Azeroth Survivors updates the root anchor as units move; Tiny Plates anchors its overlay to the native health bar and restores only native child visibility/alpha that it changed.

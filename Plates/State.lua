@@ -72,44 +72,6 @@ local function FindNameFontString(frame, name)
 	return fallback
 end
 
-local function CapturePoints(frame)
-	local points = {}
-	local count = 0
-	if type(frame.GetNumPoints) == "function" then
-		count = frame:GetNumPoints() or 0
-	end
-	if count > 0 then
-		for i = 1, count do
-			local point, relativeTo, relativePoint, x, y = frame:GetPoint(i)
-			if point then
-				table.insert(points, {
-					point = point, relativeTo = relativeTo, relativePoint = relativePoint,
-					x = x or 0, y = y or 0,
-				})
-			end
-		end
-	else
-		local point, relativeTo, relativePoint, x, y = frame:GetPoint()
-		if point then
-			table.insert(points, {
-				point = point, relativeTo = relativeTo, relativePoint = relativePoint,
-				x = x or 0, y = y or 0,
-			})
-		end
-	end
-	return points
-end
-
-local function RestorePoints(frame, points)
-	if type(points) ~= "table" or table.getn(points) == 0 then return end
-	frame:ClearAllPoints()
-	for i = 1, table.getn(points) do
-		local p = points[i]
-		frame:SetPoint(p.point, p.relativeTo or frame:GetParent(),
-			p.relativePoint or p.point, p.x, p.y)
-	end
-end
-
 local function SaveObjectState(object, states, plate)
 	plate = plate or object
 	-- The root plate's visibility belongs to the game. Never restore it from our snapshot:
@@ -133,31 +95,6 @@ end
 local function CaptureNativeState(frame)
 	if frame.arcanePlatesNativeCaptured then return end
 	local previouslyStyled = frame.arcanePlatesStyledVisual or frame.arcanePlatesOverlay
-	frame.arcanePlatesNativeWidth = frame.arcanePlatesStackOriginalWidth or frame:GetWidth()
-	frame.arcanePlatesNativeHeight = frame.arcanePlatesStackOriginalHeight or frame:GetHeight()
-	frame.arcanePlatesNativeScale = frame.arcanePlatesStackOriginalScale
-		or frame.arcanePlatesOriginalScale or frame:GetScale()
-	frame.arcanePlatesNativePoints = CapturePoints(frame)
-
-	-- Preserve the explicit native anchor kept by the old stacking integration when present.
-	if frame.arcanePlatesStackNativePoint then
-		frame.arcanePlatesNativePoints = {{
-			point = frame.arcanePlatesStackNativePoint,
-			relativeTo = frame.arcanePlatesStackNativeRelativeTo or frame:GetParent(),
-			relativePoint = frame.arcanePlatesStackNativeRelativePoint or frame.arcanePlatesStackNativePoint,
-			x = frame.arcanePlatesStackNativeX or 0,
-			y = frame.arcanePlatesStackNativeY or 0,
-		}}
-	elseif frame.arcanePlatesStackPoint then
-		frame.arcanePlatesNativePoints = {{
-			point = frame.arcanePlatesStackPoint,
-			relativeTo = frame.arcanePlatesStackRelativeTo or frame:GetParent(),
-			relativePoint = frame.arcanePlatesStackRelativePoint or frame.arcanePlatesStackPoint,
-			x = frame.arcanePlatesStackX or 0,
-			y = frame.arcanePlatesStackY or 0,
-		}}
-	end
-
 	local states = {}
 	SaveObjectState(frame, states)
 	-- If an older version already modified this frame, an accurate child snapshot no longer
@@ -184,20 +121,8 @@ local function RestoreNativeState(frame)
 		end
 	end
 
-	-- Only restore geometry that Tiny Plates owns. Replacement visual children are never
-	-- recentered or rescaled here; their original anchors/scales are not ours to rewrite.
-	if frame.arcanePlatesNativeWidth then frame:SetWidth(frame.arcanePlatesNativeWidth) end
-	if frame.arcanePlatesNativeHeight then frame:SetHeight(frame.arcanePlatesNativeHeight) end
-	if frame.arcanePlatesNativeScale then frame:SetScale(frame.arcanePlatesNativeScale) end
-	if type(frame.arcanePlatesNativePoints) == "table" then
-		RestorePoints(frame, frame.arcanePlatesNativePoints)
-	elseif frame.arcanePlatesNativePoint then
-		frame:ClearAllPoints()
-		frame:SetPoint(frame.arcanePlatesNativePoint,
-			frame.arcanePlatesNativeRelativeTo or frame:GetParent(),
-			frame.arcanePlatesNativeRelativePoint or frame.arcanePlatesNativePoint,
-			frame.arcanePlatesNativeX or 0, frame.arcanePlatesNativeY or 0)
-	end
+	-- The WorldFrame plate's size and world-projected anchor belong to the game. Tiny Plates
+	-- restores only native child visibility/alpha that it explicitly changed.
 	if frame.arcanePlatesBossGuardianLabel then frame.arcanePlatesBossGuardianLabel:Hide() end
 	if frame.arcanePlatesBossGuardianLabelHolder then frame.arcanePlatesBossGuardianLabelHolder:Hide() end
 	if frame.arcanePlatesShrunkLabelHolder then frame.arcanePlatesShrunkLabelHolder:Hide() end
@@ -305,7 +230,6 @@ local function RegisterPlate(frame, knownPlates, orderedPlates)
 		knownPlates[frame] = true
 		table.insert(orderedPlates, frame)
 		CaptureNativeState(frame)
-		frame.arcanePlatesOriginalScale = frame:GetScale() or 1
 	elseif nameChanged then
 		-- A recycled frame may contain new native regions/children. Capture those after
 		-- restoring the previous unit, while retaining the original objects' snapshots.

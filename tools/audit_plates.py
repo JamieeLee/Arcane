@@ -29,16 +29,20 @@ visuals = sources["Plates/Visuals.lua"]
 controller = sources["Plates/ArcanePlates.lua"]
 options = sources["Plates/ArcanePlatesOptions.lua"]
 
-require("GetNumPoints" in state and "frame:GetPoint(i)" in state,
-        "native state must capture every anchor point")
+require("CapturePoints" not in state and "RestorePoints" not in state,
+        "Tiny Plates must not snapshot or restore game-owned WorldFrame anchors")
+require("frame:SetPoint(" not in state and "frame:ClearAllPoints()" not in state,
+        "native restoration must not reposition the moving WorldFrame plate")
 require("SaveObjectState" in state and "object ~= plate" in state,
         "native state snapshots must not own plate visibility")
 require('if state.shown then object:Show() else object:Hide() end' in state,
         "captured child visibility must be restored exactly")
 require("if state.shown then frame:Show()" not in state,
         "restoration must never re-show a pooled root nameplate")
-require("styled:ClearAllPoints()" not in state,
-        "native restoration must not recenter replacement visuals")
+require("arcanePlatesNativeWidth" not in state
+        and "arcanePlatesNativeScale" not in state
+        and "arcanePlatesNativePoints" not in state,
+        "native restoration must not restore stale root geometry")
 require("regions[i]:Show()" not in state and "children[i]:Show()" not in state
         and "SetAlpha(1)" not in state,
         "do not use blanket show/alpha restoration when native state is unknown")
@@ -62,6 +66,11 @@ require("if oldOnHide then oldOnHide() end" in options,
 require("HasStatusBar" not in state,
         "duplicate HasStatusBar helper should be consolidated into ContainsStatusBar")
 
+
+require("arcanePlatesStackOriginalWidth" not in visuals
+        and "arcanePlatesStackPoint" not in visuals
+        and "frame:ClearAllPoints()" not in visuals,
+        "Tiny Plates visuals must not rewrite game-owned plate root geometry")
 
 require("frame.arcanePlatesHiddenByOption = true" in visuals,
         "hiding regular plates must record an explicit reversible hidden state")

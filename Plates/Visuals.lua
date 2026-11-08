@@ -205,43 +205,8 @@ local function ApplyPlateStyle(frame)
 end
 
 local function CreatePlateOverlay(frame)
-	if not frame.arcanePlatesStackOriginalWidth then frame.arcanePlatesStackOriginalWidth = frame:GetWidth() end
-	if not frame.arcanePlatesStackOriginalHeight then frame.arcanePlatesStackOriginalHeight = frame:GetHeight() end
-	if not frame.arcanePlatesStackOriginalScale then
-		frame.arcanePlatesStackOriginalScale = frame.arcanePlatesOriginalScale or frame:GetScale()
-	end
-	if frame:GetWidth() ~= frame.arcanePlatesStackOriginalWidth then
-		frame:SetWidth(frame.arcanePlatesStackOriginalWidth)
-	end
-	if frame:GetHeight() ~= frame.arcanePlatesStackOriginalHeight then
-		frame:SetHeight(frame.arcanePlatesStackOriginalHeight)
-	end
-	if frame.arcanePlatesStackPoint then
-		frame:ClearAllPoints()
-		frame:SetPoint(frame.arcanePlatesStackPoint,
-			frame.arcanePlatesStackRelativeTo or frame:GetParent(),
-			frame.arcanePlatesStackRelativePoint,
-			frame.arcanePlatesStackX, frame.arcanePlatesStackY)
-		frame.arcanePlatesStackPoint, frame.arcanePlatesStackRelativeTo = nil, nil
-		frame.arcanePlatesStackRelativePoint, frame.arcanePlatesStackX, frame.arcanePlatesStackY = nil, nil, nil
-	end
-	if frame.arcanePlatesStackNativePoint then
-		frame:ClearAllPoints()
-		frame:SetPoint(frame.arcanePlatesStackNativePoint,
-			frame.arcanePlatesStackNativeRelativeTo or frame:GetParent(),
-			frame.arcanePlatesStackNativeRelativePoint,
-			frame.arcanePlatesStackNativeX, frame.arcanePlatesStackNativeY)
-		frame.arcanePlatesStackNativePoint, frame.arcanePlatesStackNativeRelativeTo = nil, nil
-		frame.arcanePlatesStackNativeRelativePoint = nil
-		frame.arcanePlatesStackNativeX, frame.arcanePlatesStackNativeY = nil, nil
-	end
-	frame.arcanePlatesStackScaleApplied = nil
-	frame.arcanePlatesStackCorrectionPending = nil
-	frame.arcanePlatesVisualCorrectionX = nil
-	frame.arcanePlatesVisualCorrectionY = nil
-	if frame:GetScale() ~= frame.arcanePlatesStackOriginalScale then
-		frame:SetScale(frame.arcanePlatesStackOriginalScale)
-	end
+	-- Do not move, resize or rescale the WorldFrame plate. The game owns its projected
+	-- position; our replacement bar is anchored to the native health bar below.
 
 	if not frame.arcanePlatesStyledVisual then
 		frame.arcanePlatesStyledVisual = FindStyledVisual(frame, frame.arcanePlatesSourceBar)
