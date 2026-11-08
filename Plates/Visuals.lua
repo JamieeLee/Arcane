@@ -103,16 +103,6 @@ local function UpdateNamePlaceholder(frame)
 		frame.arcanePlatesBossGuardianLabel)
 end
 
-local function HideShrunkPlate(frame)
-	if frame.arcanePlatesBossGuardianLabel then frame.arcanePlatesBossGuardianLabel:Hide() end
-	HideShrunkNameLabel(frame)
-	P.State.HideNameText(frame)
-	if frame.arcanePlatesStyledVisual then frame.arcanePlatesStyledVisual:Hide() end
-	if frame.arcanePlatesOverlay then frame.arcanePlatesOverlay:Hide() end
-	P.State.HideNativePlate(frame, nil)
-	frame.arcanePlatesHiddenByOption = true
-end
-
 local PLATE_ENEMY_COLORS = {
 	{ 0.30, 0.02, 0.02 }, { 0.72, 0.05, 0.04 }, { 1.00, 0.30, 0.14 },
 }
@@ -292,32 +282,10 @@ local function CreatePlateOverlay(frame)
 end
 
 local function Apply(frame)
-	local special = P.Special.IsBossOrGuardianPlate(frame)
-	if not special and P.Option("hideShrunkPlates") then
-		-- This option hides Arcane's regular enemy plate; there is no separate stock
-		-- renderer to fall back to. Keep the transition explicit and reversible.
-		HideShrunkPlate(frame)
-		return true
-	end
-
-	local wasHiddenByOption = frame.arcanePlatesHiddenByOption and true or false
-	if wasHiddenByOption then
-		-- Restore captured native children only long enough to rebuild Arcane's overlay.
-		-- Keep the option state until the replacement has been created and applied.
-		P.State.RestoreNativeState(frame)
-	end
-
-	if not CreatePlateOverlay(frame) then
-		if wasHiddenByOption then HideShrunkPlate(frame) end
-		return false
-	end
-	local styled = ApplyPlateStyle(frame)
-	if not styled then
-		if wasHiddenByOption then HideShrunkPlate(frame) end
-		return false
-	end
-	frame.arcanePlatesHiddenByOption = nil
-	return true
+	-- V remains the game's native visibility control. The Arcane bar is parented to
+	-- this same pooled plate, so the game hides and shows the replacement with it.
+	if not CreatePlateOverlay(frame) then return false end
+	return ApplyPlateStyle(frame)
 end
 
 local lastOverlaySyncTime
@@ -352,4 +320,3 @@ end
 
 P.Visuals.Apply = Apply
 P.Visuals.SyncOverlayValues = SyncOverlayValues
-P.Visuals.HideShrunkPlate = HideShrunkPlate
