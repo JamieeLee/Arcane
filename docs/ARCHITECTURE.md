@@ -51,10 +51,10 @@ Tiny Plates is split by responsibility rather than by individual helper:
 - `Plates/State.lua` owns native plate discovery, snapshots, anchor restoration and safe visibility changes.
 - `Plates/SpecialTargets.lua` owns boss/guardian identity and debuff presentation.
 - `Plates/Visuals.lua` owns replacement bars, labels and plate styling.
-- `Plates/ArcanePlates.lua` owns scanning, cadence, enable/disable and lifecycle.
+- `Plates/ArcanePlates.lua` owns discovery cadence, update scheduling and addon lifecycle.
 - `Plates/ArcanePlatesOptions.lua` owns the settings UI and saved option access.
 
-The controller delegates to these modules in TOC order. State restoration deliberately avoids changing root plate visibility or rewriting replacement UI child geometry it does not own. The regular-plate hide setting is a reversible presentation toggle: unchecking it restores the captured native child state and reapplies Arcane's Tiny Plates overlay; it does not switch to a separate stock renderer.
+The controller delegates to these modules in TOC order. Tiny Plates is not a separately toggleable Arcane part: it is the UX's enemy-plate renderer and remains active whenever Arcane is loaded. The game's native `V` command owns enemy-plate visibility. Each replacement bar is parented to the same pooled native plate, so it follows the game's show/hide state without binding or overriding `V`. There is no second hide checkbox and no stock-renderer fallback.
 
 
 Tiny Plates does not own the `WorldFrame` plate root's dimensions, scale or projected position. Azeroth Survivors updates the root anchor as units move; Tiny Plates anchors its overlay to the native health bar and restores only native child visibility/alpha that it changed.
