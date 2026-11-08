@@ -167,8 +167,12 @@ local function UpdatePlateHealthText(frame, source)
 	end
 	local _, maximum = source:GetMinMaxValues()
 	local value = source:GetValue()
-	local text = PlateHealthText(value, maximum)
-	C.SetText(frame.arcanePlatesHealthText, text)
+	if frame.arcanePlatesHealthTextValue ~= value
+			or frame.arcanePlatesHealthTextMaximum ~= maximum then
+		C.SetText(frame.arcanePlatesHealthText, PlateHealthText(value, maximum))
+		frame.arcanePlatesHealthTextValue = value
+		frame.arcanePlatesHealthTextMaximum = maximum
+	end
 	if not frame.arcanePlatesHealthText:IsShown() then frame.arcanePlatesHealthText:Show() end
 end
 
@@ -296,15 +300,24 @@ local function Apply(frame)
 		return true
 	end
 
-	if frame.arcanePlatesHiddenByOption then
-		-- Restore the native child visibility before looking up the source StatusBar again.
-		-- The following style pass immediately masks those native visuals with Arcane's bar.
+	local wasHiddenByOption = frame.arcanePlatesHiddenByOption and true or false
+	if wasHiddenByOption then
+		-- Restore captured native children only long enough to rebuild Arcane's overlay.
+		-- Keep the option state until the replacement has been created and applied.
 		P.State.RestoreNativeState(frame)
-		frame.arcanePlatesHiddenByOption = nil
 	end
 
-	if not CreatePlateOverlay(frame) then return false end
-	return ApplyPlateStyle(frame)
+	if not CreatePlateOverlay(frame) then
+		if wasHiddenByOption then HideShrunkPlate(frame) end
+		return false
+	end
+	local styled = ApplyPlateStyle(frame)
+	if not styled then
+		if wasHiddenByOption then HideShrunkPlate(frame) end
+		return false
+	end
+	frame.arcanePlatesHiddenByOption = nil
+	return true
 end
 
 local lastOverlaySyncTime
