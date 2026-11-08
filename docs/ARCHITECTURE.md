@@ -48,7 +48,7 @@ The largest remaining feature files are candidates for later, isolated extractio
 ## Tiny Plates
 
 Tiny Plates is split by responsibility rather than by individual helper:
-- `Plates/State.lua` owns native plate discovery, snapshots, anchor restoration and safe visibility changes.
+- `Plates/State.lua` owns native plate discovery, child-state snapshots and safe visibility restoration.
 - `Plates/SpecialTargets.lua` owns boss/guardian identity and debuff presentation.
 - `Plates/Visuals.lua` owns replacement bars, labels and plate styling.
 - `Plates/ArcanePlates.lua` owns discovery cadence, update scheduling and addon lifecycle.
