@@ -72,10 +72,11 @@ require("arcanePlatesStackOriginalWidth" not in visuals
         and "frame:ClearAllPoints()" not in visuals,
         "Tiny Plates visuals must not rewrite game-owned plate root geometry")
 
-require("hideShrunkPlates" not in controller
+require('P.Option("hideShrunkPlates")' not in controller
+        and 'd["hideShrunkPlates"] = nil' in controller
         and "hideShrunkPlates" not in visuals
         and "hideShrunkPlates" not in options,
-        "Tiny Plates must not have a second hide switch beside the game's V control")
+        "Tiny Plates must not have a second hide switch; only clear the retired saved key")
 require("Hide regular plates" not in options,
         "the settings panel must not offer a fake stock-plate fallback")
 require("C.RegisterPart" not in controller and "SetEnabled" not in controller
