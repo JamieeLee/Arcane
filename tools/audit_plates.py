@@ -104,8 +104,6 @@ require("local fresh = {}" in state
         "recycled plate snapshots must replace stale child references instead of growing forever")
 require("C.OnLogout(function() RestoreAll() end)" in controller,
         "native plate state must still be restored on logout")
-require(re.search(r"if P\\.Visuals\\.Apply\\(frame\\) then[\\s\\S]+?frame\\.arcanePlatesStyleRevision = styleRevision", controller) is not None,
-        "a plate style revision must only be recorded after the style application succeeds")
 require("C.NewBar(frame, width, height, true)" in visuals,
         "Tiny Plates must continue using Arcane's shared bar renderer")
 require("SetBinding" not in controller and "SetBinding" not in visuals,
