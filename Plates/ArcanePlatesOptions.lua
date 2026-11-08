@@ -209,14 +209,7 @@ local function BuildPanel(parent)
 	panel:EnableMouse(true)
 	panel:SetFrameStrata(parent and parent:GetFrameStrata() or "DIALOG")
 	panel:Hide()
-	if parent then
-		-- Preserve any existing hub cleanup before closing this child settings panel.
-		local oldOnHide = parent:GetScript("OnHide")
-		parent:SetScript("OnHide", function()
-			if oldOnHide then oldOnHide() end
-			if panel then panel:Hide() end
-		end)
-	end
+	-- The panel is a child of the hub; the game's frame hierarchy hides it with the hub.
 	C.AboveHub(panel)
 	if type(UISpecialFrames) == "table" then table.insert(UISpecialFrames, "ArcanePlatesOptions") end
 
