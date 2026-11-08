@@ -110,6 +110,7 @@ local function HideShrunkPlate(frame)
 	if frame.arcanePlatesStyledVisual then frame.arcanePlatesStyledVisual:Hide() end
 	if frame.arcanePlatesOverlay then frame.arcanePlatesOverlay:Hide() end
 	P.State.HideNativePlate(frame, nil)
+	frame.arcanePlatesHiddenByOption = true
 end
 
 local PLATE_ENEMY_COLORS = {
@@ -177,10 +178,6 @@ local function ApplyPlateStyle(frame)
 	if not special then
 		if frame.arcanePlatesBossGuardianLabel then frame.arcanePlatesBossGuardianLabel:Hide() end
 		if frame.arcanePlatesDebuffRow then frame.arcanePlatesDebuffRow:Hide() end
-		if P.Option("hideShrunkPlates") then
-			HideShrunkPlate(frame)
-			return true
-		end
 	end
 	P.State.HideNameText(frame)
 	if frame.arcanePlatesStyledVisual then frame.arcanePlatesStyledVisual:Hide() end
@@ -327,11 +324,20 @@ end
 
 local function Apply(frame)
 	local special = P.Special.IsBossOrGuardianPlate(frame)
-	-- Hiding ordinary plates needs no replacement bar; do not fail just because the
-	-- native frame has not finished constructing its StatusBar yet.
 	if not special and P.Option("hideShrunkPlates") then
-		return ApplyPlateStyle(frame)
+		-- This option hides Arcane's regular enemy plate; there is no separate stock
+		-- renderer to fall back to. Keep the transition explicit and reversible.
+		HideShrunkPlate(frame)
+		return true
 	end
+
+	if frame.arcanePlatesHiddenByOption then
+		-- Restore the native child visibility before looking up the source StatusBar again.
+		-- The following style pass immediately masks those native visuals with Arcane's bar.
+		P.State.RestoreNativeState(frame)
+		frame.arcanePlatesHiddenByOption = nil
+	end
+
 	if not CreatePlateOverlay(frame) then return false end
 	return ApplyPlateStyle(frame)
 end

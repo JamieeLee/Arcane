@@ -62,4 +62,20 @@ require("if oldOnHide then oldOnHide() end" in options,
 require("HasStatusBar" not in state,
         "duplicate HasStatusBar helper should be consolidated into ContainsStatusBar")
 
+
+require("frame.arcanePlatesHiddenByOption = true" in visuals,
+        "hiding regular plates must record an explicit reversible hidden state")
+require("if frame.arcanePlatesHiddenByOption then" in visuals
+        and "P.State.RestoreNativeState(frame)" in visuals
+        and "CreatePlateOverlay(frame)" in visuals,
+        "unchecking hide regular plates must restore native pieces and rebuild the Arcane overlay")
+require("Hide regular plates" in options
+        and "Unchecking restores the Arcane health bars" in options,
+        "the option must explain that it restores Tiny Plates, not a stock renderer")
+require("SetEnabled(false)" not in controller,
+        "a rendering error must not disable the only enemy health-bar renderer")
+require("SafeCall(\"plate discovery\", RegisterPlate, frame)" in controller
+        and "SafeCall(\"plate \" .. tostring(frame), ApplyKnownPlate, frame, updateDebuffs)" in controller,
+        "plate discovery and rendering errors must be isolated per frame")
+
 print("Tiny Plates ownership and regression audits passed.")

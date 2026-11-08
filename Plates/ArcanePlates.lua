@@ -21,12 +21,31 @@ local refreshPending = true
 local styleRevision = 0
 local scanFrame
 
+local reportedErrors = {}
+
+local function ReportError(scope, err)
+	local message = tostring(err)
+	if reportedErrors[scope] == message then return end
+	reportedErrors[scope] = message
+	C.Print(C.L("Tiny Plates encountered an error in ") .. scope .. ": " .. message)
+end
+
+local function SafeCall(scope, callback, first, second)
+	local ok, result = pcall(callback, first, second)
+	if not ok then
+		ReportError(scope, result)
+		return false
+	end
+	reportedErrors[scope] = nil
+	return true, result
+end
+
 local function RegisterPlate(frame)
 	return P.State.RegisterPlate(frame, knownPlates, orderedPlates)
 end
 
 local function SyncOverlayValues()
-	P.Visuals.SyncOverlayValues(orderedPlates)
+	SafeCall("health-bar update", P.Visuals.SyncOverlayValues, orderedPlates)
 end
 
 local function ApplyKnownPlate(frame, updateDebuffs)
@@ -41,12 +60,11 @@ local function ApplyKnownPlate(frame, updateDebuffs)
 	if frame.arcanePlatesAppliedCategory ~= category
 			or frame.arcanePlatesStyleRevision ~= styleRevision then
 		if P.Visuals.Apply(frame) then
-			-- Record the revision only after a complete style pass. A plate that is still
-			-- constructing its StatusBar must remain eligible for a later retry.
+			-- A hidden regular plate is a completed presentation state too. Record only
+			-- successful transitions so an incomplete overlay remains eligible for retry.
 			frame.arcanePlatesAppliedCategory = category
 			frame.arcanePlatesStyleRevision = styleRevision
 		else
-			P.State.RestoreNativeState(frame)
 			frame.arcanePlatesAppliedCategory = nil
 			frame.arcanePlatesStyleRevision = -1
 		end
@@ -54,8 +72,11 @@ local function ApplyKnownPlate(frame, updateDebuffs)
 
 	if special then
 		if updateDebuffs then
-			if P.Option("showDebuffs") then P.Special.UpdateDebuffs(frame)
-			else P.Special.HideDebuffs(frame) end
+			if P.Option("showDebuffs") then
+				SafeCall("boss debuff update", P.Special.UpdateDebuffs, frame)
+			else
+				P.Special.HideDebuffs(frame)
+			end
 		end
 	elseif frame.arcanePlatesDebuffRow then
 		P.Special.HideDebuffs(frame)
@@ -63,9 +84,17 @@ local function ApplyKnownPlate(frame, updateDebuffs)
 end
 
 local function StyleKnownPlates(updateDebuffs)
-	P.Special.RefreshNames(false, orderedPlates)
+	SafeCall("boss and guardian index", P.Special.RefreshNames, false, orderedPlates)
 	for i = 1, table.getn(orderedPlates) do
-		ApplyKnownPlate(orderedPlates[i], updateDebuffs)
+		local frame = orderedPlates[i]
+		local scope = "plate " .. tostring(frame)
+		local ok = SafeCall(scope, ApplyKnownPlate, frame, updateDebuffs)
+		if not ok then
+			-- Retry this plate on the next scan. Never disable the whole renderer because
+			-- one recycled or malformed game frame behaved unexpectedly.
+			frame.arcanePlatesAppliedCategory = nil
+			frame.arcanePlatesStyleRevision = -1
+		end
 	end
 end
 
@@ -77,7 +106,7 @@ local function ScanNameplates()
 		if frame and frame.IsVisible and frame:IsVisible()
 				and frame.GetWidth and frame:GetWidth() > 0
 				and frame.GetHeight and frame:GetHeight() > 0 then
-			RegisterPlate(frame)
+			SafeCall("plate discovery", RegisterPlate, frame)
 		end
 	end
 end
@@ -92,12 +121,13 @@ local function RestoreAll()
 	for i = 1, table.getn(orderedPlates) do
 		local frame = orderedPlates[i]
 		if frame then
-			P.State.RestoreNativeState(frame)
+			SafeCall("native plate restoration", P.State.RestoreNativeState, frame)
 			if frame.arcanePlatesOverlay then frame.arcanePlatesOverlay:Hide() end
 			P.Special.HideDebuffs(frame)
 			if frame.arcanePlatesBossGuardianLabel then frame.arcanePlatesBossGuardianLabel:Hide() end
 			if frame.arcanePlatesBossGuardianLabelHolder then frame.arcanePlatesBossGuardianLabelHolder:Hide() end
 			if frame.arcanePlatesShrunkLabelHolder then frame.arcanePlatesShrunkLabelHolder:Hide() end
+			frame.arcanePlatesHiddenByOption = nil
 			frame.arcanePlatesNativeRestored = true
 		end
 	end
@@ -171,24 +201,14 @@ C.OnInit(function()
 		end
 		if refreshPending then
 			refreshPending = false
-			local ok, err = pcall(StyleKnownPlates, updateDebuffs)
-			if not ok then
-				C.Print(C.L("Arcane nameplates stopped after an error: ") .. tostring(err))
-				SetEnabled(false)
-			end
+			StyleKnownPlates(updateDebuffs)
 		elseif updateDebuffs then
-			local ok, err = pcall(function()
-				P.Special.RefreshNames(false, orderedPlates)
-				for i = 1, table.getn(orderedPlates) do
-					local frame = orderedPlates[i]
-					if frame.arcanePlatesBossGuardian and frame:IsVisible() and P.Option("showDebuffs") then
-						P.Special.UpdateDebuffs(frame)
-					end
+			SafeCall("boss and guardian index", P.Special.RefreshNames, false, orderedPlates)
+			for i = 1, table.getn(orderedPlates) do
+				local frame = orderedPlates[i]
+				if frame.arcanePlatesBossGuardian and frame:IsVisible() and P.Option("showDebuffs") then
+					SafeCall("boss debuff update", P.Special.UpdateDebuffs, frame)
 				end
-			end)
-			if not ok then
-				C.Print(C.L("Arcane nameplate debuff update stopped after an error: ") .. tostring(err))
-				SetEnabled(false)
 			end
 		end
 	end)

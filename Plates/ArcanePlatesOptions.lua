@@ -231,7 +231,7 @@ local function BuildPanel(parent)
 	Checkbox(panel, "hideBossName", "Hide boss / guardian names", "Hide the name label above special plates.", 18, -87)
 
 	PanelText(panel, "Regular plates", 16, -121, 280, 10, { 0.72, 0.68, 0.58 })
-	Checkbox(panel, "hideShrunkPlates", "Hide regular plates", "Hide ordinary mob plates entirely. Requires overlapping nameplates.", 18, -137)
+	Checkbox(panel, "hideShrunkPlates", "Hide regular plates", "Hide regular enemy plates managed by Tiny Plates. Unchecking restores the Arcane health bars; V still controls plate visibility.", 18, -137)
 	Checkbox(panel, "showShrunkName", "Show names on nameplates", "Show each regular mob name above its shrunken plate.", 18, -162)
 
 	PanelText(panel, "Health display", 16, -198, 280, 10, { 0.72, 0.68, 0.58 })
