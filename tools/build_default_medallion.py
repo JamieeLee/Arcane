@@ -8,7 +8,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "tools" / "assets" / "PanelDefaultMedallion.webp"
 OUTPUT = ROOT / "Art" / "PanelDefaultMedallion.tga"
-EXPECTED_SIZE = (128, 128)
+EXPECTED_SIZE = (512, 512)
 
 
 def encode_tga_rle(image: Image.Image) -> bytes:
