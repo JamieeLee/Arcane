@@ -899,24 +899,16 @@ function C.Panel(frame, sigils)
 		table.insert(sideEnds, d)
 	end
 	if sigils then
-		p.sigils, p.sigilsGem = {}, {}
+		p.sigils = {}
 		for i, side in ipairs({ "LEFT", "RIGHT" }) do
 			local right = side == "RIGHT"
 			local x = right and -C.PANEL_MEDALLION_X or C.PANEL_MEDALLION_X
-			local t = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcanePaladin.tga")
+			local t = C.Tex(frame, "OVERLAY", C.ART .. "PanelDefaultMedallion.tga")
 			t:SetWidth(C.PANEL_MEDALLION)
 			t:SetHeight(C.PANEL_MEDALLION)
 			t:SetPoint("CENTER", frame, side, x, C.PANEL_MEDALLION_Y)
 			if right then t:SetTexCoord(1, 0, 0, 1) end
 			p.sigils[i] = t
-			-- Keep the amber gemstone on its own layer so the approved gold stays crisp.
-			local gem = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcaneGem.tga")
-			gem:SetWidth(C.PANEL_MEDALLION)
-			gem:SetHeight(C.PANEL_MEDALLION)
-			gem:SetPoint("CENTER", frame, side, x, C.PANEL_MEDALLION_Y)
-			if right then gem:SetTexCoord(1, 0, 0, 1) end
-			gem:SetVertexColor(1.00, 0.85, 0.40, 1)
-			p.sigilsGem[i] = gem
 		end
 	end
 	return p
