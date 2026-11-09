@@ -1,7 +1,7 @@
 -- Native nameplate discovery and reversible state management.
 local C = Arcane
-C.Plates = C.Plates or {}
-local P = C.Plates
+C.Nameplates = C.Nameplates or {}
+local P = C.Nameplates
 P.State = {}
 
 local function NormalizeName(text)

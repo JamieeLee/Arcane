@@ -2,7 +2,6 @@
 """Keep Arcane's product identity, v0.6 metadata and retained integrations consistent."""
 from pathlib import Path
 import re
-import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 

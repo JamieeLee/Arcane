@@ -29,6 +29,8 @@ visuals = sources["Plates/Visuals.lua"]
 controller = sources["Plates/Controller.lua"]
 options = sources["Plates/Options.lua"]
 
+require(all("C.Nameplates = C.Nameplates or {}" in sources[name] for name in PLATE_FILES),
+        "all nameplate modules must use Arcane's own shared namespace")
 require("CapturePoints" not in state and "RestorePoints" not in state,
         "Arcane Nameplates must not snapshot or restore game-owned WorldFrame anchors")
 require("frame:SetPoint(" not in state and "frame:ClearAllPoints()" not in state,

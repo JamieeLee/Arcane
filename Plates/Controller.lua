@@ -1,7 +1,7 @@
 -- Arcane Nameplates controller: scanning, update cadence and lifecycle.
 local C = Arcane
-C.Plates = C.Plates or {}
-local P = C.Plates
+C.Nameplates = C.Nameplates or {}
+local P = C.Nameplates
 
 P.Option = function(key)
 	if type(C.NameplateOption) == "function" then return C.NameplateOption(key) end

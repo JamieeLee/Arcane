@@ -18,7 +18,7 @@ on:
       - "**.lua"
       - "**.toc"
       - "tools/**"
-      - ".github/workflows/numbers-refactor.yml"
+      - ".github/workflows/arcane-validation.yml"
   workflow_dispatch:
 
 permissions:

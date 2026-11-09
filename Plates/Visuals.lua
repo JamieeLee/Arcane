@@ -1,7 +1,7 @@
 -- Nameplate visuals: overlay creation, health display and labels.
 local C = Arcane
-C.Plates = C.Plates or {}
-local P = C.Plates
+C.Nameplates = C.Nameplates or {}
+local P = C.Nameplates
 P.Visuals = {}
 
 local function FindStyledVisual(frame, source)

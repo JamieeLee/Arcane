@@ -1,6 +1,5 @@
 -- Arcane Nameplates settings. All state lives under ArcaneDB.nameplates.
--- The settings are embedded in Arcane's options flow; there is no ArcaneNameplates minimap button
--- or second standalone settings window.
+-- The settings are embedded in Arcane's options flow; there is no separate minimap button or standalone settings window.
 
 local C = Arcane
 local db

@@ -1,7 +1,7 @@
 -- Boss/guardian identity, labels and debuff presentation.
 local C = Arcane
-C.Plates = C.Plates or {}
-local P = C.Plates
+C.Nameplates = C.Nameplates or {}
+local P = C.Nameplates
 P.Special = {}
 
 local bossGuardianNames = {}
