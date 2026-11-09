@@ -22,11 +22,10 @@ local C = N.Config
 -- Shared behavior stays with its owner; other modules call that implementation.
 
 --[[
-Arcane UI: damage numbers (Smooth Numbers) - calmer, cleaner damage numbers for Azeroth Survivors.
+Arcane UI: damage numbers - calm, readable floating combat text for Azeroth Survivors.
 
 The game gives addons every hit you deal, with a place in the world to draw it
-(its world-anchored combat text API). Smooth Numbers turns the game's own
-floating numbers off and draws its own in their place:
+(its world-anchored combat text API). Arcane Damage Numbers replaces the game's floating combat text while enabled:
 
   - the hits on one enemy add up into one number that counts up
   - the skill's icon beside each number (then each number is one skill's)

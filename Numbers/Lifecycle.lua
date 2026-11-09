@@ -118,7 +118,7 @@ local function Step(now)
 end
 
 S.errors, S.lastErrorAt, S.errorShown, S.giveUp = 0, 0, false, false
-S.blocked = false  -- Smooth Numbers itself is running, so this part stays off
+S.blocked = false  -- Set when the separate legacy Smooth Numbers addon is also loaded.
 S.SetEnabled = nil -- below
 
 -- A problem in one frame never reaches the game: that frame's numbers are

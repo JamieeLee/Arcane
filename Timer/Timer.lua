@@ -1852,7 +1852,7 @@ local function BuildOptions()
 
 	local title = OptText(o, 16, 1, 0.82, 0.25)
 	title:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -14)
-	title:SetText("Smooth Boss Timer")
+	title:SetText("Arcane Boss Timer")
 	local version = OptText(o, 10, 0.55, 0.55, 0.6)
 	version:SetPoint("LEFT", title, "RIGHT", 8, -1)
 	version:SetText("v" .. VERSION)

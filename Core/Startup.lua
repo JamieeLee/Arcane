@@ -18,7 +18,7 @@ core:SetScript("OnEvent", function()
 				local ok, err = pcall(C.inits[i])
 				if not ok then C.Print(C.L("error while starting: ") .. tostring(err)) end
 			end
-			-- the two addons Arcane UI grew out of would draw everything twice
+			-- These legacy addons overlap Arcane modules and must not draw on top of them.
 			local old = {}
 			if type(IsAddOnLoaded) == "function" then
 				if IsAddOnLoaded("SmoothNumbers") then table.insert(old, "Smooth Numbers") end
