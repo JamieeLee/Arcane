@@ -31,7 +31,7 @@ local RESULTS = {
 
 local db
 local root
-local S = { stamp = nil, openedAt = nil, alpha = 0, values = {}, closed = false, broken = false, lastPhase = nil, runActive = false }
+local S = { summaryKey = nil, result = nil, openedAt = nil, alpha = 0, values = {}, closed = false, broken = false, lastPhase = nil, runActive = false }
 
 local function Value(row, v, k)
 	if type(v) ~= "number" then return "-" end
@@ -57,6 +57,17 @@ local function Fill(e)
 	S.values = Read(e)
 end
 
+-- The result label repeats (for example, "left" can happen every run), so identify
+-- an ending by the actual snapshot rather than by its outcome alone.
+local function SummaryKey(e)
+	return table.concat({
+		tostring(e.result), tostring(e.t), tostring(e.lvl), tostring(e.kills),
+		tostring(e.elites), tostring(e.guardians), tostring(e.bosses),
+		tostring(e.dmg), tostring(e.taken), tostring(e.gold),
+		tostring(e.chests), tostring(e.magnets), tostring(e.endl), tostring(e.hero),
+	}, "\001")
+end
+
 local function Show(e, now)
 	Fill(e)
 	S.openedAt = now
@@ -75,37 +86,38 @@ local function Step(dt, now)
 	if type(e) ~= "table" then e = nil end
 
 	-- The summary API can retain the previous end result while a new run is underway.
-	-- Track the run lifecycle too: the result label alone is not unique (two runs can
-	-- both end as "left", "dead" or "victory").
+	-- Track the run lifecycle too: the result label alone is not unique.
 	if phase == "playing" and S.lastPhase == "ready" then
 		S.runActive = true
 		S.closed = true
 	end
 
-	local stamp = e and tostring(e.result) or nil
+	local key = e and SummaryKey(e) or nil
 	if S.runActive then
-		-- Wait for this run's own end state and summary. Do not let the old summary
-		-- reopen during play, and don't require its result label to differ from last time.
-		if e and (phase == nil or phase == "dead" or phase == "victory") then
-			S.stamp = stamp
+		-- Wait for this run's own end state and a changed summary snapshot. This prevents
+		-- stale data from reopening during play and permits repeated identical outcomes.
+		if e and key ~= S.summaryKey and (phase == nil or phase == "dead" or phase == "victory") then
+			S.summaryKey = key
+			S.result = tostring(e.result)
 			S.endT = tonumber(e.t)
 			S.runActive = false
 			Show(e, now)
 		end
-	elseif e and stamp ~= S.stamp then
+	elseif e and key ~= S.summaryKey then
 		-- Also support loading the addon while already outside a run with a summary ready.
-		S.stamp = stamp
+		S.summaryKey = key
+		S.result = tostring(e.result)
 		S.endT = tonumber(e.t)
 		Show(e, now)
 	end
 	S.lastPhase = phase
 
 	-- fighting on past a victory (endless): the summary steps aside
-	if S.stamp == "victory" and not S.closed and S.endT then
+	if S.result == "victory" and not S.closed and S.endT then
 		local t = tonumber(C.Call(AZS_GetRunTime))
 		if t and t > S.endT + 3 then S.closed = true end
 	end
-	local want = (S.stamp and not S.closed) and 1 or 0
+	local want = (S.summaryKey and not S.closed) and 1 or 0
 	S.alpha = C.Toward(S.alpha, want, want > 0 and 6 or 9, dt)
 	if S.alpha < 0.01 then
 		C.Vis(root, false)
