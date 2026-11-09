@@ -1,6 +1,6 @@
 ## Unreleased
 
-- **Run summary dismissal:** keep the end-of-run summary visible during the next run’s “Move to begin” ready state, then automatically dismiss it when that run actually starts.
+- **Run summary lifecycle:** keep the end-of-run summary visible during “Move to begin,” dismiss it when the next run starts, and show the next end summary even when consecutive runs have the same result. Keep the saved summary visible when the live run-summary API clears its data.
 
 - **Stats default position:** Stats now resets directly above the Damage meter on the right side, aligned to the meter's right edge. The Damage meter and Luck keep their original right-side default positions.
 

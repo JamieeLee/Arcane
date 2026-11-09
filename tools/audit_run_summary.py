@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static checks for the run summary's end-to-next-run lifecycle."""
+"""Static regression checks for repeated run-summary lifecycles."""
 from pathlib import Path
 import sys
 
@@ -11,26 +11,30 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 required = (
-    ('local phase = type(AZS_GetPhase) == "function" and C.Call(AZS_GetPhase) or nil',
-     "the run summary must read the game's current run phase"),
-    ('phase == "playing" and S.lastPhase == "ready"',
-     "a new run must be recognized when it leaves the ready state and starts playing"),
-    ('S.lastPhase = phase',
-     "the previous run phase must be retained between summary updates"),
+    ('runActive = false', "the summary must track whether a new run is active"),
+    ('phase == "playing" and S.lastPhase == "ready"', "the new run must be detected when it starts"),
+    ('S.runActive = true', "starting a new run must arm the next summary"),
+    ('phase == nil or phase == "dead" or phase == "victory"', "the active run must wait for its own ending"),
+    ('S.runActive = false', "the new end summary must finish the active-run wait"),
+    ('S.endT = tonumber(e.t)', "the new summary's ending time must be stored"),
+    ('local want = (S.stamp and not S.closed) and 1 or 0', "the displayed snapshot must remain visible independently of the live getter"),
 )
 for fragment, message in required:
     if fragment not in source:
         fail(message)
 
-ready = source.find('phase == "playing" and S.lastPhase == "ready"')
-close = source.find("S.closed = true", ready)
-remember = source.find("S.lastPhase = phase", ready)
-if ready < 0 or close < 0 or remember < 0 or not (ready < close < remember):
-    fail("the summary must close on the ready-to-playing transition, not merely on entering ready")
+start = source.find('if phase == "playing" and S.lastPhase == "ready" then')
+arm = source.find("S.runActive = true", start)
+end_wait = source.find("if S.runActive then", arm)
+show_new = source.find("Show(e, now)", end_wait)
+stamp_only = source.find("elseif e and stamp ~= S.stamp then", end_wait)
+if min(start, arm, end_wait, show_new, stamp_only) < 0 or not (start < arm < end_wait < show_new < stamp_only):
+    fail("a new run must re-arm summary display before the result-label fallback")
 
-if "if e and not S.closed and phase == \"playing\" and S.lastPhase == \"ready\" then" not in source:
-    fail("the new-run transition must not dismiss an already-closed or absent summary")
+if '(e and not S.closed)' in source:
+    fail("the summary's visibility must not depend on a possibly stale or cleared getter result")
 
-print("PASS: the summary stays open while a new run is waiting in ready")
-print("PASS: the summary closes when the new run enters playing")
-print("PASS: the existing end-of-run summary and endless-victory behavior remain in place")
+print("PASS: starting a new run dismisses the previous summary")
+print("PASS: the next run's own end reopens the summary even with the same result label")
+print("PASS: the stored summary remains visible after the live API clears its data")
+print("PASS: the initial out-of-run summary fallback remains available")

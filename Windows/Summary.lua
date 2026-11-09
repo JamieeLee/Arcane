@@ -31,7 +31,7 @@ local RESULTS = {
 
 local db
 local root
-local S = { stamp = nil, openedAt = nil, alpha = 0, values = {}, closed = false, broken = false, lastPhase = nil }
+local S = { stamp = nil, openedAt = nil, alpha = 0, values = {}, closed = false, broken = false, lastPhase = nil, runActive = false }
 
 local function Value(row, v, k)
 	if type(v) ~= "number" then return "-" end
@@ -73,31 +73,39 @@ local function Step(dt, now)
 	local e = nil
 	if type(AZS_GetRunSummary) == "function" then e = C.Call(AZS_GetRunSummary) end
 	if type(e) ~= "table" then e = nil end
-	-- The numbers are taken once, as the run ends, and then stay still: in co-op the run goes on
-	-- after you fall and the game's end line keeps counting, which would make them flicker. Only
-	-- another ending (your friends win after you fell) or a new run takes them again.
-	local stamp = e and tostring(e.result) or nil
-	if stamp ~= S.stamp then
-		S.stamp = stamp
-		if e then
-			Show(e, now)
-			S.endT = tonumber(e.t)
-		else
-			S.closed = true
-		end
-	end
-	-- A new run first waits in "ready" ("Move to begin"). Keep the summary there;
-	-- dismiss it only when that new run actually starts and the phase becomes "playing".
-	if e and not S.closed and phase == "playing" and S.lastPhase == "ready" then
+
+	-- The summary API can retain the previous end result while a new run is underway.
+	-- Track the run lifecycle too: the result label alone is not unique (two runs can
+	-- both end as "left", "dead" or "victory").
+	if phase == "playing" and S.lastPhase == "ready" then
+		S.runActive = true
 		S.closed = true
 	end
+
+	local stamp = e and tostring(e.result) or nil
+	if S.runActive then
+		-- Wait for this run's own end state and summary. Do not let the old summary
+		-- reopen during play, and don't require its result label to differ from last time.
+		if e and (phase == nil or phase == "dead" or phase == "victory") then
+			S.stamp = stamp
+			S.endT = tonumber(e.t)
+			S.runActive = false
+			Show(e, now)
+		end
+	elseif e and stamp ~= S.stamp then
+		-- Also support loading the addon while already outside a run with a summary ready.
+		S.stamp = stamp
+		S.endT = tonumber(e.t)
+		Show(e, now)
+	end
 	S.lastPhase = phase
+
 	-- fighting on past a victory (endless): the summary steps aside
-	if e and not S.closed and stamp == "victory" and S.endT then
+	if S.stamp == "victory" and not S.closed and S.endT then
 		local t = tonumber(C.Call(AZS_GetRunTime))
 		if t and t > S.endT + 3 then S.closed = true end
 	end
-	local want = (e and not S.closed) and 1 or 0
+	local want = (S.stamp and not S.closed) and 1 or 0
 	S.alpha = C.Toward(S.alpha, want, want > 0 and 6 or 9, dt)
 	if S.alpha < 0.01 then
 		C.Vis(root, false)
