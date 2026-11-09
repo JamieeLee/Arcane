@@ -1,5 +1,7 @@
 ## Unreleased
 
+- **Run summary dismissal:** keep the end-of-run summary visible during the next run’s “Move to begin” ready state, then automatically dismiss it when that run actually starts.
+
 - **Stats default position:** Stats now resets directly above the Damage meter on the right side, aligned to the meter's right edge. The Damage meter and Luck keep their original right-side default positions.
 
 - **Stock gameplay notification text:** keep the native message feed transparent and borderless; its text uses the active Arcane UX palette in Arcane, Hybrid and Full Class modes. The feed remains movable through Arcane's Move frames system, while genuine Lua script errors stay in their separate error window.

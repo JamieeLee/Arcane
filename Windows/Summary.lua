@@ -31,7 +31,7 @@ local RESULTS = {
 
 local db
 local root
-local S = { stamp = nil, openedAt = nil, alpha = 0, values = {}, closed = false, broken = false }
+local S = { stamp = nil, openedAt = nil, alpha = 0, values = {}, closed = false, broken = false, lastPhase = nil }
 
 local function Value(row, v, k)
 	if type(v) ~= "number" then return "-" end
@@ -69,6 +69,7 @@ local function Close()
 end
 
 local function Step(dt, now)
+	local phase = type(AZS_GetPhase) == "function" and C.Call(AZS_GetPhase) or nil
 	local e = nil
 	if type(AZS_GetRunSummary) == "function" then e = C.Call(AZS_GetRunSummary) end
 	if type(e) ~= "table" then e = nil end
@@ -85,6 +86,12 @@ local function Step(dt, now)
 			S.closed = true
 		end
 	end
+	-- A new run first waits in "ready" ("Move to begin"). Keep the summary there;
+	-- dismiss it only when that new run actually starts and the phase becomes "playing".
+	if e and not S.closed and phase == "playing" and S.lastPhase == "ready" then
+		S.closed = true
+	end
+	S.lastPhase = phase
 	-- fighting on past a victory (endless): the summary steps aside
 	if e and not S.closed and stamp == "victory" and S.endT then
 		local t = tonumber(C.Call(AZS_GetRunTime))
