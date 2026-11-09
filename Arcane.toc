@@ -67,8 +67,8 @@ Minimap/Button.lua
 Plates/State.lua
 Plates/SpecialTargets.lua
 Plates/Visuals.lua
-Plates/ArcanePlates.lua
-Plates/ArcanePlatesOptions.lua
+Plates/Controller.lua
+Plates/Options.lua
 Minimap/Chests.lua
 Windows/Meter.lua
 Windows/Hurt.lua
