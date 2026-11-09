@@ -1,8 +1,17 @@
--- Arcane UI: reversible controls for the game's own error/notification feed.
--- The stock frame keeps receiving its normal events; this only controls whether it is visible.
+-- Arcane UI: the game's own error/notification feed, with Arcane's shared panel treatment.
+-- The stock frame keeps its original events and message colors; Arcane owns only its shell,
+-- default placement, saved movement and visibility switch.
 local C = Arcane
 local DEFAULTS = { enabled = true }
 local db
+local deco
+local themeStamp = -1
+
+local function Theme()
+	if not deco then return end
+	C.PanelTheme(deco, C.Pal())
+	themeStamp = C.palStamp
+end
 
 local function Apply()
 	if not db then return end
@@ -16,22 +25,30 @@ end
 C.OnInit(function()
 	db = C.DB("stockErrors", DEFAULTS)
 	local frame = getglobal("UIErrorsFrame")
-	if type(frame) == "table" then
-		C.Movable(frame, "stockErrors", "Stock error messages", function(f)
-			f:ClearAllPoints()
-			local bosses = getglobal("ArcaneBosses")
-			if type(bosses) == "table" then
-				-- The reset/default position belongs immediately beneath Arcane's boss stack.
-				f:SetPoint("TOP", bosses, "BOTTOM", 0, -22)
-			else
-				f:SetPoint("TOP", UIParent, "TOP", 0, -122)
-			end
-		end)
-	end
+	if type(frame) ~= "table" then return end
+
+	C.Movable(frame, "stockErrors", "Stock error messages", function(f)
+		f:ClearAllPoints()
+		-- Center on the game's "Move to Begin" prompt. This keeps the error and
+		-- information feed in the center field without overlapping the boss stack.
+		f:SetPoint("CENTER", UIParent, "CENTER", 0, 120)
+	end)
+	deco = C.Panel(frame, false)
+	Theme()
+
+	-- Shared palettes can change when the player selects a UI style or a run class
+	-- is resolved. Refresh only when the common palette stamp changes.
+	local themeDriver = CreateFrame("Frame", "ArcaneStockErrorsThemeDriver")
+	themeDriver:SetScript("OnUpdate", function()
+		if themeStamp ~= C.palStamp then Theme() end
+	end)
 	Apply()
 end)
 
-C.OnWorld(Apply)
+C.OnWorld(function()
+	Theme()
+	Apply()
+end)
 
 C.OnLogout(function()
 	-- Do not leave the game's own frame parented under Arcane's hidden container at logout.

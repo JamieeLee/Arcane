@@ -1,5 +1,7 @@
 ## Unreleased
 
+- **Stock message panel theme and placement:** the stock error/information frame now uses Arcane's shared panel treatment and refreshes with Classic Arcane, Hybrid and Full Class palette changes. Its reset position is centered on the game's "Move to Begin" prompt. Red errors, yellow information messages and system-supplied message colors remain unchanged.
+
 - **Stats default position:** Stats now resets directly above the Damage meter on the right side, aligned to the meter's right edge. The Damage meter and Luck keep their original right-side default positions.
 
 - **Stock error-frame controls:** the original `UIErrorsFrame` can now be shown or hidden from Arcane Options and repositioned with Arcane's Move frames mode. Hiding it is visual only; its original error, info and system-message event handling stays intact for A/B testing.

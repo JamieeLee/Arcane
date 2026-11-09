@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static checks for Arcane's reversible stock error-frame controls."""
+"""Static checks for Arcane's reversible, themed stock error-frame controls."""
 from pathlib import Path
 import sys
 
@@ -21,21 +21,25 @@ contracts = (
     ('C.Movable(frame, "stockErrors", "Stock error messages"', "the stock frame must use Arcane's native mover"),
     ('C.HideStock("UIErrorsFrame")', "the off state must hide the stock frame through Arcane's stock-frame helper"),
     ('C.RestoreStock("UIErrorsFrame")', "the on state must restore the stock frame"),
-    ('C.OnWorld(Apply)', "the saved visibility state must be reapplied on world entry"),
+    ('C.OnWorld(function()', "the saved visibility state and theme must be reapplied on world entry"),
     ('C.RegisterPart({', "the visibility switch must appear in Arcane's own Options hub"),
     ('key = "errors"', "the stock frame must have an Arcane part command"),
-    ('f:SetPoint("TOP", bosses, "BOTTOM", 0, -22)', "the default position must sit immediately beneath Arcane's boss and mini-boss stack"),
+    ('f:SetPoint("CENTER", UIParent, "CENTER", 0, 120)', "the default position must center on the Move to Begin prompt"),
 )
 for contract, message in contracts:
     if contract not in code:
         fail(message)
 
-if 'getglobal("ArcaneBosses")' not in code or 'f:SetPoint("TOP", UIParent, "TOP", 0, -122)' not in code:
-    fail("the stock frame must use Arcane's boss stack as its default anchor, with a safe fallback")
+if 'C.Panel(frame, false)' not in code or 'C.PanelTheme(deco, C.Pal())' not in code:
+    fail("the stock message frame must use Arcane's shared panel and active palette")
+if "themeStamp ~= C.palStamp" not in code or 'CreateFrame("Frame", "ArcaneStockErrorsThemeDriver")' not in code:
+    fail("the stock message panel must refresh when the active Arcane theme changes")
 if 'C.OnLogout(function()' not in code or 'C.RestoreStock("UIErrorsFrame") end' not in code:
     fail("a disabled stock frame must be restored during logout cleanup")
 if "UnregisterEvent" in code or 'SetScript("OnEvent"' in code:
     fail("Arcane must not remove or replace the stock frame's event handling")
+if 'SetFont(' in code or 'SetTextColor(' in code:
+    fail("Arcane must leave the stock message font and per-message semantic colors unchanged")
 
 # Preserve the existing right-side Damage meter/Luck defaults; only Stats is
 # newly stacked above the meter. Reset must settle dependent anchors together.
@@ -58,5 +62,6 @@ if movement.index("if C.timerReset then C.timerReset() end") > movement.index("f
 
 print("PASS: stock error frame has a reversible Arcane Options toggle")
 print("PASS: stock error frame uses Arcane's Move frames position system")
-print("PASS: stock error frame defaults beneath Arcane's boss bars; original event handling is untouched")
+print("PASS: stock message frame uses the shared Arcane palette and centered default placement")
+print("PASS: stock message colors and event routing remain untouched")
 print("PASS: Luck and Damage meter keep their original right-side defaults; only Stats is added above the meter")
