@@ -1,6 +1,6 @@
 -- Arcane UI: the game's own error/notification feed, with Arcane's shared panel treatment.
--- The stock frame keeps its original events and message colors; Arcane owns only its shell,
--- default placement, saved movement and visibility switch.
+-- The stock frame keeps its original events and message text; Arcane owns only its shell,
+-- default placement, saved movement, visibility switch and theme color.
 local C = Arcane
 local DEFAULTS = { enabled = true }
 local db
@@ -29,15 +29,26 @@ C.OnInit(function()
 
 	C.Movable(frame, "stockErrors", "Stock error messages", function(f)
 		f:ClearAllPoints()
-		-- Center on the game's "Move to Begin" prompt. This keeps the error and
-		-- information feed in the center field without overlapping the boss stack.
+		-- Center on the game's "Move to Begin" prompt.
 		f:SetPoint("CENTER", UIParent, "CENTER", 0, 120)
 	end)
 	deco = C.Panel(frame, false)
 	Theme()
 
-	-- Shared palettes can change when the player selects a UI style or a run class
-	-- is resolved. Refresh only when the common palette stamp changes.
+	-- In 1.12, gameplay notices of every kind reach this MessageFrame through AddMessage:
+	-- UI_ERROR_MESSAGE, UI_INFO_MESSAGE, SYSMSG and direct FrameXML AddMessage calls.
+	-- The red/yellow event colors are not Lua-error classification; actual Lua errors
+	-- use the separate script-error window. Recolor only the line, keeping its text and
+	-- native display duration/queue behavior unchanged.
+	local nativeAddMessage = frame.AddMessage
+	if type(nativeAddMessage) == "function" then
+		frame.AddMessage = function(self, message, red, green, blue, alpha)
+			local title = C.Pal().title
+			return nativeAddMessage(self, message, title[1], title[2], title[3], alpha or 1)
+		end
+	end
+
+	-- Refresh the panel shell when the shared Arcane palette changes.
 	local themeDriver = CreateFrame("Frame", "ArcaneStockErrorsThemeDriver")
 	themeDriver:SetScript("OnUpdate", function()
 		if themeStamp ~= C.palStamp then Theme() end
@@ -58,7 +69,7 @@ end)
 C.RegisterPart({
 	key = "errors",
 	name = "Stock error messages",
-	note = "The game's original red errors, yellow notices and colored system messages. Turn it off to compare without them; use Move frames to reposition it.",
+	note = "The game's original gameplay messages, themed to Arcane. Turn it off to compare without them; use Move frames to reposition it.",
 	get = function() return db and db.enabled end,
 	set = function(on)
 		if not db then return end

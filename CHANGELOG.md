@@ -1,5 +1,7 @@
 ## Unreleased
 
+- **Stock message panel theme and placement:** the stock gameplay-message frame now uses Arcane's shared panel treatment and active palette in Arcane, Hybrid and Full Class modes. All UIErrorsFrame:AddMessage lines (including red/yellow events, system messages and direct FrameXML calls) use the active UI accent; their text, routing, queue and display timing stay stock. Lua script errors remain in the separate script-error window. Its reset position is centered on the game's "Move to Begin" prompt.
+
 - **Stock message panel theme and placement:** the stock error/information frame now uses Arcane's shared panel treatment and refreshes with Classic Arcane, Hybrid and Full Class palette changes. Its reset position is centered on the game's "Move to Begin" prompt. Red errors, yellow information messages and system-supplied message colors remain unchanged.
 
 - **Stats default position:** Stats now resets directly above the Damage meter on the right side, aligned to the meter's right edge. The Damage meter and Luck keep their original right-side default positions.

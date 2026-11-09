@@ -25,21 +25,24 @@ contracts = (
     ('C.RegisterPart({', "the visibility switch must appear in Arcane's own Options hub"),
     ('key = "errors"', "the stock frame must have an Arcane part command"),
     ('f:SetPoint("CENTER", UIParent, "CENTER", 0, 120)', "the default position must center on the Move to Begin prompt"),
+    ('deco = C.Panel(frame, false)', "the frame shell must use Arcane's shared panel"),
+    ('C.PanelTheme(deco, C.Pal())', "the shell must use the active Arcane palette"),
+    ('local nativeAddMessage = frame.AddMessage', "the stock MessageFrame AddMessage method must be preserved"),
+    ('frame.AddMessage = function(self, message, red, green, blue, alpha)', "all stock message paths must be recolored at the common AddMessage boundary"),
+    ('nativeAddMessage(self, message, title[1], title[2], title[3], alpha or 1)', "the original MessageFrame method must receive the active theme color"),
 )
 for contract, message in contracts:
     if contract not in code:
         fail(message)
 
-if 'C.Panel(frame, false)' not in code or 'C.PanelTheme(deco, C.Pal())' not in code:
-    fail("the stock message frame must use Arcane's shared panel and active palette")
 if "themeStamp ~= C.palStamp" not in code or 'CreateFrame("Frame", "ArcaneStockErrorsThemeDriver")' not in code:
     fail("the stock message panel must refresh when the active Arcane theme changes")
 if 'C.OnLogout(function()' not in code or 'C.RestoreStock("UIErrorsFrame") end' not in code:
     fail("a disabled stock frame must be restored during logout cleanup")
 if "UnregisterEvent" in code or 'SetScript("OnEvent"' in code:
     fail("Arcane must not remove or replace the stock frame's event handling")
-if 'SetFont(' in code or 'SetTextColor(' in code:
-    fail("Arcane must leave the stock message font and per-message semantic colors unchanged")
+if "SetFont(" in code or "SetText(" in code:
+    fail("Arcane must leave stock message text and font behavior unchanged")
 
 # Preserve the existing right-side Damage meter/Luck defaults; only Stats is
 # newly stacked above the meter. Reset must settle dependent anchors together.
@@ -62,6 +65,6 @@ if movement.index("if C.timerReset then C.timerReset() end") > movement.index("f
 
 print("PASS: stock error frame has a reversible Arcane Options toggle")
 print("PASS: stock error frame uses Arcane's Move frames position system")
-print("PASS: stock message frame uses the shared Arcane palette and centered default placement")
-print("PASS: stock message colors and event routing remain untouched")
+print("PASS: stock message panel and every AddMessage line use the active Arcane theme")
+print("PASS: original message text, routing, font and display behavior remain unchanged")
 print("PASS: Luck and Damage meter keep their original right-side defaults; only Stats is added above the meter")
