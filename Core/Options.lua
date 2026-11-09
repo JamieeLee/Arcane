@@ -257,9 +257,9 @@ local function BuildHub()
 	o.lock:SetPoint("TOPLEFT", o, "TOPLEFT", 14 + COL_W, y)
 	y = y - 30
 	local platesButton = C.Button(o, 148, 24, "", function()
-		if C.arcanePlatesOptions then C.arcanePlatesOptions(o) end
+		if C.arcaneNameplateOptions then C.arcaneNameplateOptions(o) end
 	end)
-	C.LText(platesButton.text, "Tiny Plates settings")
+	C.LText(platesButton.text, "Arcane Nameplates settings")
 	platesButton:SetPoint("TOPLEFT", o, "TOPLEFT", 14, y)
 	local langButton = C.Button(o, 148, 24, "", function()
 		if o.langMenu:IsShown() then o.langMenu:Hide() else o.langMenu:Show() end
