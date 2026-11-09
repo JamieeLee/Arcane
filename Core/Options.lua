@@ -257,7 +257,7 @@ local function BuildHub()
 	o.lock:SetPoint("TOPLEFT", o, "TOPLEFT", 14 + COL_W, y)
 	y = y - 30
 	local platesButton = C.Button(o, 148, 24, "", function()
-		if C.arcaneNameplateOptions then C.arcaneNameplateOptions(o) end
+		if C.nameplateOptions then C.nameplateOptions(o) end
 	end)
 	C.LText(platesButton.text, "Arcane Nameplates settings")
 	platesButton:SetPoint("TOPLEFT", o, "TOPLEFT", 14, y)

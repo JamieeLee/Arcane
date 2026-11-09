@@ -1,4 +1,4 @@
--- Arcane Arcane Nameplates settings. All state lives under ArcaneDB.nameplates.
+-- Arcane Nameplates settings. All state lives under ArcaneDB.nameplates.
 -- The settings are embedded in Arcane's options flow; there is no ArcaneNameplates minimap button
 -- or second standalone settings window.
 
@@ -247,6 +247,6 @@ function C.ToggleNameplateOptions(parent)
 	end
 end
 
-C.arcaneNameplateOptions = C.ToggleNameplateOptions
+C.nameplateOptions = C.ToggleNameplateOptions
 
 C.OnInit(function() DB() end)
