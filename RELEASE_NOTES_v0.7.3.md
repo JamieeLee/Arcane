@@ -11,10 +11,10 @@ Arcane v0.7.3 packages the current mainline HUD as a consistent, verified instal
 
 ## Install package
 
-- **Download:** \`ArcaneV0.7.3.zip\`
-- **Archive layout:** the ZIP opens directly to \`Arcane/Arcane.toc\`.
-- **Assets:** includes the complete \`Art/\` and \`Fonts/\` folders, multilingual font files, and attribution/license notices.
-- **Upgrade:** extract into \`Interface/AddOns\`; keep the installed folder named \`Arcane\`. Existing \`ArcaneDB\` saved settings are retained.
+- **Download:** `ArcaneV0.7.3.zip`
+- **Archive layout:** the ZIP opens directly to `Arcane/Arcane.toc`.
+- **Assets:** includes the complete `Art/` and `Fonts/` folders, multilingual font files, and attribution/license notices.
+- **Upgrade:** extract into `Interface/AddOns`; keep the installed folder named `Arcane`. Existing `ArcaneDB` saved settings are retained.
 
 ## Validation
 
