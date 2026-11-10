@@ -161,11 +161,15 @@ local function ApplyCombatText(pal)
 	end
 
 	if not themedCombatFonts then
+		local found = 0
 		for i = 1, 20 do
 			local fs = getglobal("CombatText" .. i)
-			if fs then SetFont(fs, C.FONT) end
+			if fs then
+				SetFont(fs, C.FONT)
+				found = found + 1
+			end
 		end
-		themedCombatFonts = true
+		themedCombatFonts = found == 20
 	end
 	return true
 end
@@ -209,6 +213,10 @@ local function RefreshZone()
 	if zoneText ~= lastZoneText or subText ~= lastSubZoneText then
 		lastZoneText, lastSubZoneText = zoneText, subText
 		ApplyZoneTheme(C.Pal())
+	else
+		-- Retry the width measurement once the client has completed its next font layout.
+		LayoutBanner(zoneBanner)
+		LayoutBanner(subZoneBanner)
 	end
 end
 
@@ -246,6 +254,7 @@ C.OnInit(function()
 			ApplyCombatText(C.Pal())
 		end
 		ApplyTheme()
+		if not themedCombatFonts then ApplyCombatText(C.Pal()) end
 		RefreshZone()
 	end)
 	watch:SetScript("OnUpdate", function()
