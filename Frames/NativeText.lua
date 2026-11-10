@@ -5,8 +5,8 @@ local C = Arcane
 local AURA_TYPES = { "SPELL_CAST", "AURA_START", "AURA_END" }
 local HEAL_TYPES = { "HEAL", "HEAL_CRIT", "PERIODIC_HEAL" }
 local STROKE_OFFSETS = {
-	{ -2, 0 }, { 2, 0 }, { 0, -2 }, { 0, 2 },
-	{ -1.5, -1.5 }, { -1.5, 1.5 }, { 1.5, -1.5 }, { 1.5, 1.5 },
+	{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
+	{ -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 },
 }
 
 local zoneStroke, subZoneStroke
@@ -58,8 +58,17 @@ local function SyncTextStroke(stroke, rim)
 		return
 	end
 
-	local face, size = source:GetFont()
+	local face, size, flags = source:GetFont()
 	if type(face) ~= "string" or type(size) ~= "number" or size <= 0 then return end
+
+	-- ZoneTextFont is defined by Blizzard with outline="THICK". That fixed black
+	-- outline has no color setter in 1.12. Replace only that flag with a colored
+	-- glyph stroke behind the native fill. The native face and point size stay exact.
+	if not stroke.nativeOutlineRemoved and type(flags) == "string"
+		and string.find(flags, "THICK") then
+		source:SetFont(face, size)
+		stroke.nativeOutlineRemoved = true
+	end
 	local width = source:GetWidth()
 	local height = source:GetHeight() or 0
 	if type(source.GetStringHeight) == "function" then
