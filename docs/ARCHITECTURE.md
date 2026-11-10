@@ -77,3 +77,15 @@ Regular Arcane Nameplates replacement bars use 75% of the native health-bar widt
 The native 1.12 nameplate exposes its level as a numeric root FontString, separate from the name. `Nameplates/State.lua` reads and caches that value before the native labels are hidden, refreshing it as pooled plates are reused. `Nameplates/Visuals.lua` displays it in a compact square glass-and-metal badge attached to the right side of the replacement bar. The badge uses the shared Arcane `rim`, `trough` and `title` palette and is parented to the replacement overlay, so it follows the game's native V visibility and pooled-frame lifecycle. If the native plate has no numeric level, the badge stays hidden.
 
 The WorldFrame plate's root size, scale, projected position and anchor remain game-owned; Arcane only enlarges its child replacement visual.
+
+
+
+## Nameplate lifecycle and hover tooltip
+
+The native Azeroth Survivors plate is recognized by its actual 1.12 structure: an anonymous `Button` under `WorldFrame`, six root regions in the game's creation order (border Texture, glow Texture, name FontString, level FontString, skull Texture, raid Texture), and one direct horizontal health `StatusBar`. `Nameplates/State.lua` validates that signature once and caches the native region and StatusBar references. It does not recursively search arbitrary descendants for a name and a wide StatusBar. Frames that do not match the native signature are ignored.
+
+The native pool is dynamic. Arcane registers hidden pool entries before first use, chains their existing `OnShow` and `OnHide` handlers without discarding them, and refreshes cached frame identities during the plate driver. On reuse, it restores the captured child visibility/alpha state, invalidates the old identity, reapplies the new plate style, and hides only the four native decoration regions, native name/level strings and native health bar. The WorldFrame root's size, scale, position and visibility remain game-owned. The controller no longer waits half a second to recognize a new plate.
+
+The replacement bar is centered on the cached native health StatusBar rather than converting a bottom-left anchor into a center offset. Its dimensions are bounded to the native StatusBar's expected range. Health text has no whitespace break around its separator and is measured/fitted against the bar's inner width, preventing current/maximum values from wrapping into two rows. The regular-bar scale and right-side enemy-level badge behavior remain unchanged.
+
+`Frames/WorldTooltip.lua` suppresses the persistent world-hover `GameTooltip` only when its owner is `UIParent`, which FrameXML uses for world units, corpses and world objects. It chains the existing default-anchor and show scripts and has a minimal owner check as a fallback for cursor-seated objects. Tooltips owned by actual UI controls are not suppressed.
