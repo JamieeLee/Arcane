@@ -1,6 +1,6 @@
 ## v0.7.2 — November 9, 2026
 
-- **Skill-bar center ornament alignment:** anchor the top and bottom center diamonds to the full outer panel instead of the undocked slot/XP root. They now remain centered over the complete bar when the kills/gold/cache dock expands or contracts. No artwork, sizing, color, slot layout or gameplay behavior changes.
+- **Skill-bar center ornament alignment:** anchor each diamond to the geometric center of its actual top or bottom gold rail. This corrects the vertical rail alignment and keeps the pair centered horizontally as the kills/gold/cache dock expands or contracts. No artwork, sizing, color, slot layout or gameplay behavior changes.
 
 ## v0.7.1 — November 9, 2026
 
