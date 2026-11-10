@@ -147,9 +147,11 @@ end
 local function HideNativePlate(frame, keep)
 	local regions = frame.arcaneNameplatesNativeRegions
 	if regions then
-		for _, index in ipairs({ 1, 2, 5, 6 }) do
-			local region = regions[index]
-			if region and region:IsShown() then region:Hide() end
+		for index = 1, 6 do
+			if index == 1 or index == 2 or index == 5 or index == 6 then
+				local region = regions[index]
+				if region and region:IsShown() then region:Hide() end
+			end
 		end
 	end
 	local bar = frame.arcaneNameplatesNativeBar
