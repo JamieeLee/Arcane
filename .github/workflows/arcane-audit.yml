@@ -166,7 +166,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
-          gh run download "$GITHUB_RUN_ID" \\
+          gh run download "$GITHUB_RUN_ID" \
             --name "Arcane-v0.7.3-test-$GITHUB_SHA" \\
             --dir release-assets
           test -s "release-assets/ArcaneV0.7.3.zip"
@@ -178,7 +178,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF_NAME" = "v0.7.3"
-          gh release create "$GITHUB_REF_NAME" "release-assets/ArcaneV0.7.3.zip" \\
-            --title "Arcane UI v0.7.3" \\
-            --notes-file "RELEASE_NOTES_v0.7.3.md" \\
+          gh release create "$GITHUB_REF_NAME" "release-assets/ArcaneV0.7.3.zip" \
+            --title "Arcane UI v0.7.3" \
+            --notes-file "RELEASE_NOTES_v0.7.3.md" \
             --verify-tag
