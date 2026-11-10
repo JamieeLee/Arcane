@@ -69,6 +69,20 @@ local function FindNameFontString(frame, name)
 	return fallback
 end
 
+-- The 1.12 plate creates its own level FontString as a root region, separate from the name.
+-- Read it before HideNameText hides the native regions; pooled plates update this string in place.
+local function GetPlateLevel(frame)
+	local regions = { frame:GetRegions() }
+	for i = 1, table.getn(regions) do
+		local region = regions[i]
+		if region and region:GetObjectType() == "FontString" then
+			local value = region:GetText()
+			if value and string.find(value, "^%d+$") then return tonumber(value) end
+		end
+	end
+	return nil
+end
+
 local function SaveObjectState(object, states, plate)
 	plate = plate or object
 	-- The root plate's visibility belongs to the game. Never restore it from our snapshot:
@@ -223,7 +237,13 @@ local function RegisterPlate(frame, knownPlates, orderedPlates)
 	if not known and not IdentifyNameplate(frame) then return false end
 
 	local currentName = GetPlateName(frame)
+	local currentLevel = GetPlateLevel(frame)
 	local oldName = frame.arcaneNameplatesPlateName
+	if currentLevel then
+		frame.arcaneNameplatesPlateLevel = currentLevel
+	elseif currentName and currentName ~= oldName then
+		frame.arcaneNameplatesPlateLevel = nil
+	end
 	-- A briefly blank name is common while a pooled plate is being reused. Do not treat
 	-- that transient state as a new unit or throw away the last valid identity.
 	local nameChanged = currentName and currentName ~= oldName
@@ -268,6 +288,7 @@ end
 
 P.State.NormalizeName = NormalizeName
 P.State.GetPlateName = GetPlateName
+P.State.GetPlateLevel = GetPlateLevel
 P.State.FindNameFontString = FindNameFontString
 P.State.IsOwnObject = IsOwnObject
 P.State.CaptureNativeState = CaptureNativeState
