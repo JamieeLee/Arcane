@@ -198,6 +198,18 @@ end
 local function UpdatePlateLevelBadge(frame)
 	local badge = EnsureLevelBadge(frame)
 	if not badge then return end
+	local size = math.max(18, math.min(22, frame.arcaneNameplatesOverlayHeight + 12))
+	if frame.arcaneNameplatesLevelBadgeSize ~= size then
+		badge:SetWidth(size)
+		badge:SetHeight(size)
+		badge.text:SetWidth(size - 2)
+		badge.text:SetHeight(size - 2)
+		frame.arcaneNameplatesLevelBadgeSize = size
+	end
+	if frame.arcaneNameplatesLevelBadgeFrameLevel ~= frame.arcaneNameplatesOverlay:GetFrameLevel() + 5 then
+		badge:SetFrameLevel(frame.arcaneNameplatesOverlay:GetFrameLevel() + 5)
+		frame.arcaneNameplatesLevelBadgeFrameLevel = frame.arcaneNameplatesOverlay:GetFrameLevel() + 5
+	end
 	local level = frame.arcaneNameplatesPlateLevel
 	if type(level) ~= "number" or level < 1 then
 		if badge:IsShown() then badge:Hide() end
