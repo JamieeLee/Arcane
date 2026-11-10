@@ -8,6 +8,7 @@ VERSION = "0.7.2"
 VERSION_TAG = "v" + VERSION
 RELEASE_ASSET = "ArcaneV0.7.2.zip"
 ARTIFACT_PREFIX = "Arcane-v0.7.2-test-"
+INSTALL_ZIP = "ArcaneV0.7.2.zip"
 
 checks = (
     (ROOT / "Core.lua", f'Arcane.VERSION = "{VERSION}"', "Core.VERSION must be 0.7.2"),
@@ -17,6 +18,7 @@ checks = (
     (ROOT / "CHANGELOG.md", "## v0.7.2 — November 9, 2026", "changelog must include the dated v0.7.1 section"),
     (ROOT / "RELEASE_NOTES_v0.7.2.md", "# Arcane UI v0.7.2", "the full v0.7.2 release notes must exist"),
     (ROOT / ".github/workflows/arcane-audit.yml", ARTIFACT_PREFIX, "CI test artifact name must use v0.7.1"),
+    (ROOT / ".github/workflows/arcane-audit.yml", f'archive="$RUNNER_TEMP/{INSTALL_ZIP}"', "CI inner installer must use the fixed ArcaneV0.7.2.zip filename"),
 )
 for path, expected, message in checks:
     if expected not in path.read_text(encoding="utf-8"):
