@@ -19,7 +19,7 @@ This document describes the source layout and the runtime rules behind it. The a
 | `Timer/` | Boss timer data and its renderer/controller. |
 | `Numbers/` | Damage-number configuration, combat intake, icons, labels, world anchors, layout, culling, placement, animation, lifecycle, options and commands. |
 | `SkillBar/` | Class/style data, visual style controller and the skill-slot/XP renderer. |
-| `Frames/` | Bosses, skulls, the player frame, party, downed-player and stored-level-up frames. |
+| `Frames/` | Bosses, skulls, the player frame, party, downed-player and stored-level-up frames, stock notifications and native text styling. |
 | `Minimap/` | Minimap presentation, edge button, cache pins and lair pins. |
 | `Windows/` | Tally, meter, damage/healing, pets, luck, summary, character, stats, talents and chat windows. |
 | `Nameplates/` | Arcane Nameplates replacement and its options. |
@@ -60,3 +60,11 @@ Arcane-owned code uses the `C.Nameplates` namespace and `arcaneNameplates*` fram
 
 
 Arcane Nameplates does not own the `WorldFrame` plate root's dimensions, scale or projected position. Azeroth Survivors updates the root anchor as units move; Arcane Nameplates anchors its overlay to the native health bar and restores only native child visibility/alpha that it changed.
+
+## Native text styling
+
+`Frames/NativeText.lua` styles the game's existing floating combat text and zone/subzone announcement strings. It changes the palette/font treatment only: Blizzard still creates the messages, applies its visibility settings, chooses the message types, animates and fades the floating lines, and runs the zone announcement lifecycle. Arcane does not replace `CombatText_AddMessage`, rewrite its event handlers, or change the scroll/fade constants.
+
+The zone and subzone labels retain their native frames and fade behavior. Arcane places timer-style gold metal endcaps around a crimson center behind the existing font strings, and uses the shared title face/color. The background textures are children of the native fading frames, so they follow the same alpha and visibility without a second animation.
+
+The native gameplay notification feed remains `UIErrorsFrame`; its existing message handler continues to use the active Arcane title color and now receives Arcane typography as well. Lua script errors remain separate. Live-client testing is still required to confirm the client exposes the expected 1.12.1 font-string and combat-text objects.
