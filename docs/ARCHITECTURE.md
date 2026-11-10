@@ -51,7 +51,7 @@ Arcane Nameplates is split by responsibility rather than by individual helper:
 - `Nameplates/State.lua` owns native plate discovery, child-state snapshots and safe visibility restoration.
 - `Nameplates/SpecialTargets.lua` owns boss/guardian identity and debuff presentation.
 - `Nameplates/Visuals.lua` owns replacement bars, labels and plate styling.
-- `Nameplates/ArcaneNameplates.lua` owns discovery cadence, update scheduling and addon lifecycle.
+- `Nameplates/ArcaneNameplates.lua` owns cached pool registration, same-update reuse styling, native-region suppression and addon lifecycle.
 - `Nameplates/ArcaneNameplatesOptions.lua` owns the settings UI and saved option access.
 
 The controller delegates to these modules in TOC order. Arcane Nameplates is Arcane's required enemy-plate renderer and remains active whenever Arcane is loaded. The game's native `V` command owns enemy-plate visibility. Azeroth Survivors creates anonymous `Button` children under `WorldFrame`, hides retired plates, and reuses free pool slots. The Arcane replacement bar is parented to the same button, so it follows the game's show/hide state without binding or overriding `V`. The registry is therefore bounded by the game's high-water plate pool; no guessed cleanup timer is needed. There is no second hide checkbox and no stock-renderer fallback.
