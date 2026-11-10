@@ -6,7 +6,7 @@
 
 - **Stock gameplay notification text:** keep the native message feed transparent and borderless; its text uses the active Arcane UX palette in Arcane, Hybrid and Full Class modes. The feed remains movable through Arcane's Move frames system, while genuine Lua script errors stay in their separate error window.
 
-- **Native floating and zone text:** keep the game's own message types, visibility filters, scroll/fade behavior and zone-announcement lifecycle. Positive buff/cast and healing feedback follow the live zone palette. Zone/subzone announcements retain their original font, exact size, fill color, position and fade; a thin outline around each letter inherits the timer's live rim color, with no side ornaments or banner panel.
+- **Native floating status text:** retain the known-good Arcane styling for positive aura/cast and healing feedback, plus the themed gameplay notification feed. Zone/subzone announcements are left entirely to the game: original wording, font, size, color, placement and fade, with no Arcane overlay or hook.
 
 - **Stock error-frame controls:** the original `UIErrorsFrame` can now be shown or hidden from Arcane Options and repositioned with Arcane's Move frames mode. Hiding it is visual only; its original error, info and system-message event handling stays intact for A/B testing.
 
