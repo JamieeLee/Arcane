@@ -108,13 +108,13 @@ require("local function DiscoverNativePool(children)" in CONTROLLER
         and "P.State.IdentifyNameplate(frame)" in CONTROLLER,
         "unseen WorldFrame buttons must go through the exact native signature")
 require("local function ScanNameplates(updateDebuffs)" in CONTROLLER
-        and "P.State.RegisterPlate, frame" in CONTROLLER,
+        and "return P.State.RegisterPlate(frame, knownPlates, orderedPlates)" in CONTROLLER,
         "known pool entries must refresh their identity and reuse state")
 require("ScanNameplates(updateDebuffs)" in CONTROLLER and "scanFrame:SetScript(\"OnUpdate\"" in CONTROLLER,
         "native plate lifecycle must be driven without a half-second timer")
 require("SCAN_INTERVAL" not in CONTROLLER and "scanClock" not in CONTROLLER,
         "there must be no arbitrary half-second discovery delay")
-require("P.State.HideNativePresentation(active[i])" in CONTROLLER,
+require("P.State.HideNativePresentation(frame)" in CONTROLLER,
         "late native level/skull/raid/glow writes must be suppressed after the game updates them")
 require("frame.arcaneNameplatesNeedsStyle" in CONTROLLER
         and "frame.arcaneNameplatesNameChangedPending" in CONTROLLER,
