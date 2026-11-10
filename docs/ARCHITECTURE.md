@@ -93,4 +93,4 @@ The replacement bar is centered on the cached native health StatusBar rather tha
 
 ## Skill-bar center ornaments
 
-The top and bottom center diamonds are anchored to the outer root.panel, not the inner slot/XP root. The outer panel expands horizontally when the kills/gold/cache tally docks, so anchoring to root.panel keeps both diamonds centered on the complete visible bar in every dock state.
+The top and bottom center diamonds are anchored to the geometric center of their respective panel rail textures (root.deco.railT and root.deco.railB). This aligns each ornament to the visible gold rail in Classic, Hybrid and Full Class modes. Because the rails span the outer panel, both diamonds remain horizontally centered on the complete visible bar as the kills/gold/cache tally dock expands or contracts.
