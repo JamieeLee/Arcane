@@ -1,5 +1,7 @@
 ## Unreleased
 
+- **Nameplate lifecycle and rendering audit:** identify the game's exact six-region/one-health-bar plate structure once, cache it, respond to native pool reuse immediately, suppress late native-region redraws, center Arcane's overlay on the native bar, and keep health text on one fitted line. Hide only the persistent world-hover tooltip owned by `UIParent`; control-owned tooltips remain available.
+
 - **Arcane Nameplates sizing:** regular enemy bars are enlarged from half to 75% of the native health-bar dimensions so current / maximum health reads comfortably inside the bar. A compact right-side glass-and-metal badge displays the enemy's native level when available; its frame follows the native plate pool and V visibility.
 
 - **Run summary lifecycle:** keep the end-of-run summary visible during “Move to begin,” dismiss it when the next run starts, and show the next end summary even when consecutive runs have the same outcome. Compare the full end snapshot so stale data cannot reopen the old summary during the new run.
