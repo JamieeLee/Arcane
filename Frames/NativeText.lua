@@ -41,7 +41,9 @@ local function HideTextStroke(stroke)
 	if not stroke or not stroke.shown then return end
 	stroke.shown = false
 	for i = 1, table.getn(stroke.copies) do
-		stroke.copies[i].fs:Hide()
+		local copy = stroke.copies[i]
+		copy.fs:Hide()
+		copy.shown = false
 	end
 end
 
