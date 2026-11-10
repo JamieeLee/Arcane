@@ -176,21 +176,22 @@ require('arg1 ~= "AZSUNITS"' in CONTROLLER and "AZS_UNITS" in SPECIAL,
 require("C.ArcaneNameplatesToggleOptions" in CORE_OPTIONS,
         "the options hub must call the canonical Arcane entry point")
 
-# World-hover information uses GameTooltip with UIParent as owner. Suppress only that owner:
-# UI buttons, inventory slots, action buttons and other owned tooltips must continue to work.
+# World-hover information is the native default-anchored GameTooltip. Suppress only
+# GameTooltip.default; ordinary control tooltips use their own anchors and remain visible.
 for token in (
-    "tip:GetOwner() == UIParent",
-    'ChainScript(GameTooltip, "OnTooltipSetDefaultAnchor", HideWorldTooltip)',
-    'ChainScript(GameTooltip, "OnShow", HideWorldTooltip)',
-    'guard:SetScript("OnUpdate", HideWorldTooltip)',
-    "local previous = frame:GetScript(scriptName)",
+    "GameTooltip.default",
+    'ChainTooltipScript("OnTooltipSetDefaultAnchor")',
+    'ChainTooltipScript("OnShow")',
+    "local previous = GameTooltip:GetScript(scriptName)",
     "if previous then previous() end",
+    "GameTooltip:Hide()",
 ):
-    require(token in TOOLTIP, f"world-tooltip suppression is missing {token!r}")
-require("tip:Hide()" in TOOLTIP and "GameTooltip:Hide()" not in TOOLTIP,
-        "only the active UIParent-owned tooltip is hidden, preserving the normal tooltip API")
-require("OnTooltipSetDefaultAnchor" in ARCH and "UIParent" in ARCH,
-        "tooltip ownership behavior must be documented")
+    require(token in TOOLTIP, f"default-tooltip suppression is missing {token!r}")
+require("Arcane" not in TOOLTIP and "C.OnInit" not in TOOLTIP
+        and 'SetScript("OnUpdate"' not in TOOLTIP,
+        "tooltip guard must be standalone and must not run a per-frame poll")
+require("OnTooltipSetDefaultAnchor" in ARCH and "GameTooltip.default" in ARCH,
+        "default-tooltip ownership behavior must be documented")
 
 # Arcane-owned branding and namespace, game-owned APIs untouched.
 owned = CONTROLLER + OPTIONS + STATE + SPECIAL + VISUALS
