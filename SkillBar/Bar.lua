@@ -766,11 +766,14 @@ C.OnInit(function()
 	-- Center each ornament on the actual gold rail, not the frame edge. The rail's
 	-- visual center is the correct alignment reference in Classic, Hybrid and Full Class.
 	local rails = { root.deco.railT, root.deco.railB }
+	-- The rail textures have transparent art padding: their rectangle centers do not
+	-- exactly match the visible gold stripe. Nudge the ornaments outward onto that stripe.
+	local railOffsets = { 2, -2 } -- WoW positive Y moves up: top up, bottom down.
 	for i = 1, table.getn(rails) do
 		local d = C.Tex(root.panel, "OVERLAY", C.ART .. "Diamond")
 		d:SetWidth(20)
 		d:SetHeight(20)
-		d:SetPoint("CENTER", rails[i], "CENTER", 0, 0)
+		d:SetPoint("CENTER", rails[i], "CENTER", 0, railOffsets[i])
 		table.insert(root.deco.metal, d)
 		table.insert(root.deco.classGems, d)
 	end
