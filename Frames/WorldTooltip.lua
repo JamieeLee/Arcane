@@ -1,39 +1,26 @@
--- Suppress the game's persistent world-hover information panel.
--- World unit/corpse/GameObject tooltips are owned by UIParent and default-anchor into
--- the bottom-right corner. Tooltips owned by actual UI controls remain untouched.
-local C = Arcane
-
-local function HideWorldTooltip()
-	local tip = GameTooltip
-	if not tip or not tip.IsShown or not tip:IsShown() then return end
-	if type(tip.GetOwner) ~= "function" then return end
-	if tip:GetOwner() == UIParent then tip:Hide() end
-end
-
-local function ChainScript(frame, scriptName, after)
-	if not frame or type(frame.GetScript) ~= "function" or type(frame.SetScript) ~= "function" then
-		return false
+-- Suppress the game's persistent default-anchored world-hover information panel.
+-- World units, corpses and world objects use GameTooltip_SetDefaultAnchor, which marks
+-- GameTooltip.default. Ordinary control tooltips use their own anchors and remain available.
+-- This file is deliberately standalone: it must not depend on Arcane's initialization table.
+local function HideDefaultTooltip()
+	if GameTooltip and GameTooltip.default and GameTooltip:IsShown() then
+		GameTooltip:Hide()
 	end
-	local previous = frame:GetScript(scriptName)
-	frame:SetScript(scriptName, function()
-		if previous then previous() end
-		after()
-	end)
-	return true
 end
 
-C.OnInit(function()
-	if not GameTooltip or not UIParent then return end
+local function ChainTooltipScript(scriptName)
+	if not GameTooltip or type(GameTooltip.GetScript) ~= "function"
+			or type(GameTooltip.SetScript) ~= "function" then return end
+	local previous = GameTooltip:GetScript(scriptName)
+	GameTooltip:SetScript(scriptName, function()
+		if previous then previous() end
+		HideDefaultTooltip()
+	end)
+end
 
-	-- This runs when FrameXML chooses the world/default anchor, before it fills the lines.
-	ChainScript(GameTooltip, "OnTooltipSetDefaultAnchor", HideWorldTooltip)
-
-	-- Fallback for cursor-seated world objects which use SetOwner(UIParent, ANCHOR_CURSOR)
-	-- without firing OnTooltipSetDefaultAnchor.
-	ChainScript(GameTooltip, "OnShow", HideWorldTooltip)
-
-	-- Also catches a world-owned tooltip that changes owner while already shown, or another
-	-- addon that calls Show() again after the first hide. One cheap owner check; no UI traversal.
-	local guard = CreateFrame("Frame", "ArcaneWorldTooltipGuard")
-	guard:SetScript("OnUpdate", HideWorldTooltip)
-end)
+if GameTooltip then
+	-- The native default-anchor script sets GameTooltip.default before this wrapper hides it.
+	ChainTooltipScript("OnTooltipSetDefaultAnchor")
+	-- Also catch clients/addons which show a tooltip after setting the default anchor.
+	ChainTooltipScript("OnShow")
+end
