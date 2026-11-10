@@ -3,7 +3,8 @@
 local C = Arcane
 local DEFAULTS = { enabled = false }
 
-local WIDTH, HEIGHT = 96, 22
+-- A generous move-only grab box around the compact native text.
+local WIDTH, HEIGHT = 144, 36
 local LABEL_WIDTH, VALUE_WIDTH, VALUE_GAP = 40, 46, 5
 local TEXT_Y = 0
 
@@ -119,7 +120,9 @@ C.OnInit(function()
 			f:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 200)
 		end
 	end)
-	mover.box:SetBackdrop(nil)
+	-- Keep the gold mover outline visible while Move frames is enabled, but leave
+	-- its interior transparent so the native FPS text remains unobstructed.
+	mover.box:SetBackdropColor(0, 0, 0, 0)
 	mover.box.text:Hide()
 
 	SetShown(db.enabled)
