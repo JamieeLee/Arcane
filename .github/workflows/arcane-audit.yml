@@ -97,7 +97,7 @@ jobs:
           set -euo pipefail
           stage="$RUNNER_TEMP/package"
           addon="$stage/Arcane"
-          archive="$RUNNER_TEMP/Arcane-v0.7.2-test-${GITHUB_SHA:0:12}.zip"
+          archive="$RUNNER_TEMP/ArcaneV0.7.2.zip"
 
           mkdir -p "$addon"
           while IFS= read -r -d '' file; do
