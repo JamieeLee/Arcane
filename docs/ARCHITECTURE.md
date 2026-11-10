@@ -68,3 +68,12 @@ Arcane Nameplates does not own the `WorldFrame` plate root's dimensions, scale o
 **Zone and subzone announcements remain entirely native.** Arcane does not reference or hook `ZoneTextString`, `SubZoneTextString`, `ZoneTextFrame`, `SubZoneTextFrame` or `SetZoneText`. The game owns their original wording, font, exact size, contextual fill color, position and fade. No outline, banner, trim, background or other Arcane decoration is added.
 
 `Frames/StockErrors.lua` retains the known-good treatment for the game's separate `UIErrorsFrame` gameplay-notification feed: Arcane typography and the active `C.Pal().title` color. Lua script errors are separate from this gameplay-notification feed. Live-client testing remains necessary in Azeroth Survivors 1.12.1 / Lua 5.0.
+
+
+## Nameplate sizing and level badge
+
+Regular Arcane Nameplates replacement bars use 75% of the native health-bar width and height (the previous regular scale was 50%). The health FontString is constrained to the bar's inner width so current/maximum health stays inside the bar rather than spilling past its edges.
+
+The native 1.12 nameplate exposes its level as a numeric root FontString, separate from the name. `Nameplates/State.lua` reads and caches that value before the native labels are hidden, refreshing it as pooled plates are reused. `Nameplates/Visuals.lua` displays it in a compact square glass-and-metal badge attached to the right side of the replacement bar. The badge uses the shared Arcane `rim`, `trough` and `title` palette and is parented to the replacement overlay, so it follows the game's native V visibility and pooled-frame lifecycle. If the native plate has no numeric level, the badge stays hidden.
+
+The WorldFrame plate's root size, scale, projected position and anchor remain game-owned; Arcane only enlarges its child replacement visual.
