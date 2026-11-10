@@ -1,3 +1,7 @@
+## v0.7.2 — November 9, 2026
+
+- **Skill-bar center ornament alignment:** anchor the top and bottom center diamonds to the full outer panel instead of the undocked slot/XP root. They now remain centered over the complete bar when the kills/gold/cache dock expands or contracts. No artwork, sizing, color, slot layout or gameplay behavior changes.
+
 ## v0.7.1 — November 9, 2026
 
 - **Arcane Nameplates settings panel:** make the settings window draggable with the left mouse button on its open background, matching the Timer and Damage Numbers options submenus. Keep it clamped to the screen and parented to Arcane Options so it still follows the hub's show/hide lifecycle. No gameplay behavior, saved-variable keys or game-owned APIs change.
