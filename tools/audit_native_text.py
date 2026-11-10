@@ -20,6 +20,8 @@ for token in (
     "source:GetFont()",
     "source:GetStringHeight()",
     "fs:SetFont(face, size)",
+    "source:SetFont(face, size)",
+    'string.find(flags, "THICK")',
     "fs:SetHeight(height)",
     "local function LivePalette()",
     "local pal = C.pal",
