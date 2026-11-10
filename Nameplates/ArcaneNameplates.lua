@@ -116,8 +116,6 @@ local function ScanNameplates(updateDebuffs)
 	local children = { WorldFrame:GetChildren() }
 	DiscoverNativePool(children)
 
-	local needsStyle = {}
-	local active = {}
 	local refreshSpecialNames = false
 	local anyIdentityChange = false
 	for i = 1, table.getn(orderedPlates) do
@@ -125,10 +123,8 @@ local function ScanNameplates(updateDebuffs)
 		local ok, registered, identityChanged, nameWasChanged = SafeCall(
 			"plate lifecycle", RegisterPlate, frame)
 		if ok and registered and frame:IsVisible() then
-			table.insert(active, frame)
 			if identityChanged or nameWasChanged or frame.arcaneNameplatesNeedsStyle
 					or frame.arcaneNameplatesStyleRevision ~= styleRevision then
-				table.insert(needsStyle, frame)
 				anyIdentityChange = true
 			end
 			if nameWasChanged or frame.arcaneNameplatesNameChangedPending then
@@ -137,23 +133,34 @@ local function ScanNameplates(updateDebuffs)
 		end
 	end
 
-	if refreshSpecialNames then
-		SafeCall("boss and guardian index", P.Special.RefreshNames, true, orderedPlates)
+	-- Run snapshots are independent of plate discovery: a boss can become known in AZS_UNITS
+	-- while its native nameplate frame and name remain unchanged.
+	if refreshPending or refreshSpecialNames then
+		SafeCall("boss and guardian index", P.Special.RefreshNames, refreshSpecialNames, orderedPlates)
+		refreshPending = false
 	elseif anyIdentityChange then
 		SafeCall("boss and guardian index", P.Special.RefreshNames, false, orderedPlates)
 	end
 
-	for i = 1, table.getn(needsStyle) do
-		local frame = needsStyle[i]
-		SafeCall("plate style", ApplyKnownPlate, frame, updateDebuffs)
-		frame.arcaneNameplatesNeedsStyle = nil
-		frame.arcaneNameplatesNameChangedPending = nil
-	end
-
-	-- The native game updates level/skull/raid/hover regions after creating the pooled plate.
-	-- Re-hide only the cached six-region/one-bar native presentation after that update each frame.
-	for i = 1, table.getn(active) do
-		P.State.HideNativePresentation(active[i])
+	-- Reuse the one cached plate registry directly. No temporary active/dirty arrays are
+	-- allocated each frame, and a pooled frame is styled on the same update that notices reuse.
+	for i = 1, table.getn(orderedPlates) do
+		local frame = orderedPlates[i]
+		if frame:IsVisible() then
+			local special = P.Special.IsBossOrGuardianPlate(frame)
+			local category = special and "boss" or "regular"
+			if frame.arcaneNameplatesNeedsStyle
+					or frame.arcaneNameplatesNameChangedPending
+					or frame.arcaneNameplatesAppliedCategory ~= category
+					or frame.arcaneNameplatesStyleRevision ~= styleRevision then
+					SafeCall("plate style", ApplyKnownPlate, frame, updateDebuffs)
+					frame.arcaneNameplatesNeedsStyle = nil
+					frame.arcaneNameplatesNameChangedPending = nil
+			end
+			-- The native game updates level/skull/raid/hover regions after creating the pooled plate.
+			-- Re-hide only the cached native presentation after those writes each UI update.
+			P.State.HideNativePresentation(frame)
+		end
 	end
 end
 
