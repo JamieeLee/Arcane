@@ -1,4 +1,4 @@
-## Unreleased
+## v0.7 — November 9, 2026
 
 - **Nameplate lifecycle and rendering audit:** identify the game's exact six-region/one-health-bar plate structure once, cache it, respond to native pool reuse immediately, suppress late native-region redraws, center Arcane's overlay on the native bar, and keep health text on one fitted line. Hide only the persistent default-anchored world-hover tooltip; ordinary control tooltips remain available. Keep the guard standalone and event-driven.
 
