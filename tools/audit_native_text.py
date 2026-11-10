@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static guardrails for native zone text outlines and behavior preservation."""
+"""Static guardrails for floating combat-text styling and untouched zone announcements."""
 
 from pathlib import Path
 
@@ -12,73 +12,64 @@ ARCH = (ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")
 assert "Frames/StockErrors.lua\nFrames/NativeText.lua" in TOC
 
 for token in (
+    '"SPELL_CAST"',
+    '"AURA_START"',
+    '"AURA_END"',
+    '"HEAL"',
+    '"HEAL_CRIT"',
+    '"PERIODIC_HEAL"',
+    "COMBAT_TEXT_TYPE_INFO",
+    "SetCombatColor(info, AURA_TYPES[i], pal.title)",
+    "SetCombatColor(info, HEAL_TYPES[i], pal.mc)",
+    "local pal = C.Pal()",
+    "C.SetFace(fs, face, size, \"OUTLINE\")",
+    'getglobal("CombatText" .. i)',
+    'watch:RegisterEvent("ADDON_LOADED")',
+):
+    assert token in THEME, f"Floating combat-text theme is missing {token!r}"
+
+# Zone/subzone announcements must remain entirely Blizzard-owned.
+for forbidden in (
     "ZoneTextString",
     "SubZoneTextString",
     "ZoneTextFrame",
     "SubZoneTextFrame",
-    'CreateFontString(nil, "BACKGROUND")',
-    "source:GetFont()",
-    "source:GetStringHeight()",
-    "fs:SetFont(face, size)",
-    "source:SetFont(face, size)",
-    'string.find(flags, "THICK")',
-    "fs:SetHeight(height)",
-    "local function LivePalette()",
-    "local pal = C.pal",
-    "local rim = pal.rim",
-    "pal.title",
-    "pal.mc",
-    '"AURA_START"',
-    '"AURA_END"',
-    '"HEAL"',
-    '"PERIODIC_HEAL"',
+    "SetZoneText",
+    "ZoneFadeInDuration",
+    "ZoneHoldDuration",
+    "ZoneFadeOutDuration",
+    "CreateFontString",
     "STROKE_OFFSETS",
-    "fs:SetTextColor(rim[1], rim[2], rim[3])",
-):
-    assert token in THEME, f"Native text theme is missing {token!r}"
-
-# Native zone FontStrings must never be restyled or moved. The outline is a separate
-# BACKGROUND-layer FontString pool, using the original face/size and a separate rim tint.
-for forbidden in (
-    "ZoneTextString:SetTextColor",
-    "SubZoneTextString:SetTextColor",
-    "ZoneTextString:SetFont",
-    "SubZoneTextString:SetFont",
-    "ZoneTextString:SetPoint",
-    "SubZoneTextString:SetPoint",
-    "C.SetFace(zone",
-    "C.SetFace(sub",
-    "C.TextColor(zone",
-    "C.TextColor(sub",
-    "C.ART .. \"FrameL\"",
-    "C.ART .. \"FrameR\"",
+    "FrameL",
+    "FrameM",
+    "FrameR",
     "CRIMSON_",
     "BANNER_HEIGHT",
-    "SetZoneText = function",
 ):
-    assert forbidden not in THEME, f"Native zone text must remain untouched: {forbidden!r}"
+    assert forbidden not in THEME, f"Zone announcement code must not be present: {forbidden!r}"
 
-# The integration must not replace native message creation, filters or animation behavior.
+# Keep native floating message creation, event handling, filters and animation untouched.
 for forbidden in (
     "CombatText_AddMessage =",
     "CombatText_OnEvent =",
     "COMBAT_TEXT_SCROLLSPEED =",
     "COMBAT_TEXT_FADEOUT_TIME =",
-    "ZoneFadeInDuration =",
-    "ZoneHoldDuration =",
-    "ZoneFadeOutDuration =",
+    "CombatText_OnUpdate =",
 ):
-    assert forbidden not in THEME, f"Native text theme must not override {forbidden!r}"
+    assert forbidden not in THEME, f"Native combat-text behavior must not be replaced: {forbidden!r}"
 
-# The existing gameplay notification color hook remains unchanged from main.
-assert "nativeAddMessage(self, message, title[1], title[2], title[3], alpha)" in STOCK
-assert "local title = C.Pal().title" in STOCK
-assert "ThemeFont(self)" not in STOCK
-assert "Native text styling" in ARCH
+# The known-good gameplay notification treatment from the user's reference ZIP stays active.
+for token in (
+    "local function ThemeFont(frame)",
+    "ThemeFont(self)",
+    "local title = C.Pal().title",
+    "nativeAddMessage(self, message, title[1], title[2], title[3], alpha)",
+):
+    assert token in STOCK, f"Stock gameplay notification theme is missing {token!r}"
 
-print("PASS native zone/subzone font, exact size, fill color, position and fades are not modified")
-print("PASS a live rim-colored outline follows each native glyph without side ornaments or a panel")
-print("PASS outline clones use the exact native face and font size with explicit line height")
-print("PASS floating status colors follow the active timer zone palette")
-print("PASS native combat-text creation, filtering, scrolling and fade constants remain native")
-print("PASS the pre-existing stock gameplay notification theme is unchanged")
+assert "Zone announcements remain entirely native" in ARCH
+
+print("PASS positive aura/cast and heal text use the known-good Arcane palette mapping")
+print("PASS Blizzard's floating message creation, filtering, movement and fade remain native")
+print("PASS NativeText.lua does not hook, move, recolor or decorate zone announcements")
+print("PASS stock gameplay notices retain the known-good Arcane font and color treatment")
