@@ -67,7 +67,7 @@ for token in (
 ):
     assert token in STOCK, f"Stock gameplay notification theme is missing {token!r}"
 
-assert "Zone announcements remain entirely native" in ARCH
+assert "Zone and subzone announcements remain entirely native" in ARCH
 
 print("PASS positive aura/cast and heal text use the known-good Arcane palette mapping")
 print("PASS Blizzard's floating message creation, filtering, movement and fade remain native")
