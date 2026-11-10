@@ -105,7 +105,7 @@ require("regions[i]:Show()" not in STATE and "children[i]:Show()" not in STATE
 require("local checkedWorldChildren = {}" in CONTROLLER,
         "new WorldFrame children must be structurally classified once")
 require("local function DiscoverNativePool(children)" in CONTROLLER
-        and "P.State.IdentifyNameplate(frame)" in CONTROLLER,
+        and 'SafeCall("plate discovery", P.State.IdentifyNameplate, frame)' in CONTROLLER,
         "unseen WorldFrame buttons must go through the exact native signature")
 require("local function ScanNameplates(updateDebuffs)" in CONTROLLER
         and "return P.State.RegisterPlate(frame, knownPlates, orderedPlates)" in CONTROLLER,
