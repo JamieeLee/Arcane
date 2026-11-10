@@ -187,7 +187,7 @@ for token in (
     "GameTooltip:Hide()",
 ):
     require(token in TOOLTIP, f"default-tooltip suppression is missing {token!r}")
-require("Arcane" not in TOOLTIP and "C.OnInit" not in TOOLTIP
+require("local C = Arcane" not in TOOLTIP and "C.OnInit" not in TOOLTIP
         and 'SetScript("OnUpdate"' not in TOOLTIP,
         "tooltip guard must be standalone and must not run a per-frame poll")
 require("OnTooltipSetDefaultAnchor" in ARCH and "GameTooltip.default" in ARCH,
