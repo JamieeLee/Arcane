@@ -23,4 +23,14 @@ for path, expected, message in checks:
         print("FAIL:", message, file=sys.stderr)
         raise SystemExit(1)
 
+# Historical changelog entries may mention v0.6, but the active install/package metadata may not.
+readme = (ROOT / "README.md").read_text(encoding="utf-8")
+workflow = (ROOT / ".github" / "workflows" / "arcane-audit.yml").read_text(encoding="utf-8")
+if "ArcaneV0.6.zip" in readme:
+    print("FAIL: README still points at the v0.6 release asset", file=sys.stderr)
+    raise SystemExit(1)
+if "Arcane-v0.6-test-" in workflow:
+    print("FAIL: CI still labels test packages as v0.6", file=sys.stderr)
+    raise SystemExit(1)
+
 print("PASS: Arcane v0.7 runtime, TOC, README, changelog, release notes and CI package metadata are consistent")
