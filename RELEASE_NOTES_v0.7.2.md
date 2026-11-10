@@ -4,8 +4,8 @@ Arcane v0.7.2 is a focused visual-alignment patch.
 
 ## Skill bar
 
-- Correct the top and bottom center diamond anchors so both ornaments stay centered on the complete visible skill-bar panel.
-- The ornaments now follow the outer panel as the kills, gold and cache dock expands or contracts, instead of remaining centered on the narrower slot/XP area.
+- Correct the top and bottom center diamond anchors so each diamond sits on the actual visual centerline of its corresponding gold rail.
+- Both diamonds remain centered horizontally on the full outer panel as the kills, gold and cache dock expands or contracts.
 - Preserve the existing diamond artwork, dimensions, palette behavior and vertical placement.
 
 ## Compatibility and validation
