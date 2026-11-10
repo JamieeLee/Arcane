@@ -1,4 +1,4 @@
-## v0.7.3 — November 10, 2026
+## v0.7.3 — November 9, 2026
 
 - **Release stabilization and packaging:** align the addon runtime, TOC, README and CI installer at v0.7.3. Validate the install ZIP's `Arcane/Arcane.toc` root, required artwork, multilingual fonts and license notices. A `v0.7.3` tag now publishes the validated archive as the official GitHub Release after the full audit job succeeds. No additional HUD or gameplay behavior changes beyond the current v0.7.2 mainline.
 
