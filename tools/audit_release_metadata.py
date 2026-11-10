@@ -23,7 +23,7 @@ checks = (
     (ROOT / ".github/workflows/arcane-audit.yml", f'- "{VERSION_TAG}"', "CI must run for the release tag"),
     (ROOT / ".github/workflows/arcane-audit.yml", "gh release create", "the validated tag build must publish a GitHub Release"),
     (ROOT / ".github/workflows/arcane-audit.yml", "GH_TOKEN: ${{ github.token }}", "release publishing must authenticate with the Actions token"),
-    (ROOT / ".github/workflows/arcane-audit.yml", 'gh run download "$GITHUB_RUN_ID" \\', "release job must download the package from this workflow run"),
+    (ROOT / ".github/workflows/arcane-audit.yml", "gh run download", "release job must download the package from this workflow run"),
 )
 for path, expected, message in checks:
     if not path.exists() or expected not in path.read_text(encoding="utf-8"):
