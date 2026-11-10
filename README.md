@@ -27,6 +27,7 @@ A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethu
 - **Standalone Stats window:** independently track the run's 29 stats in customizable groups; choose which values appear and see changes flash green or red.
 - **Chat:** dressed to match, and kept clear of the skill bar's full Arcane medallion.
 - **Damage numbers:** calm and readable; a spell hitting a crowd adds up into one number a second, and a number that keeps stacking grows.
+- **Native game text:** floating buff/heal feedback and zone announcements keep their original behavior, now in Arcane typography and colors; zone names sit on a crimson inset with the timer's gold metal ends.
 - **Damage-number customization:** six optional custom typefaces and six selectable critical-hit backdrops (Flame, Frost, Arcane, Holy, Shadow and Storm); existing defaults remain unchanged.
 - **Run summary:** when a run ends, your time, level, kills, bosses, damage dealt and taken, gold and caches on one panel.
 
