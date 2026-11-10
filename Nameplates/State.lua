@@ -192,23 +192,29 @@ local function InstallLifecycleHooks(frame)
 end
 
 local function RegisterPlate(frame, knownPlates, orderedPlates)
-	if not frame or not frame.IsVisible or not frame:IsVisible()
-			or not frame.IsShown or not frame:IsShown()
-			or not frame.GetWidth or frame:GetWidth() <= 0
-			or not frame.GetHeight or frame:GetHeight() <= 0 then
-			if frame then frame.arcaneNameplatesWasShown = false end
-			return false, false
+	if not frame or not frame.GetObjectType or frame:GetObjectType() ~= "Button" then
+		return false, false, false
 	end
 
 	local known = knownPlates[frame] and true or false
-	if not known and not IdentifyNameplate(frame) then return false, false end
-	if not frame.arcaneNameplatesNativeCaptured then CaptureNativeState(frame) end
-	if not frame.arcaneNameplatesNativeCaptured then return false, false end
 	if not known then
+		if not IdentifyNameplate(frame) then return false, false, false end
 		knownPlates[frame] = true
 		table.insert(orderedPlates, frame)
+		CaptureNativeState(frame)
 		InstallLifecycleHooks(frame)
 		frame.arcaneNameplatesSourceBar = frame.arcaneNameplatesNativeBar
+		frame.arcaneNameplatesAppliedCategory = nil
+		frame.arcaneNameplatesStyleRevision = -1
+	end
+	if not frame.arcaneNameplatesNativeCaptured then CaptureNativeState(frame) end
+	if not frame.arcaneNameplatesNativeCaptured then return false, false, false end
+
+	local visible = frame.IsShown and frame:IsShown()
+		and frame.IsVisible and frame:IsVisible()
+	if not visible then
+		frame.arcaneNameplatesWasShown = false
+		return true, false, false
 	end
 
 	local currentName = GetPlateName(frame)
@@ -238,9 +244,11 @@ local function RegisterPlate(frame, knownPlates, orderedPlates)
 		frame.arcaneNameplatesAppliedCategory = nil
 		frame.arcaneNameplatesStyleRevision = -1
 		frame.arcaneNameplatesNativeRestored = false
+		frame.arcaneNameplatesNeedsStyle = true
+		if nameChanged then frame.arcaneNameplatesNameChangedPending = true end
 		if frame.arcaneNameplatesHealthBar then frame.arcaneNameplatesHealthBar.snap = true end
 	end
-	return true, changed
+	return true, changed, nameChanged and true or false
 end
 
 P.State.NormalizeName = NormalizeName
