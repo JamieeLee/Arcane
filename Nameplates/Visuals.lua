@@ -198,7 +198,7 @@ end
 local function UpdatePlateLevelBadge(frame)
 	local badge = EnsureLevelBadge(frame)
 	if not badge then return end
-	local size = math.max(18, math.min(22, frame.arcaneNameplatesOverlayHeight + 12))
+	local size = math.max(16, math.min(20, frame.arcaneNameplatesOverlayHeight + 9))
 	if frame.arcaneNameplatesLevelBadgeSize ~= size then
 		badge:SetWidth(size)
 		badge:SetHeight(size)
