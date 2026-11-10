@@ -768,7 +768,7 @@ C.OnInit(function()
 		local d = C.Tex(root.panel, "OVERLAY", C.ART .. "Diamond")
 		d:SetWidth(20)
 		d:SetHeight(20)
-		d:SetPoint("CENTER", root, edge, 0, 0)
+		d:SetPoint("CENTER", root.panel, edge, 0, 0)
 		table.insert(root.deco.metal, d)
 		table.insert(root.deco.classGems, d)
 	end
