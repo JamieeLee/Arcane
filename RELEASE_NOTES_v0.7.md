@@ -4,6 +4,8 @@ Arcane v0.7 is a substantial polish and reliability release. It builds on the v0
 
 ## Enemy nameplates — bigger, clearer, and more reliable
 
+- **Arcane Nameplates identity and upgrade path.** The former Tiny Plates subsystem is now consistently named and namespaced as Arcane Nameplates. Azeroth Survivors' `AZS_*` integration identifiers remain untouched, and the existing `ArcaneDB.nameplates` settings bucket is retained so saved colors and display preferences survive the upgrade.
+
 - **Regular enemy bars are larger.** The standard replacement bar now uses 75% of the native health-bar dimensions instead of 50%, giving health values more room without changing the game's projected nameplate position.
 - **Health values stay on one line.** Current and maximum health are rendered without breakable spacing around the separator. The text measures itself and fits to the usable inner width of the bar, including larger health totals.
 - **Enemy level is visible at a glance.** A compact square badge sits on the right side of the health bar, using Arcane's dark glass fill, metallic rim, and active title color.
