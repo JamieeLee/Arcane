@@ -139,18 +139,19 @@ local function UpdatePlateHealthText(frame, source)
 	if not frame.arcaneNameplatesHealthText then
 		local special = frame.arcaneNameplatesBossGuardian and true or false
 		local size = special and 10 or 8
+		local width = math.max(40, frame.arcaneNameplatesOverlayWidth - 6)
 		local text = C.Text(frame.arcaneNameplatesHealthBar.top, C.FONT, size, "OUTLINE",
-			"CENTER", frame.arcaneNameplatesOverlayWidth + 20)
+			"CENTER", width)
 		text:SetPoint("CENTER", frame.arcaneNameplatesOverlay, "CENTER", 0, 0)
 		frame.arcaneNameplatesHealthText = text
 		frame.arcaneNameplatesHealthTextSize = size
-		frame.arcaneNameplatesHealthTextWidth = frame.arcaneNameplatesOverlayWidth + 20
+		frame.arcaneNameplatesHealthTextWidth = width
 	elseif frame.arcaneNameplatesHealthTextSize ~= (frame.arcaneNameplatesBossGuardian and 10 or 8) then
 		local size = frame.arcaneNameplatesBossGuardian and 10 or 8
 		C.SetFace(frame.arcaneNameplatesHealthText, C.FONT, size, "OUTLINE")
 		frame.arcaneNameplatesHealthTextSize = size
 	end
-	local width = frame.arcaneNameplatesOverlayWidth + 20
+	local width = math.max(40, frame.arcaneNameplatesOverlayWidth - 6)
 	if frame.arcaneNameplatesHealthTextWidth ~= width then
 		frame.arcaneNameplatesHealthText:SetWidth(width)
 		frame.arcaneNameplatesHealthTextWidth = width
@@ -164,6 +165,59 @@ local function UpdatePlateHealthText(frame, source)
 		frame.arcaneNameplatesHealthTextMaximum = maximum
 	end
 	if not frame.arcaneNameplatesHealthText:IsShown() then frame.arcaneNameplatesHealthText:Show() end
+end
+
+local function EnsureLevelBadge(frame)
+	if frame.arcaneNameplatesLevelBadge then return frame.arcaneNameplatesLevelBadge end
+	local overlay = frame.arcaneNameplatesOverlay
+	if not overlay then return nil end
+
+	local special = frame.arcaneNameplatesBossGuardian and true or false
+	local size = math.max(18, math.min(22, frame.arcaneNameplatesOverlayHeight + (special and 12 or 12)))
+	local badge = CreateFrame("Frame", nil, overlay)
+	badge:SetWidth(size)
+	badge:SetHeight(size)
+	badge:SetPoint("LEFT", overlay, "RIGHT", -1, 0)
+	badge:SetFrameLevel(overlay:GetFrameLevel() + 5)
+
+	badge.edge = C.Tex(badge, "BACKGROUND", C.FLAT)
+	badge.edge:SetAllPoints(badge)
+	badge.fill = C.Tex(badge, "BORDER", C.FLAT)
+	badge.fill:SetPoint("TOPLEFT", badge, "TOPLEFT", 1, -1)
+	badge.fill:SetPoint("BOTTOMRIGHT", badge, "BOTTOMRIGHT", -1, 1)
+	badge.text = C.Text(badge, C.FONT, 8, "OUTLINE", "CENTER", size - 2)
+	badge.text:SetHeight(size - 2)
+	badge.text:SetPoint("CENTER", badge, "CENTER", 0, 0)
+	badge.text:SetText("")
+
+	frame.arcaneNameplatesLevelBadge = badge
+	frame.arcaneNameplatesLevelBadgeSize = size
+	return badge
+end
+
+local function UpdatePlateLevelBadge(frame)
+	local badge = EnsureLevelBadge(frame)
+	if not badge then return end
+	local level = frame.arcaneNameplatesPlateLevel
+	if type(level) ~= "number" or level < 1 then
+		if badge:IsShown() then badge:Hide() end
+		return
+	end
+
+	local levelText = tostring(math.floor(level))
+	if frame.arcaneNameplatesLevelBadgeText ~= levelText then
+		C.SetText(badge.text, levelText)
+		frame.arcaneNameplatesLevelBadgeText = levelText
+	end
+
+	if frame.arcaneNameplatesLevelBadgeThemeStamp ~= C.palStamp then
+		local pal = C.Pal()
+		badge.edge:SetVertexColor(pal.rim[1], pal.rim[2], pal.rim[3], 1)
+		badge.fill:SetVertexColor(pal.trough[1], pal.trough[2], pal.trough[3], 0.98)
+		badge.text:SetTextColor(pal.title[1], pal.title[2], pal.title[3])
+		frame.arcaneNameplatesLevelBadgeThemeStamp = C.palStamp
+	end
+	if not badge:IsShown() then badge:Show() end
 end
 
 local function ApplyPlateStyle(frame)
@@ -184,6 +238,7 @@ local function ApplyPlateStyle(frame)
 	if bar.w ~= width or bar.h ~= height then C.BarLayout(bar, width, height) end
 	overlay:SetFrameLevel(math.max(frame:GetFrameLevel() + 2, source:GetFrameLevel() + 1))
 	C.BarLevels(bar, overlay:GetFrameLevel())
+	UpdatePlateLevelBadge(frame)
 	if frame.arcaneNameplatesBarThemeStamp ~= C.palStamp then
 		C.BarTheme(bar, C.Pal())
 		frame.arcaneNameplatesBarThemeStamp = C.palStamp
@@ -252,7 +307,7 @@ local function CreatePlateOverlay(frame)
 	end
 	if not point then return false end
 	frame.arcaneNameplatesSourceOriginalWidth, frame.arcaneNameplatesSourceOriginalHeight = originalWidth, originalHeight
-	local visualScale = P.Special.IsBossOrGuardianPlate(frame) and 1 or 0.5
+	local visualScale = P.Special.IsBossOrGuardianPlate(frame) and 1 or 0.75
 	local width, height = originalWidth * visualScale, originalHeight * visualScale
 	local adjustedX, adjustedY = x or 0, y or 0
 	if string.find(point, "LEFT") then adjustedX = adjustedX + width / 2 end
@@ -309,6 +364,7 @@ local function SyncOverlayValues(orderedPlates)
 			local ratio = range > 0 and C.Clamp((value - minimum) / range, 0, 1) or 0
 			C.BarStep(bar, ratio, dt, now)
 			UpdatePlateHealthText(frame, source)
+			UpdatePlateLevelBadge(frame)
 			if frame.arcaneNameplatesBarThemeStamp ~= C.palStamp then
 				C.BarTheme(bar, C.Pal())
 				frame.arcaneNameplatesBarThemeStamp = C.palStamp
