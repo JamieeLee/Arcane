@@ -262,6 +262,7 @@ C.OnInit(function()
 		if poll < 0.2 then return end
 		poll = 0
 		ApplyTheme()
+		if not themedCombatFonts then ApplyCombatText(C.Pal()) end
 		RefreshZone()
 	end)
 
