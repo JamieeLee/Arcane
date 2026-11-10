@@ -102,8 +102,6 @@ local function DiscoverNativePool(children)
 					SafeCall("plate registration", RegisterPlate, frame)
 				elseif frame.GetWidth and frame:GetWidth() > 0
 						and frame.GetHeight and frame:GetHeight() > 0 then
-						-- A fully-sized non-native Button is not revisited every frame. Native pool
-						-- buttons are created with their six regions and direct bar in one transaction.
 						checkedWorldChildren[frame] = true
 				end
 			else
@@ -118,39 +116,44 @@ local function ScanNameplates(updateDebuffs)
 	local children = { WorldFrame:GetChildren() }
 	DiscoverNativePool(children)
 
-	local changed = false
-	local nameChanged = false
+	local needsStyle = {}
+	local active = {}
+	local refreshSpecialNames = false
+	local anyIdentityChange = false
 	for i = 1, table.getn(orderedPlates) do
 		local frame = orderedPlates[i]
 		local ok, registered, identityChanged, nameWasChanged = SafeCall(
 			"plate lifecycle", RegisterPlate, frame)
-		if ok and registered then
-			if identityChanged then changed = true end
-			if nameWasChanged then nameChanged = true end
-			if frame:IsVisible() then
-				local special = P.Special.IsBossOrGuardianPlate(frame)
-				local category = special and "boss" or "regular"
-				if identityChanged or frame.arcaneNameplatesAppliedCategory ~= category
-						or frame.arcaneNameplatesStyleRevision ~= styleRevision then
-					ApplyKnownPlate(frame, updateDebuffs)
-				end
-				-- The game updates native level, skull, raid and hover-glow regions as its
-				-- per-frame plate state changes. Keep those native layers suppressed every
-				-- frame, while leaving our overlay/debuff/name children alone.
-				P.State.HideNativePresentation(frame)
+		if ok and registered and frame:IsVisible() then
+			table.insert(active, frame)
+			if identityChanged or nameWasChanged or frame.arcaneNameplatesNeedsStyle
+					or frame.arcaneNameplatesStyleRevision ~= styleRevision then
+				table.insert(needsStyle, frame)
+				anyIdentityChange = true
+			end
+			if nameWasChanged or frame.arcaneNameplatesNameChangedPending then
+				refreshSpecialNames = true
 			end
 		end
 	end
-	if nameChanged then
+
+	if refreshSpecialNames then
 		SafeCall("boss and guardian index", P.Special.RefreshNames, true, orderedPlates)
-		-- A classification may have changed with the new name; update just those styles on
-		-- this same UI tick rather than waiting for the next cadence.
-		for i = 1, table.getn(orderedPlates) do
-			local frame = orderedPlates[i]
-			if frame:IsVisible() then ApplyKnownPlate(frame, updateDebuffs) end
-		end
-	elseif changed then
+	elseif anyIdentityChange then
 		SafeCall("boss and guardian index", P.Special.RefreshNames, false, orderedPlates)
+	end
+
+	for i = 1, table.getn(needsStyle) do
+		local frame = needsStyle[i]
+		SafeCall("plate style", ApplyKnownPlate, frame, updateDebuffs)
+		frame.arcaneNameplatesNeedsStyle = nil
+		frame.arcaneNameplatesNameChangedPending = nil
+	end
+
+	-- The native game updates level/skull/raid/hover regions after creating the pooled plate.
+	-- Re-hide only the cached six-region/one-bar native presentation after that update each frame.
+	for i = 1, table.getn(active) do
+		P.State.HideNativePresentation(active[i])
 	end
 end
 
