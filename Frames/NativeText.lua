@@ -1,15 +1,12 @@
--- Arcane UI: theme the client's floating status and zone text without replacing its behavior.
--- Blizzard keeps ownership of message creation, filtering, scrolling, fade timing and visibility.
+-- Arcane UI: theme native floating status text and decorate zone labels.
+-- The client keeps ownership of the zone text itself and all message/animation behavior.
 local C = Arcane
 
 local AURA_TYPES = { "SPELL_CAST", "AURA_START", "AURA_END" }
 local HEAL_TYPES = { "HEAL", "HEAL_CRIT", "PERIODIC_HEAL" }
-local BANNER_HEIGHT, BANNER_CAP = 22, 22
-local CRIMSON_DARK = { 0.10, 0.008, 0.018 }
-local CRIMSON_LEFT = { 0.18, 0.012, 0.028 }
-local CRIMSON_RIGHT = { 0.38, 0.025, 0.045 }
+local TRIM_SIZE, TRIM_GAP = 16, 10
 
-local zoneBanner, subZoneBanner
+local zoneTrim, subZoneTrim
 local themedCombatFonts = false
 local nativeSetZoneText
 local lastPalette = {}
@@ -27,117 +24,73 @@ local function SetFont(fs, face)
 	if type(fs.SetShadowOffset) == "function" then fs:SetShadowOffset(1, -1) end
 end
 
-local function HideBanner(b)
-	if not b or not b.shown then return end
-	b.shown = false
-	b.back:Hide()
-	b.fill:Hide()
-	b.gloss:Hide()
-	b.left:Hide()
-	b.middle:Hide()
-	b.right:Hide()
-end
-
-local function NewBanner(parent, fs)
+-- Small ornamental end pieces only. The native zone/subzone text is never restyled:
+-- its original font, size, color (including PvP colors), position and fade remain intact.
+local function NewTrim(parent, fs)
 	if not parent or not fs then return nil end
-	local b = { text = fs, shown = false }
-	-- These are textures on the native fading frame, not a replacement message frame.
-	-- The background and metal therefore inherit the game's exact fade and visibility.
-	b.back = C.Tex(parent, "BACKGROUND", C.FLAT)
-	b.fill = C.Tex(parent, "BORDER", C.ART .. "Fill")
-	b.gloss = C.Tex(parent, "BORDER", C.FLAT)
-	b.left = C.Tex(parent, "BORDER", C.ART .. "FrameL")
-	b.middle = C.Tex(parent, "BORDER", C.ART .. "FrameM")
-	b.right = C.Tex(parent, "BORDER", C.ART .. "FrameR")
-	b.left:SetWidth(BANNER_CAP)
-	b.left:SetHeight(BANNER_HEIGHT)
-	b.middle:SetHeight(BANNER_HEIGHT)
-	b.right:SetWidth(BANNER_CAP)
-	b.right:SetHeight(BANNER_HEIGHT)
-	b.back:Hide()
-	b.fill:Hide()
-	b.gloss:Hide()
-	b.left:Hide()
-	b.middle:Hide()
-	b.right:Hide()
-	return b
+	local trim = { text = fs, shown = false }
+	trim.left = C.Tex(parent, "OVERLAY", C.ART .. "FrameL")
+	trim.right = C.Tex(parent, "OVERLAY", C.ART .. "FrameR")
+	trim.left:SetWidth(TRIM_SIZE)
+	trim.left:SetHeight(TRIM_SIZE)
+	trim.right:SetWidth(TRIM_SIZE)
+	trim.right:SetHeight(TRIM_SIZE)
+	trim.left:Hide()
+	trim.right:Hide()
+	return trim
 end
 
-local function LayoutBanner(b)
-	if not b then return end
-	local value = b.text:GetText()
+local function HideTrim(trim)
+	if not trim or not trim.shown then return end
+	trim.shown = false
+	trim.left:Hide()
+	trim.right:Hide()
+end
+
+local function LayoutTrim(trim)
+	if not trim then return end
+	local value = trim.text:GetText()
 	if not value or value == "" then
-		b.value = value
-		HideBanner(b)
+		trim.value = value
+		HideTrim(trim)
 		return
 	end
 
-	local measured = b.text:GetStringWidth()
-	if type(measured) ~= "number" or measured < 4 then return end
-	local width = math.max(190, math.min(680, measured + 58))
-	if b.value ~= value or b.width ~= width then
-		b.value, b.width = value, width
-
-		b.back:ClearAllPoints()
-		b.back:SetPoint("CENTER", b.text, "CENTER", 0, 0)
-		b.back:SetWidth(width - 34)
-		b.back:SetHeight(17)
-
-		b.fill:ClearAllPoints()
-		b.fill:SetPoint("CENTER", b.text, "CENTER", 0, 0)
-		b.fill:SetWidth(width - 48)
-		b.fill:SetHeight(12)
-		b.fill:SetGradientAlpha("HORIZONTAL",
-			CRIMSON_LEFT[1], CRIMSON_LEFT[2], CRIMSON_LEFT[3], 0.96,
-			CRIMSON_RIGHT[1], CRIMSON_RIGHT[2], CRIMSON_RIGHT[3], 0.96)
-
-		b.gloss:ClearAllPoints()
-		b.gloss:SetPoint("TOPLEFT", b.fill, "TOPLEFT", 0, 0)
-		b.gloss:SetPoint("TOPRIGHT", b.fill, "TOPRIGHT", 0, 0)
-		b.gloss:SetHeight(4)
-		b.gloss:SetGradientAlpha("VERTICAL", 1, 0.82, 0.66, 0.18, 1, 0.82, 0.66, 0)
-
-		b.left:ClearAllPoints()
-		b.left:SetPoint("CENTER", b.back, "LEFT", 8, 0)
-		b.right:ClearAllPoints()
-		b.right:SetPoint("CENTER", b.back, "RIGHT", -8, 0)
-		b.middle:ClearAllPoints()
-		b.middle:SetPoint("LEFT", b.left, "RIGHT", -8, 0)
-		b.middle:SetPoint("RIGHT", b.right, "LEFT", 8, 0)
+	local width = trim.text:GetStringWidth()
+	if type(width) ~= "number" or width < 4 then return end
+	local offset = width * 0.5 + TRIM_GAP
+	if trim.value ~= value or trim.offset ~= offset then
+		trim.value, trim.offset = value, offset
+		trim.left:ClearAllPoints()
+		trim.left:SetPoint("CENTER", trim.text, "CENTER", -offset, 0)
+		trim.right:ClearAllPoints()
+		trim.right:SetPoint("CENTER", trim.text, "CENTER", offset, 0)
 	end
-
-	if not b.shown then
-		b.shown = true
-		b.back:Show()
-		b.fill:Show()
-		b.gloss:Show()
-		b.left:Show()
-		b.middle:Show()
-		b.right:Show()
+	if not trim.shown then
+		trim.shown = true
+		trim.left:Show()
+		trim.right:Show()
 	end
-	b.back:SetVertexColor(CRIMSON_DARK[1], CRIMSON_DARK[2], CRIMSON_DARK[3], 0.94)
 end
 
-local function ColorZoneText(fs, color)
-	if not fs or not color then return end
-	-- SetZoneText writes its own PvP/default color, so invalidate the shared writer's cache.
-	fs.mr, fs.mg, fs.mb = nil, nil, nil
-	C.TextColor(fs, color[1], color[2], color[3])
+local function ApplyTrimColor(trim, pal)
+	if not trim then return end
+	local rim = pal.rim
+	trim.left:SetVertexColor(rim[1], rim[2], rim[3], 1)
+	trim.right:SetVertexColor(rim[1], rim[2], rim[3], 1)
 end
 
-local function ApplyZoneTheme(pal)
+local function RefreshZone()
 	local zone = getglobal("ZoneTextString")
 	local sub = getglobal("SubZoneTextString")
-	local pvp = getglobal("PVPInfoTextString")
-	local arena = getglobal("PVPArenaTextString")
-
-	ColorZoneText(zone, pal.title)
-	ColorZoneText(sub, pal.title)
-	-- Secondary territory labels keep their native meaning/color, but use Arcane typography.
-	if pvp then SetFont(pvp, C.FONT) end
-	if arena then SetFont(arena, C.FONT) end
-	LayoutBanner(zoneBanner)
-	LayoutBanner(subZoneBanner)
+	local zoneText = zone and zone:GetText() or nil
+	local subText = sub and sub:GetText() or nil
+	if zoneText ~= lastZoneText or subText ~= lastSubZoneText then
+		lastZoneText, lastSubZoneText = zoneText, subText
+	end
+	-- The trim follows the measured native string width; no native text region is modified.
+	LayoutTrim(zoneTrim)
+	LayoutTrim(subZoneTrim)
 end
 
 local function SetCombatColor(info, name, color)
@@ -151,8 +104,8 @@ local function ApplyCombatText(pal)
 	local info = COMBAT_TEXT_TYPE_INFO
 	if type(info) ~= "table" then return false end
 
-	-- Keep the client's categories and show/filter flags. Only retint the messages that
-	-- Blizzard paints green by default; damage, harmful effects and resource colors remain theirs.
+	-- Change only the colors of the native positive aura/cast and heal categories.
+	-- All show flags, harmful categories and client message behavior remain untouched.
 	for i = 1, table.getn(AURA_TYPES) do
 		SetCombatColor(info, AURA_TYPES[i], pal.title)
 	end
@@ -174,14 +127,6 @@ local function ApplyCombatText(pal)
 	return true
 end
 
-local function ApplyBannerMetal(b, pal)
-	if not b then return end
-	local rim = pal.rim
-	b.left:SetVertexColor(rim[1], rim[2], rim[3], 1)
-	b.middle:SetVertexColor(rim[1], rim[2], rim[3], 1)
-	b.right:SetVertexColor(rim[1], rim[2], rim[3], 1)
-end
-
 local function ApplyTheme()
 	local pal = C.Pal()
 	local changed = pal.title[1] ~= lastPalette.titleR
@@ -199,25 +144,9 @@ local function ApplyTheme()
 	lastPalette.mcR, lastPalette.mcG, lastPalette.mcB = pal.mc[1], pal.mc[2], pal.mc[3]
 	lastPalette.rimR, lastPalette.rimG, lastPalette.rimB = pal.rim[1], pal.rim[2], pal.rim[3]
 
-	ApplyZoneTheme(pal)
-	ApplyBannerMetal(zoneBanner, pal)
-	ApplyBannerMetal(subZoneBanner, pal)
+	ApplyTrimColor(zoneTrim, pal)
+	ApplyTrimColor(subZoneTrim, pal)
 	ApplyCombatText(pal)
-end
-
-local function RefreshZone()
-	local zone = getglobal("ZoneTextString")
-	local sub = getglobal("SubZoneTextString")
-	local zoneText = zone and zone:GetText() or nil
-	local subText = sub and sub:GetText() or nil
-	if zoneText ~= lastZoneText or subText ~= lastSubZoneText then
-		lastZoneText, lastSubZoneText = zoneText, subText
-		ApplyZoneTheme(C.Pal())
-	else
-		-- Retry the width measurement once the client has completed its next font layout.
-		LayoutBanner(zoneBanner)
-		LayoutBanner(subZoneBanner)
-	end
 end
 
 C.OnInit(function()
@@ -226,20 +155,16 @@ C.OnInit(function()
 	local zone = getglobal("ZoneTextString")
 	local sub = getglobal("SubZoneTextString")
 
-	if zone then
-		SetFont(zone, C.TITLE_FONT)
-		zoneBanner = NewBanner(zoneFrame, zone)
-	end
-	if sub then
-		SetFont(sub, C.TITLE_FONT)
-		subZoneBanner = NewBanner(subFrame, sub)
-	end
+	if zone then zoneTrim = NewTrim(zoneFrame, zone) end
+	if sub then subZoneTrim = NewTrim(subFrame, sub) end
 
+	-- Keep the game's SetZoneText implementation and all its original colors. The wrapper
+	-- only lays out our independent end trims after the native labels have been updated.
 	if type(SetZoneText) == "function" then
 		nativeSetZoneText = SetZoneText
 		SetZoneText = function(showPVPInfo)
 			nativeSetZoneText(showPVPInfo)
-			ApplyZoneTheme(C.Pal())
+			RefreshZone()
 		end
 	end
 
@@ -250,9 +175,6 @@ C.OnInit(function()
 	watch:RegisterEvent("ZONE_CHANGED_INDOORS")
 	watch:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	watch:SetScript("OnEvent", function()
-		if event == "ADDON_LOADED" then
-			ApplyCombatText(C.Pal())
-		end
 		ApplyTheme()
 		if not themedCombatFonts then ApplyCombatText(C.Pal()) end
 		RefreshZone()
@@ -267,7 +189,6 @@ C.OnInit(function()
 	end)
 
 	ApplyTheme()
-	ApplyZoneTheme(C.Pal())
 	ApplyCombatText(C.Pal())
 	RefreshZone()
 end)
