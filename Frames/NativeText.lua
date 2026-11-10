@@ -5,21 +5,22 @@ local C = Arcane
 local AURA_TYPES = { "SPELL_CAST", "AURA_START", "AURA_END" }
 local HEAL_TYPES = { "HEAL", "HEAL_CRIT", "PERIODIC_HEAL" }
 local STROKE_OFFSETS = {
-	{ -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 },
-	{ -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 },
+	{ -2, 0 }, { 2, 0 }, { 0, -2 }, { 0, 2 },
+	{ -1.5, -1.5 }, { -1.5, 1.5 }, { 1.5, -1.5 }, { 1.5, 1.5 },
 }
 
 local zoneStroke, subZoneStroke
 local themedCombatFonts = false
+local combatColorsApplied = false
 local lastPalette = {}
 local poll = 0
 
--- The timer owns the zone palette and writes it to Arcane.pal every time its trim color
--- glides. Read that exact rim rather than the more general panel palette.
-local function TimerRim()
-	local p = C.pal
-	if type(p) == "table" and type(p.rim) == "table" then return p.rim end
-	return C.Pal().rim
+-- The timer publishes its interpolated zone palette on Arcane.pal. C.Pal() is the
+-- broader bronze/class palette, so it must not be used for zone-following text accents.
+local function LivePalette()
+	local pal = C.pal
+	if type(pal) == "table" and type(pal.rim) == "table" then return pal end
+	return C.DEFAULT_PAL or C.Pal()
 end
 
 local function NewTextStroke(parent, source)
@@ -59,16 +60,25 @@ local function SyncTextStroke(stroke, rim)
 
 	local face, size = source:GetFont()
 	if type(face) ~= "string" or type(size) ~= "number" or size <= 0 then return end
-	local width, height = source:GetWidth(), source:GetHeight()
+	local width = source:GetWidth()
+	local height = source:GetHeight() or 0
+	if type(source.GetStringHeight) == "function" then
+		local stringHeight = source:GetStringHeight() or 0
+		if stringHeight > height then height = stringHeight end
+	end
+	-- The native XML sets the text region's height to zero (auto-sized). A copied
+	-- FontString needs an explicit height or the client may clip the whole outline away.
+	if height < size then height = size * 1.5 end
+	height = height + 4
 	local justifyH = type(source.GetJustifyH) == "function" and source:GetJustifyH() or "CENTER"
-	local justifyV = type(source.GetJustifyV) == "function" and source:GetJustifyV() or "MIDDLE"
+	local justifyV = type(source.GetJustifyV) == "function" and source:GetJustifyV() or nil
 
 	for i = 1, table.getn(stroke.copies) do
 		local copy = stroke.copies[i]
 		local fs = copy.fs
 		if copy.face ~= face or copy.size ~= size then
-			-- A plain colored glyph sits behind the game's original text. The native
-			-- FontString on ARTWORK remains on top with all of its original styling.
+			-- Use the exact native face and point size, but no native dark outline on the
+			-- copy: its colored edge is the part that should show around the untouched text.
 			fs:SetFont(face, size)
 			copy.face, copy.size = face, size
 		end
@@ -80,7 +90,7 @@ local function SyncTextStroke(stroke, rim)
 			fs:SetWidth(width)
 			copy.width = width
 		end
-		if type(height) == "number" and height > 0 and copy.height ~= height then
+		if copy.height ~= height then
 			fs:SetHeight(height)
 			copy.height = height
 		end
@@ -88,7 +98,7 @@ local function SyncTextStroke(stroke, rim)
 			fs:SetJustifyH(justifyH)
 			copy.justifyH = justifyH
 		end
-		if copy.justifyV ~= justifyV then
+		if justifyV and type(fs.SetJustifyV) == "function" and copy.justifyV ~= justifyV then
 			fs:SetJustifyV(justifyV)
 			copy.justifyV = justifyV
 		end
@@ -119,23 +129,24 @@ local function ApplyCombatText(pal)
 	local info = COMBAT_TEXT_TYPE_INFO
 	if type(info) ~= "table" then return false end
 
-	-- Change only the colors of the native positive aura/cast and heal categories.
-	-- All show flags, harmful categories and client message behavior remain untouched.
+	-- Preserve Blizzard's message types, visibility flags and animation. Only positive
+	-- aura/cast and healing colors follow the live zone palette; harmful colors remain native.
 	for i = 1, table.getn(AURA_TYPES) do
 		SetCombatColor(info, AURA_TYPES[i], pal.title)
 	end
 	for i = 1, table.getn(HEAL_TYPES) do
 		SetCombatColor(info, HEAL_TYPES[i], pal.mc)
 	end
+	combatColorsApplied = true
 
 	if not themedCombatFonts then
 		local found = 0
 		for i = 1, 20 do
 			local fs = getglobal("CombatText" .. i)
 			if fs then
-				local face, size = fs:GetFont()
-				if type(face) == "string" and type(size) == "number" then
-					fs:SetFont(C.Face(C.FONT), size, "OUTLINE")
+				local _, size, flags = fs:GetFont()
+				if type(size) == "number" and size > 0 then
+					fs:SetFont(C.Face(C.FONT), size, flags)
 				end
 				found = found + 1
 			end
@@ -146,8 +157,8 @@ local function ApplyCombatText(pal)
 end
 
 local function ApplyTheme()
-	local pal = C.Pal()
-	local rim = TimerRim()
+	local pal = LivePalette()
+	local rim = pal.rim
 	local changed = pal.title[1] ~= lastPalette.titleR
 		or pal.title[2] ~= lastPalette.titleG
 		or pal.title[3] ~= lastPalette.titleB
@@ -157,19 +168,24 @@ local function ApplyTheme()
 		or rim[1] ~= lastPalette.rimR
 		or rim[2] ~= lastPalette.rimG
 		or rim[3] ~= lastPalette.rimB
-	if not changed then return end
 
-	lastPalette.titleR, lastPalette.titleG, lastPalette.titleB = pal.title[1], pal.title[2], pal.title[3]
-	lastPalette.mcR, lastPalette.mcG, lastPalette.mcB = pal.mc[1], pal.mc[2], pal.mc[3]
-	lastPalette.rimR, lastPalette.rimG, lastPalette.rimB = rim[1], rim[2], rim[3]
+	if changed then
+		lastPalette.titleR, lastPalette.titleG, lastPalette.titleB = pal.title[1], pal.title[2], pal.title[3]
+		lastPalette.mcR, lastPalette.mcG, lastPalette.mcB = pal.mc[1], pal.mc[2], pal.mc[3]
+		lastPalette.rimR, lastPalette.rimG, lastPalette.rimB = rim[1], rim[2], rim[3]
+		SyncTextStroke(zoneStroke, rim)
+		SyncTextStroke(subZoneStroke, rim)
+	end
 
-	SyncTextStroke(zoneStroke, rim)
-	SyncTextStroke(subZoneStroke, rim)
-	ApplyCombatText(pal)
+	-- Retry until Blizzard_CombatText has created its table and all 20 font strings.
+	-- Reapply on palette transitions so the floating text follows each zone's colors.
+	if changed or not combatColorsApplied or not themedCombatFonts then
+		ApplyCombatText(pal)
+	end
 end
 
 local function RefreshZone()
-	local rim = TimerRim()
+	local rim = LivePalette().rim
 	SyncTextStroke(zoneStroke, rim)
 	SyncTextStroke(subZoneStroke, rim)
 end
@@ -188,7 +204,6 @@ C.OnInit(function()
 	watch:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	watch:SetScript("OnEvent", function()
 		ApplyTheme()
-		if not themedCombatFonts then ApplyCombatText(C.Pal()) end
 		RefreshZone()
 	end)
 	watch:SetScript("OnUpdate", function()
@@ -196,11 +211,9 @@ C.OnInit(function()
 		if poll < 0.1 then return end
 		poll = 0
 		ApplyTheme()
-		if not themedCombatFonts then ApplyCombatText(C.Pal()) end
 		RefreshZone()
 	end)
 
 	ApplyTheme()
-	ApplyCombatText(C.Pal())
 	RefreshZone()
 end)
