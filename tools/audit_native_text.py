@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static guardrails for native text theming and unchanged zone text."""
+"""Static guardrails for native zone text outlines and behavior preservation."""
 
 from pathlib import Path
 
@@ -16,36 +16,43 @@ for token in (
     "SubZoneTextString",
     "ZoneTextFrame",
     "SubZoneTextFrame",
-    "nativeSetZoneText(showPVPInfo)",
-    "COMBAT_TEXT_TYPE_INFO",
+    'CreateFontString(nil, "BACKGROUND")',
+    "source:GetFont()",
+    "fs:SetFont(face, size)",
+    "TimerRim()",
+    "local p = C.pal",
+    "pal.mc",
     '"AURA_START"',
     '"AURA_END"',
     '"HEAL"',
     '"PERIODIC_HEAL"',
-    'C.ART .. "FrameL"',
-    'C.ART .. "FrameR"',
-    "pal.rim",
+    "STROKE_OFFSETS",
+    "fs:SetTextColor(rim[1], rim[2], rim[3])",
 ):
     assert token in THEME, f"Native text theme is missing {token!r}"
 
-# Only decorative end trim textures may be attached to the native zone frames.
+# Native zone FontStrings must never be restyled or moved. The outline is a separate
+# BACKGROUND-layer FontString pool, using the original face/size and a separate tint.
 for forbidden in (
     "ZoneTextString:SetTextColor",
     "SubZoneTextString:SetTextColor",
-    'SetFont(zone,',
-    'SetFont(sub,',
+    "ZoneTextString:SetFont",
+    "SubZoneTextString:SetFont",
+    "ZoneTextString:SetPoint",
+    "SubZoneTextString:SetPoint",
     "C.SetFace(zone",
     "C.SetFace(sub",
     "C.TextColor(zone",
     "C.TextColor(sub",
-    "C.ART .. \"Fill\"",
-    "C.ART .. \"FrameM\"",
+    "C.ART .. \"FrameL\"",
+    "C.ART .. \"FrameR\"",
     "CRIMSON_",
     "BANNER_HEIGHT",
+    "SetZoneText = function",
 ):
-    assert forbidden not in THEME, f"Native zone label appearance must remain untouched: {forbidden!r}"
+    assert forbidden not in THEME, f"Native zone text must remain untouched: {forbidden!r}"
 
-# The integration must not replace the native combat-text message path or its behavior.
+# The integration must not replace native message creation, filters or animation behavior.
 for forbidden in (
     "CombatText_AddMessage =",
     "CombatText_OnEvent =",
@@ -61,8 +68,9 @@ assert "nativeAddMessage(self, message, title[1], title[2], title[3], alpha)" in
 assert "ThemeFont(self)" in STOCK
 assert "Native text styling" in ARCH
 
-print("PASS native zone/subzone font, size, color, position and fades are not modified")
-print("PASS only two rim-tinted end trims decorate each native zone text line")
-print("PASS floating status colors are applied through COMBAT_TEXT_TYPE_INFO")
-print("PASS floating combat-text creation, filtering, scrolling and fade constants remain native")
+print("PASS native zone/subzone font, size, fill color, position and fades are not modified")
+print("PASS a rim-colored text outline follows each native glyph with no side ornaments or panel")
+print("PASS outline uses the original font face and exact font size")
+print("PASS floating status colors use the active Arcane palette")
+print("PASS native combat-text creation, filtering, scrolling and fade constants remain native")
 print("PASS stock gameplay notices retain their native MessageFrame handler")
