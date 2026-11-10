@@ -214,6 +214,10 @@ def main() -> None:
         fail("Hybrid center diamonds must use the active class gem color")
     if 'table.insert(root.deco.classGems, d)' not in bar:
         fail("Bar.lua must register the two center diamonds for class coloring")
+    if 'd:SetPoint("CENTER", root.panel, edge, 0, 0)' not in bar:
+        fail("Center diamonds must be anchored to the full panel so they stay centered when the tally dock expands")
+    if 'd:SetPoint("CENTER", root, edge, 0, 0)' in bar:
+        fail("Center diamonds must not stay anchored to the undocked skill-bar root")
     if 'panel.endLeft or {}' not in styles or 'panel.endRight or {}' in styles:
         fail("Hybrid must replace only the left panel end and preserve the complete right endcap beneath the class crest")
     if ("local HYBRID_MEDALLION_SIZE = P_SIGIL * 1.40" not in core
