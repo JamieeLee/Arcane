@@ -91,6 +91,22 @@ require("frame.arcaneNameplatesHiddenByOption" not in controller
         "retired per-option plate masking state must be removed")
 require("local oldOnHide = parent:GetScript" not in options,
         "the options panel should rely on parent-child visibility, not replace the hub OnHide script")
+require("local function GetPlateLevel(frame)" in state
+        and "frame.arcaneNameplatesPlateLevel = currentLevel" in state
+        and 'string.find(value, "^%d+$")' in state,
+        "enemy levels must be read from the native root level FontString before native labels are hidden")
+require("local visualScale = P.Special.IsBossOrGuardianPlate(frame) and 1 or 0.75" in visuals,
+        "regular replacement bars should be comfortably larger than the old half-size bars")
+require("frame.arcaneNameplatesLevelBadge = badge" in visuals
+        and 'badge:SetPoint("LEFT", overlay, "RIGHT", -1, 0)' in visuals
+        and "UpdatePlateLevelBadge(frame)" in visuals,
+        "the custom level badge must attach to the right of the Arcane bar and update with pooled plate state")
+require("badge.edge:SetVertexColor(pal.rim[1], pal.rim[2], pal.rim[3], 1)" in visuals
+        and "badge.fill:SetVertexColor(pal.trough[1], pal.trough[2], pal.trough[3], 0.98)" in visuals,
+        "the enemy-level badge must use the shared Arcane metal/glass palette")
+require("frame.arcaneNameplatesOverlayWidth - 6" in visuals,
+        "health numbers must fit inside the widened bar, leaving the level badge outside it")
+
 require("frame.arcaneNameplatesHealthTextValue" in visuals
         and "frame.arcaneNameplatesHealthTextMaximum" in visuals,
         "health numbers should only be reformatted when the health values change")
