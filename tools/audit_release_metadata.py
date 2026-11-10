@@ -16,12 +16,14 @@ checks = (
     (ROOT / "README.md", f"**Current release: {VERSION_TAG}**", "README current release must match"),
     (ROOT / "README.md", RELEASE_ASSET, "README installer filename must match"),
     (ROOT / "README.md", f"RELEASE_NOTES_{VERSION_TAG}.md", "README must link to the current release notes"),
-    (ROOT / "CHANGELOG.md", f"## {VERSION_TAG} — November 10, 2026", "changelog must include the dated release section"),
+    (ROOT / "CHANGELOG.md", f"## {VERSION_TAG} — November 9, 2026", "changelog must include the dated release section"),
     (ROOT / f"RELEASE_NOTES_{VERSION_TAG}.md", f"# Arcane UI {VERSION_TAG}", "current release notes must exist"),
     (ROOT / ".github/workflows/arcane-audit.yml", ARTIFACT_PREFIX, "CI artifact prefix must match the release version"),
     (ROOT / ".github/workflows/arcane-audit.yml", f'archive="$RUNNER_TEMP/{INSTALL_ZIP}"', "CI installer filename must match the release asset"),
     (ROOT / ".github/workflows/arcane-audit.yml", f'- "{VERSION_TAG}"', "CI must run for the release tag"),
     (ROOT / ".github/workflows/arcane-audit.yml", "gh release create", "the validated tag build must publish a GitHub Release"),
+    (ROOT / ".github/workflows/arcane-audit.yml", "GH_TOKEN: ${{ github.token }}", "release publishing must authenticate with the Actions token"),
+    (ROOT / ".github/workflows/arcane-audit.yml", 'gh run download "$GITHUB_RUN_ID" \\', "release job must download the package from this workflow run"),
 )
 for path, expected, message in checks:
     if not path.exists() or expected not in path.read_text(encoding="utf-8"):
