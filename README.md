@@ -260,7 +260,7 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 The marked block below is the canonical release-note body used by the GitHub release workflow. Update this block in place for the next release and keep its version marker aligned with the release tag.
 
 <!-- RELEASE_NOTES_v0.7.6_BEGIN -->
-##### Arcane UI v0.7.6 — Co-op Summary, Stored Level-Ups and HUD Cleanup
+### Arcane UI v0.7.6 — Co-op Summary, Stored Level-Ups and HUD Cleanup
 
 Arcane v0.7.6 brings a multiplayer run-summary fix, clearer cache markers, a properly connected Stored Level-Ups setting, and a little less unused game UI.
 
