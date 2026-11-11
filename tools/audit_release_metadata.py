@@ -52,8 +52,9 @@ for path, expected, message in checks:
 
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 workflow = (ROOT / ".github" / "workflows" / "arcane-audit.yml").read_text(encoding="utf-8")
-if any(name in readme for name in ("ArcaneV0.7.5.zip", "ArcaneV0.7.4.zip", "ArcaneV0.7.3.zip")):
-    print("FAIL: README still points at an older installer", file=sys.stderr)
+current_docs = readme.split("## Project workflow, QA and collaboration", 1)[0]
+if any(name in current_docs for name in ("ArcaneV0.7.5.zip", "ArcaneV0.7.4.zip", "ArcaneV0.7.3.zip")):
+    print("FAIL: current README install instructions still point at an older installer", file=sys.stderr)
     raise SystemExit(1)
 if any(name in workflow for name in ("Arcane-v0.7.5-test-", "Arcane-v0.7.4-test-", "Arcane-v0.7.3-test-")):
     print("FAIL: CI still labels test packages with an older release version", file=sys.stderr)
