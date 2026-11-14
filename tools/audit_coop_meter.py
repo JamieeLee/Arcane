@@ -114,9 +114,9 @@ S.partyRun, S.partyAt, S.checkpoint, S.partyBaseOnly = "r1", 10, nil, false
 AZS_GetMeterContext = function() return {runId="r1",localOwnerId="self"} end
 AZS_GetMeterSnapshot = function() return nil, {code="NOT_READY"} end
 check(ReadSnapshot("party") == "game", "fresh party fallback blocked")
-S.checkpoint = "cp1"
+S.checkpoint, S.checkpointRun = "cp1", "r1"
 check(ReadSnapshot("party") == true, "checkpoint must disable whole-run fallback")
-S.checkpoint = nil
+S.checkpoint, S.checkpointRun = nil, nil
 S.partyAt = 11
 check(ReadSnapshot("party") == true, "stale party feed should not override ledger")
 
