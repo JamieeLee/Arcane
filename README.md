@@ -1,6 +1,8 @@
 # Arcane UI
 
-**Current release: v0.7.8**
+**Current release: v0.7.9-beta.1**
+
+*Beta testing only. The current public stable release remains v0.7.8.*
 
 A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethus.pl)), the World of Warcraft 1.12 roguelike. Everything is drawn in one look (dark glass, a gold rail, the timer's metal) and steps aside while you pick your cards.
 
@@ -20,7 +22,7 @@ A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethu
 - **Kills, gold and cache:** in the panel; hover for what each gives.
 - **Loot pop-up:** each drop appears with its icon, name and rarity color; earned marks appear as their own notification. Up to three stack, and the game's own pop-up returns when Loot is turned off.
 - **Stored level-ups:** Arcane's checkbox controls and mirrors the game's actual Store Level-Ups setting. When enabled, a glowing Level Up! button shows how many choices wait; its default position clears the skill bar and XP display.
-- **Damage meter:** Damage Done, Healing Done, Boss Damage, Party DPS (with each member's best skill) and Damage Taken, with icons, per second and shares. Resizable from any edge.
+- **Damage meter:** Damage Done, Healing Done, Boss Damage, Party DPS (with each member's best skill and optional click-to-view skill breakdown) and Damage Taken, with icons, per second and shares. Resizable from any edge.
 - **Luck medallion:** your luck and the odds of a Rare, Epic or Legendary card.
 - **Minimap:** a metal ring, your local time, the caches and the guardians' lairs (with the time until each empty lair fills); cache and lair pins fade when they overlap your arrow. The **A** button on its edge opens Arcane Options; use the **Luck** and **Damage meter** toggles in that menu to show or hide those windows. The unused stock **M** world-map shortcut is suppressed while Arcane is loaded, without overwriting saved or custom keybindings.
 - **Character window:** gear slots lit in their rarity color and your run's stats grouped beside it (zeros dimmed, changes flashing); its Talents tab opens Arcane UI's talent window (your trees, points and learned talents with their ranks).
@@ -40,11 +42,11 @@ Every optional HUD part can be turned on or off, sized and moved. Arcane Namepla
 
 The addon's load map, `Arcane.toc`, stays at the repository root. Lua modules are grouped by responsibility under `Core/`, `Timer/`, `Numbers/`, `SkillBar/`, `Frames/`, `Minimap/`, `Windows/`, `Nameplates/`, `Loot/` and `Locales/`. `Art/` and `Fonts/` also stay at the addon root so the game's existing asset paths remain unchanged. The repository itself is not the install folder. For a release ZIP, place the root files and all module and asset folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The release asset is named `ArcaneV0.7.8.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
+The release asset is named `ArcaneV0.7.9-beta.1.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
-1. Download `ArcaneV0.7.8.zip` from [Releases](../../releases).
+1. Download `ArcaneV0.7.9-beta.1.zip` from [Releases](../../releases).
 2. Unzip it into your game's `Interface/AddOns` folder. You should end up with `Interface/AddOns/Arcane/Arcane.toc`.
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
@@ -267,6 +269,25 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
+### v0.7.9-beta.1 — November 14, 2026
+
+Beta test build for co-op damage-meter improvements. Stable v0.7.8 remains available; the beta needs multiplayer verification before any stable release.
+
+#### Improvements
+
+- **Party DPS:** use newer native party updates when the detailed co-op ledger temporarily reports that it is not ready; preserve the ledger's owner-ID identity and its checkpoint-based Reset behavior.
+- **Party member details:** click a player in Party DPS to view their individual skills, proc damage and combined summon damage using the existing skill-row renderer. Click the player title to return.
+- **Best skill:** retain descriptive skill labels in the party overview, including top skills from the native party feed when the detailed ledger has no resolved name.
+- **Refresh:** respond promptly to party updates, while maintaining the existing reading cadence for detailed skill snapshots.
+- **Lifecycle:** prevent old run/party identities and old rows from leaking into a newly selected player.
+
+#### Validation
+
+- Automated syntax, packaging, localization and meter-contract checks are required.
+- Multiplayer testing is still required for party transitions, skill ownership, Reset, latency and frame-rate behavior.
+
+Initial co-op feature contribution and design reference: Creed.
+
 ### v0.7.8 — November 12, 2026
 
 Improves the readability and spacing of guardian health bars while preserving the compact two-column layout.
