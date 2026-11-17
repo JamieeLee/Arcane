@@ -1,6 +1,6 @@
 # Arcane UI
 
-**Current release: v0.8.0-beta.1**
+**Current release: v0.8.0-beta.2**
 
 *QA beta test build — not yet published as a stable release. Latest stable: v0.7.9. Damage-number rendering is working in initial in-game testing; new visual looks and multiplayer still need validation.*
 
@@ -42,11 +42,11 @@ Every optional HUD part can be turned on or off, sized and moved. Arcane Namepla
 
 The addon's load map, `Arcane.toc`, stays at the repository root. Lua modules are grouped by responsibility under `Core/`, `Timer/`, `Numbers/`, `SkillBar/`, `Frames/`, `Minimap/`, `Windows/`, `Nameplates/`, `Loot/` and `Locales/`. `Art/` and `Fonts/` also stay at the addon root so the game's existing asset paths remain unchanged. The repository itself is not the install folder. For a release ZIP, place the root files and all module and asset folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The release asset is named `ArcaneV0.8.0-beta.1.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
+The release asset is named `ArcaneV0.8.0-beta.2.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
-1. For this QA beta, download the test ZIP from the successful [Arcane QA and Manual Release](../../actions/workflows/arcane-audit.yml) run for PR #58. The workflow artifact contains `ArcaneV0.8.0-beta.1.zip`. The last stable `v0.7.9` remains on [Releases](../../releases).
+1. For this QA beta, download the test ZIP from the successful [Arcane QA and Manual Release](../../actions/workflows/arcane-audit.yml) run for PR #58. The workflow artifact contains `ArcaneV0.8.0-beta.2.zip`. The last stable `v0.7.9` remains on [Releases](../../releases).
 2. Unzip it into your game's `Interface/AddOns` folder. You should end up with `Interface/AddOns/Arcane/Arcane.toc`.
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
@@ -269,6 +269,16 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 For every new beta or release, increment the version beyond the last stable tag; use `-beta.N` for test builds, and do not reuse a published tag. Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
+### v0.8.0-beta.2 — November 17, 2026
+
+**QA follow-up beta — native gameplay notification overlap.**
+
+#### Fixed
+
+- **Stock error messages are now off by default.** In-game testing showed that disabling this optional native message feed eliminates overlapping center-screen announcements. It remains available as an opt-in checkbox in Arcane Options.
+- **Preserve player preferences:** users who already enabled or disabled Stock error messages keep their saved choice; only fresh or unset settings receive the new default.
+- **Combat numbers and announcements:** leave damage-number rendering and the game's other native announcement systems unchanged.
+
 ### v0.8.0-beta.1 — November 17, 2026
 
 **QA beta — not a published stable release.** Gives the damage numbers looks: fonts, colors and critical-hit backdrops that go together, with crits that shimmer and land in a flash.

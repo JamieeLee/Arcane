@@ -17,7 +17,7 @@ if name not in toc or not (ROOT / name).is_file():
 
 code = (ROOT / name).read_text(encoding="utf-8")
 contracts = (
-    ('local DEFAULTS = { enabled = true }', "stock error messages must remain visible by default"),
+    ('local DEFAULTS = { enabled = false }', "stock error messages must be off by default to prevent native announcement overlap"),
     ('C.Movable(frame, "stockErrors", "Stock error messages"', "the stock frame must use Arcane's native mover"),
     ('C.HideStock("UIErrorsFrame")', "the off state must hide the stock frame through Arcane's stock-frame helper"),
     ('C.RestoreStock("UIErrorsFrame")', "the on state must restore the stock frame"),
