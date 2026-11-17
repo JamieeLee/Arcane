@@ -186,6 +186,13 @@ local function EnsureLevelBadge(frame)
 end
 
 local function UpdatePlateLevelBadge(frame)
+	-- The badge is a separate child of the health bar. Hide an existing one before
+	-- allocating or updating anything; on a new plate, disabling it creates nothing.
+	if not P.Option("showLevelBadges") then
+		local badge = frame.arcaneNameplatesLevelBadge
+		if badge and badge:IsShown() then badge:Hide() end
+		return
+	end
 	local badge = EnsureLevelBadge(frame)
 	if not badge then return end
 	local size = math.max(16, math.min(20, frame.arcaneNameplatesOverlayHeight + 9))

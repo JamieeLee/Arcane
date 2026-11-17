@@ -1,8 +1,8 @@
 # Arcane UI
 
-**Current release: v0.7.9**
+**Current release: v0.8.0-beta.3**
 
-*Current stable release. Co-op meter improvements have automated test coverage; broader live multiplayer validation is ongoing.*
+*QA beta test build — not yet published as a stable release. Latest stable: v0.7.9. Damage-number rendering is working in initial in-game testing; new visual looks and multiplayer still need validation.*
 
 A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethus.pl)), the World of Warcraft 1.12 roguelike. Everything is drawn in one look (dark glass, a gold rail, the timer's metal) and steps aside while you pick your cards.
 
@@ -28,7 +28,7 @@ A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethu
 - **Character window:** gear slots lit in their rarity color and your run's stats grouped beside it (zeros dimmed, changes flashing); its Talents tab opens Arcane UI's talent window (your trees, points and learned talents with their ranks).
 - **Standalone Stats window:** independently track the run's 29 stats in customizable groups; choose which values appear and see changes flash green or red.
 - **Chat:** dressed to match, and kept clear of the skill bar's full Arcane medallion.
-- **Damage numbers:** calm and readable; a spell hitting a crowd adds up into one number a second, and a number that keeps stacking grows.
+- **Damage numbers:** calm and readable; a spell hitting a crowd adds up into one number a second, and a number that keeps stacking grows. Pick a **look** in their options (`/Arcane numbers`): **Custom** (your own font and critical-hit backdrop), **Elemental** (every spell school in its color, and each school's crit in its own letters, colors and burst), **Comic**, **Royal** or **Grim**. A look's crits shimmer between two colors and land in a flash of light.
 - **FPS display:** an Arcane-owned readout inside the standard movable-frame system, with a larger grab target in Move frames mode. Toggle it from Arcane Options; Ctrl+R is disabled while Arcane is loaded.
 - **Native game text:** positive buff/cast and healing feedback use Arcane's known-good text colors and font. Zone announcements such as “Tower of Azora” remain completely original; gameplay notices keep their existing Arcane theme.
 - **Damage-number customization:** six optional custom typefaces and six selectable critical-hit backdrops (Flame, Frost, Arcane, Holy, Shadow and Storm); existing defaults remain unchanged.
@@ -42,11 +42,11 @@ Every optional HUD part can be turned on or off, sized and moved. Arcane Namepla
 
 The addon's load map, `Arcane.toc`, stays at the repository root. Lua modules are grouped by responsibility under `Core/`, `Timer/`, `Numbers/`, `SkillBar/`, `Frames/`, `Minimap/`, `Windows/`, `Nameplates/`, `Loot/` and `Locales/`. `Art/` and `Fonts/` also stay at the addon root so the game's existing asset paths remain unchanged. The repository itself is not the install folder. For a release ZIP, place the root files and all module and asset folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The release asset is named `ArcaneV0.7.9.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
+The release asset is named `ArcaneV0.8.0-beta.3.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
-1. Download `ArcaneV0.7.9.zip` from [Releases](../../releases).
+1. For this QA beta, download the test ZIP from the successful [Arcane QA and Manual Release](../../actions/workflows/arcane-audit.yml) run for PR #58. The workflow artifact contains `ArcaneV0.8.0-beta.3.zip`. The last stable `v0.7.9` remains on [Releases](../../releases).
 2. Unzip it into your game's `Interface/AddOns` folder. You should end up with `Interface/AddOns/Arcane/Arcane.toc`.
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
@@ -160,7 +160,7 @@ This document describes the source layout and the runtime rules behind it. The a
 | `Core/` | Shared math, drawing, language/font handling, saved settings, stock-HUD handoff, bars, sizing, panels, safe calls, movement, options, commands, cards and shared unit-frame helpers. |
 | `Locales/` | English source strings and translated dictionaries. |
 | `Timer/` | Boss timer data and its renderer/controller. |
-| `Numbers/` | Damage-number configuration, combat intake, icons, labels, world anchors, layout, culling, placement, animation, lifecycle, options and commands. |
+| `Numbers/` | Damage-number configuration, looks, combat intake, icons, labels, world anchors, layout, culling, placement, animation, lifecycle, options and commands. |
 | `SkillBar/` | Class/style data, visual style controller and the skill-slot/XP renderer. |
 | `Frames/` | Bosses, skulls, the player frame, party, downed-player and stored-level-up frames, native FPS readout, stock notifications and native text styling. |
 | `Minimap/` | Minimap presentation, edge button, cache pins and lair pins. |
@@ -262,13 +262,81 @@ The Hybrid-only Arcane medallion is original generated artwork adapted for Arcan
 
 The optional damage-number font choices include six bundled fonts adapted from the corresponding open font releases. Their original copyright notices and SIL Open Font License terms are retained in [Fonts/NumberFonts-LICENSE.txt](Fonts/NumberFonts-LICENSE.txt); the font files are not relicensed by Arcane.
 
-The optional critical-hit backdrops reuse six effect textures from the synced Creed working base. They are only used behind critical damage numbers when selected; they do not recolor Arcane's panels, bars, medallions, or overall bronze/gold theme.
+The optional critical-hit backdrops reuse six effect textures from the synced Creed working base. Three more (Steel, Burst and Gilded) are original artwork drawn for Arcane by `tools/build_crit_backdrops.py`. They are only used behind critical damage numbers when selected; they do not recolor Arcane's panels, bars, medallions, or overall bronze/gold theme.
 
 ## Consolidated release history
 
-Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
+For every new beta or release, increment the version beyond the last stable tag; use `-beta.N` for test builds, and do not reuse a published tag. Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
+### v0.8.0-beta.3 — November 17, 2026
+
+**QA follow-up beta — keep native location announcements and warning messages legible.**
+
+#### Fixed
+
+- **Center-screen announcement collisions:** the game's native Raid Warning and Boss Emote frames previously inherited their positions from UIErrorsFrame. Anchor them in a separate lane below the top HUD, away from the red zone/subzone titles. Preserve the game's messages, colors, animations and timing.
+- **World transitions:** reapply these warning anchors on world entry without any per-frame updates or new rendering paths.
+- **Stock errors:** the optional Stock error messages switch stays OFF by default from beta.2. No change to existing saved preferences.
+
+#### In-game QA
+
+- Trigger zone/subzone discovery at the same time as raid or boss warnings (e.g., entering Jasperlode Mine while the swarm warning appears). Verify readable, separated lines and adequate clearance from the boss timer; also verify that the unchanged red zone text still fades normally.
+
+### v0.8.0-beta.2 — November 17, 2026
+
+**QA follow-up beta — native gameplay notification overlap.**
+
+#### Fixed
+
+- **Stock error messages are now off by default.** In-game testing showed that disabling this optional native message feed reduces overlapping center-screen announcements; separate raid warnings can still overlap zone text. It remains available as an opt-in checkbox in Arcane Options.
+- **Preserve player preferences:** users who already enabled or disabled Stock error messages keep their saved choice; only fresh or unset settings receive the new default.
+- **Combat numbers and announcements:** leave damage-number rendering and the game's other native announcement systems unchanged.
+
+### v0.8.0-beta.1 — November 17, 2026
+
+**QA beta — not a published stable release.** Gives the damage numbers looks: fonts, colors and critical-hit backdrops that go together, with crits that shimmer and land in a flash.
+
+#### New
+
+- **Optional nameplate levels:** a **Show level badges** checkbox in Arcane Nameplates (under Regular plates) shows or hides the level squares attached to health bars. ON by default to preserve the existing design. Turning it off leaves the bar unchanged and avoids allocating level-badge visuals for new mobs.
+- **Focused number settings:** the Damage Numbers window has **Behavior** (density, motion, grouping, switches) and **Appearance** (looks, fonts, size, critical-hit backdrops) tabs. Both reuse the same settings, Preview, and Reset controls; Custom remains the default.
+- **Number looks:** pick one in the damage-number options (`/Arcane numbers`) with the new **Look** row, or type `/Arcane numbers custom | elemental | comic | royal | grim`.
+  - **Custom:** your own font, critical-hit backdrop and switches, exactly as before. It is the default, so nothing changes until a look is picked. Picking a font or a backdrop by hand also goes back to Custom.
+  - **Elemental:** every hit in its spell school's color. Each school's crit has its own letters, colors and backdrop: Black Ops One on Steel for physical, Cinzel on Holy, Bangers on Flame for fire, Creepster on green lightning for nature, Cinzel on Frost, Pirata One on Shadow, Uncial Antiqua on Arcane.
+  - **Comic:** Bangers letters; a hit glows hotter the harder it lands against the usual hits; crits burst on a comic-book star.
+  - **Royal:** Cinzel letters in ivory; crits shimmer in gold on a dark plaque in a gold rim.
+  - **Grim:** Pirata One letters, bone pale; crits drip in Creepster, green and violet, over the shadow void.
+- **Dynamic crits:** in a look, a crit lands white-hot in a flash of light, then shimmers between its two colors, drawn a little larger. A number that turns crit as its crits come to outweigh the rest gets its letters, backdrop and flash at that moment.
+- **Three new critical-hit backdrops:** Steel (crossing blade slashes), Burst (a comic star) and Gilded (a plaque). Original art, drawn by `tools/build_crit_backdrops.py`; Custom can pick them too.
+
+#### Fixed
+
+- **FPS mover consistency:** restore the standard Arcane move-mode glass, gold border and centered "FPS display" label. Hide the running FPS readout only while moving so the two labels do not overlap.
+- **Damage Numbers settings:** widen the two-tab window and constrain checkbox text to its available width; leave extra room for longer translated merge descriptions, preserving option wording and saved settings.
+- **Arcane menu:** rename the navigation button to "Arcane Nameplate Settings" without changing the Nameplates submenu.
+- **Version consistency:** the next prerelease uses v0.8.0-beta.1 rather than reusing the published v0.7.9 version.
+- **Critical-hit backdrop size:** the backdrop now spans the icon and number it sits behind. It never knew their width before (`w.block` was never set), so every backdrop had the same size.
+- **Stepping back through the backdrops:** `<` on None now goes round to the last backdrop. Lua 5.0's `math.mod` keeps a negative remainder, so the step went nowhere.
+- **Untranslated words:** the motions, their notes, the backdrop names, "Critical hit backdrop", "Motion" and the motion slash help had no translations. All are now in the 11 languages, with the looks' words.
+- **Words in their language's letters:** a Miss or Immune keeps the face its language draws with; a number's digits keep the look's face in every language.
+
+#### Validation
+
+- `tools/audit_number_looks.py` (in CI) checks that every font and backdrop a look names exists, that the backdrop art is a valid texture, that every word is translated, and that Custom keeps the player's picks. It fails on v0.7.8. All 14 audits pass, and all 75 Lua chunks compile under Lua 5.0.
+- In a stand-in client running Arcane's load order, 53 behaviour checks pass here; 38 of them fail on v0.7.8. They cover:
+  - Custom unchanged;
+  - each look's letters, colors and backdrop for hits and for each school's crits;
+  - the shimmer, flash and white-hot landing;
+  - Comic's heat;
+  - a number turning crit;
+  - Russian and its words;
+  - the backdrop fitting its number;
+  - the options window, the slash commands, Reset and an unknown saved look;
+  - Preview in every look and motion.
+- A sweep of the options in all 11 languages finds no word running out of its place (495 places).
+- Not yet seen in the game: the fonts switching per crit and the added flash.
+
 ### v0.7.9 — November 16, 2026
 
 **Stable release — consolidated co-op meter improvements and a comprehensive performance audit.**

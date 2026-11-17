@@ -2,7 +2,7 @@
 -- Keep the native MessageFrame transparent and intact. Arcane owns its saved position,
 -- visibility switch, font treatment and the color used for each new message.
 local C = Arcane
-local DEFAULTS = { enabled = true }
+local DEFAULTS = { enabled = false }
 local db
 
 local function Apply()

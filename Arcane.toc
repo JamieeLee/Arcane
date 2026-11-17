@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Arcane UI
 ## Notes: A clean, smooth HUD for Azeroth Survivors. Click the A on the minimap (or type /Arcane) for options.
-## Version: v0.7.9
+## Version: v0.8.0-beta.3
 ## SavedVariables: ArcaneDB
 
 Core.lua
@@ -35,6 +35,7 @@ Timer/Data.lua
 Timer/Timer.lua
 
 Numbers/Numbers.lua
+Numbers/Looks.lua
 Numbers/Widgets.lua
 Numbers/Combat.lua
 Numbers/Icons.lua

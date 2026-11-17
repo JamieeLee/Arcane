@@ -132,6 +132,9 @@ jobs:
       - name: Verify combined co-op and performance beta integration
         run: python tools/audit_combined_integration.py
 
+      - name: Audit damage-number looks and crit backdrops
+        run: python tools/audit_number_looks.py
+
       - name: Compile every Lua chunk and enforce local-variable limits
         shell: bash
         run: |

@@ -259,7 +259,7 @@ local function BuildHub()
 	local nameplatesButton = C.Button(o, 148, 24, "", function()
 		if C.ArcaneNameplatesToggleOptions then C.ArcaneNameplatesToggleOptions(o) end
 	end)
-	C.LText(nameplatesButton.text, "Arcane Nameplates settings")
+	C.LText(nameplatesButton.text, "Arcane Nameplate Settings")
 	nameplatesButton:SetPoint("TOPLEFT", o, "TOPLEFT", 14, y)
 	local langButton = C.Button(o, 148, 24, "", function()
 		if o.langMenu:IsShown() then o.langMenu:Hide() else o.langMenu:Show() end

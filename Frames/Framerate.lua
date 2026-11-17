@@ -55,7 +55,13 @@ local function SetShown(on)
 	on = on and true or false
 	HideNativeReadout()
 	db.enabled = on
-	if on then frame:Show(); ApplyTheme() else frame:Hide() end
+	if on then
+		frame:Show()
+		ApplyTheme()
+		if C.unlocked then readout:Hide() else readout:Show() end
+	else
+		frame:Hide()
+	end
 end
 
 C.OnInit(function()
@@ -86,9 +92,12 @@ C.OnInit(function()
 			f:SetPoint("CENTER", UIParent, "BOTTOM", 298, 103)
 		end
 	end)
-	-- Keep the standard Arcane gold outline visible in Move frames mode; no filled panel.
-	mover.box:SetBackdropColor(0, 0, 0, 0)
-	mover.box.text:Hide()
+	-- Use the shared mover glass, gold outline and label. Keep live FPS text from
+	-- drawing through the centered mover label while Move frames mode is active.
+	mover.box:SetScript("OnShow", function() readout:Hide() end)
+	mover.box:SetScript("OnHide", function()
+		if db.enabled then readout:Show() end
+	end)
 
 	SetShown(db.enabled)
 

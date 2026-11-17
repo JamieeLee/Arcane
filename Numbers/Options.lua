@@ -8,6 +8,9 @@ local C = N.Config
 -- The options window (/Arcane numbers)
 
 local options
+local PANEL_WIDTH, PAD = 360, 14
+local CONTENT_WIDTH = PANEL_WIDTH - 2 * PAD
+local CHECK_LABEL_WIDTH = CONTENT_WIDTH - 22
 
 local function Fill(parent, drawLayer, r, g, b, a)
 	local texture = parent:CreateTexture(nil, drawLayer)
@@ -71,9 +74,10 @@ end
 
 local function MakeCheck(parent, y, label, key)
 	local check = CreateFrame("Button", nil, parent)
-	check:SetWidth(272)
-	check:SetHeight(20)
-	check:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, y)
+	check:SetWidth(CONTENT_WIDTH)
+	-- The two merge descriptions can wrap, especially after translation.
+	check:SetHeight((key == "crowd" or key == "bySpell") and 30 or 20)
+	check:SetPoint("TOPLEFT", parent, "TOPLEFT", PAD, y)
 	check:EnableMouse(true)
 	check.edge = Fill(check, "BORDER", 0.38, 0.38, 0.42, 1)
 	check.edge:SetWidth(14)
@@ -87,6 +91,10 @@ local function MakeCheck(parent, y, label, key)
 	check.mark:SetPoint("BOTTOMRIGHT", check.edge, "BOTTOMRIGHT", -3, 3)
 	check.label = Text(check, 11, 0.92, 0.92, 0.92)
 	check.label:SetPoint("LEFT", check.edge, "RIGHT", 8, 0)
+	check.label:SetWidth(CHECK_LABEL_WIDTH)
+	check.label:SetHeight(check:GetHeight())
+	check.label:SetJustifyH("LEFT")
+	check.label:SetJustifyV("MIDDLE")
 	C.LText(check.label, label)
 	check.key = key
 	check:SetScript("OnEnter", function()
@@ -127,9 +135,18 @@ S.RefreshOptions = function()
 		PaintButton(button)
 	end
 	o.motionNote:SetText(C.L(C.MOTION_NOTES[C.db.motion] or ""))
+	local look = C.db.look or "custom"
+	o.lookText:SetText(C.L(C.LOOKS.names[look] or "Custom"))
+	o.lookNote:SetText(C.L(C.LOOKS.notes[look] or ""))
 	o.sizeText:SetText(string.format("%d%%", math.floor(C.db.size * 100 + 0.5)))
 	o.fontText:SetText(C.FONTS[C.db.font].name)
 	o.backText:SetText(C.L(C.CRIT_BACKDROPS.names[C.db.backdrop or "none"] or "None"))
+	-- A look brings its own letters and crit backdrop: your own picks wait, dimmed, for Custom.
+	local own = (look == "custom") and 1 or 0.4
+	o.fontHead:SetAlpha(own)
+	o.fontText:SetAlpha(own)
+	o.backdropHead:SetAlpha(own)
+	o.backText:SetAlpha(own)
 	for i = 1, table.getn(o.checks) do
 		local check = o.checks[i]
 		if C.db[check.key] then
@@ -143,9 +160,9 @@ end
 local function BuildOptions()
 	local o = CreateFrame("Frame", "ArcaneNumbersOptions", UIParent)
 	options = o
-	o:SetWidth(300)
-	o:SetHeight(660)
-	o:SetPoint("CENTER", UIParent, "CENTER", 0, 40)
+	o:SetWidth(PANEL_WIDTH)
+	o:SetHeight(630)
+	o:SetPoint("CENTER", UIParent, "CENTER", 0, 20)
 	if AUI.AboveHub then AUI.AboveHub(o) else o:SetFrameStrata("DIALOG") end
 	o:SetBackdrop({ bgFile = C.FLAT, edgeFile = C.FLAT, edgeSize = 1, insets = { left = 1, right = 1, top = 1, bottom = 1 } })
 	o:SetBackdropColor(0.05, 0.05, 0.07, 0.96)
@@ -177,53 +194,146 @@ local function BuildOptions()
 	end)
 	close:SetPoint("TOPRIGHT", o, "TOPRIGHT", -10, -10)
 
-	o.toggle = MakeButton(o, 272, 28, "", function()
+	o.toggle = MakeButton(o, CONTENT_WIDTH, 28, "", function()
 		N.Lifecycle.SetEnabled(not C.db.enabled)
 	end)
 	o.toggle:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -46)
 
-	local styleHead = Text(o, 12, 0.85, 0.85, 0.9)
-	styleHead:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -88)
+	-- Two focused pages; settings and renderer remain shared.
+	local behavior = CreateFrame("Frame", nil, o)
+	behavior:SetAllPoints(o)
+	local appearance = CreateFrame("Frame", nil, o)
+	appearance:SetAllPoints(o)
+	o.behaviorTab = MakeButton(o, 162, 27, "", function() o.ShowPage("behavior") end)
+	o.behaviorTab:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -88)
+	C.LText(o.behaviorTab.text, "Behavior")
+	o.appearanceTab = MakeButton(o, 162, 27, "", function() o.ShowPage("appearance") end)
+	o.appearanceTab:SetPoint("TOPLEFT", o, "TOPLEFT", 184, -88)
+	C.LText(o.appearanceTab.text, "Appearance")
+
+	local styleHead = Text(behavior, 12, 0.85, 0.85, 0.9)
+	styleHead:SetPoint("TOPLEFT", behavior, "TOPLEFT", 14, -132)
 	C.LText(styleHead, "Style")
 	o.presets = {}
 	for i = 1, 3 do
 		local name = C.PRESET_ORDER[i]
-		local button = MakeButton(o, 88, 24, C.PRESET_NAMES[name], function()
+		local button = MakeButton(behavior, 104, 24, C.PRESET_NAMES[name], function()
 			C.ApplyPreset(name)
 			S.RefreshOptions()
 		end)
 		button.preset = name
 		C.LText(button.text, C.PRESET_NAMES[name])
-		button:SetPoint("TOPLEFT", o, "TOPLEFT", 14 + (i - 1) * 92, -106)
+		button:SetPoint("TOPLEFT", behavior, "TOPLEFT", PAD + (i - 1) * 114, -151)
 		o.presets[i] = button
 	end
-	o.styleNote = Text(o, 10, 0.6, 0.6, 0.65)
-	o.styleNote:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -136)
-	o.styleNote:SetWidth(272)
+	o.styleNote = Text(behavior, 10, 0.6, 0.6, 0.65)
+	o.styleNote:SetPoint("TOPLEFT", behavior, "TOPLEFT", 14, -183)
+	o.styleNote:SetWidth(CONTENT_WIDTH)
 	o.styleNote:SetJustifyH("LEFT")
 
-	local sizeHead = Text(o, 12, 0.85, 0.85, 0.9)
-	sizeHead:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -166)
+	local motionHead = Text(behavior, 12, 0.85, 0.85, 0.9)
+	motionHead:SetPoint("TOPLEFT", behavior, "TOPLEFT", 14, -211)
+	C.LText(motionHead, "Motion")
+	o.motions = {}
+	for i = 1, table.getn(C.MOTION_ORDER) do
+		local name = C.MOTION_ORDER[i]
+		local button = MakeButton(behavior, 77, 24, C.MOTION_NAMES[name], function()
+			C.db.motion = name
+			S.RefreshOptions()
+		end)
+		button.motion = name
+		C.LText(button.text, C.MOTION_NAMES[name])
+		button:SetPoint("TOPLEFT", behavior, "TOPLEFT", PAD + (i - 1) * 85, -230)
+		o.motions[i] = button
+	end
+	o.motionNote = Text(behavior, 10, 0.6, 0.6, 0.65)
+	o.motionNote:SetPoint("TOPLEFT", behavior, "TOPLEFT", 14, -260)
+	o.motionNote:SetWidth(CONTENT_WIDTH)
+	o.motionNote:SetJustifyH("LEFT")
+
+	local divider = Fill(behavior, "ARTWORK", 1, 1, 1, 0.08)
+	divider:SetPoint("TOPLEFT", behavior, "TOPLEFT", 14, -293)
+	divider:SetWidth(CONTENT_WIDTH)
+	divider:SetHeight(1)
+
+	o.checks = {
+		MakeCheck(behavior, -307, "Skill icons (one number per skill)", "icons"),
+		MakeCheck(behavior, -329, "DoT totals until the enemy dies", "dotTotals"),
+		MakeCheck(behavior, -351, "Short numbers (12.3K)", "short"),
+		MakeCheck(behavior, -373, "One number per group of enemies", "group"),
+		MakeCheck(behavior, -395, "Move overlapping numbers apart", "spread"),
+		MakeCheck(behavior, -417, "Show hit count (x5)", "count"),
+		MakeCheck(behavior, -439, "Color by spell school", "school"),
+		MakeCheck(behavior, -461, "Show Miss and Immune", "misses"),
+		MakeCheck(behavior, -483, "Merge a spell on 3+ enemies: one number a second", "crowd"),
+		MakeCheck(behavior, -517, "Merge every spell: one number a second", "bySpell"),
+	}
+
+	-- The look: letters, colors and a crit backdrop that go together. Custom is your own picks.
+	local lookHead = Text(appearance, 12, 0.85, 0.85, 0.9)
+	lookHead:SetPoint("TOPLEFT", appearance, "TOPLEFT", 14, -135)
+	C.LText(lookHead, "Look")
+	local function ChangeLook(step)
+		local order = C.LOOKS.order
+		local count = table.getn(order)
+		local index = 1
+		for i = 1, count do
+			if order[i] == C.db.look then index = i; break end
+		end
+		index = math.mod(index - 1 + step + count, count) + 1
+		C.SetLook(order[index])
+		S.RefreshOptions()
+	end
+	local previousLook = MakeButton(appearance, 22, 22, "<", function() ChangeLook(-1) end)
+	previousLook:SetPoint("TOPLEFT", appearance, "TOPLEFT", 180, -132)
+	o.lookText = Text(appearance, 11, 1, 1, 1)
+	o.lookText:SetPoint("LEFT", previousLook, "RIGHT", 0, 0)
+	o.lookText:SetWidth(122)
+	o.lookText:SetJustifyH("CENTER")
+	local nextLook = MakeButton(appearance, 22, 22, ">", function() ChangeLook(1) end)
+	nextLook:SetPoint("LEFT", previousLook, "RIGHT", 122, 0)
+	o.lookNote = Text(appearance, 10, 0.6, 0.6, 0.65)
+	o.lookNote:SetPoint("TOPLEFT", appearance, "TOPLEFT", 14, -165)
+	o.lookNote:SetWidth(CONTENT_WIDTH)
+	o.lookNote:SetJustifyH("LEFT")
+	-- Picking a font or a crit backdrop by hand goes back to Custom, where your picks apply.
+	local function OwnPicks()
+		if (C.db.look or "custom") ~= "custom" then
+			C.SetLook("custom")
+		end
+	end
+
+	local appearanceDivider = Fill(appearance, "ARTWORK", 1, 1, 1, 0.08)
+	appearanceDivider:SetPoint("TOPLEFT", appearance, "TOPLEFT", 14, -208)
+	appearanceDivider:SetWidth(CONTENT_WIDTH)
+	appearanceDivider:SetHeight(1)
+
+	local sizeHead = Text(appearance, 12, 0.85, 0.85, 0.9)
+	sizeHead:SetPoint("TOPLEFT", appearance, "TOPLEFT", 14, -232)
 	C.LText(sizeHead, "Size")
-	local smaller = MakeButton(o, 26, 22, "-", function()
+	-- Size, Font and the crit backdrop: each picker starts clear of its label (the longest is
+	-- "Critical hit backdrop") and ends at the row's right edge, with room for a long name.
+	local smaller = MakeButton(appearance, 22, 22, "-", function()
 		C.db.size = AUI.Clamp(math.floor(C.db.size * 10 + 0.5) / 10 - 0.1, 0.6, 1.8)
 		S.RefreshOptions()
 	end)
-	smaller:SetPoint("TOPLEFT", o, "TOPLEFT", 126, -162)
-	o.sizeText = Text(o, 12, 1, 1, 1)
+	smaller:SetPoint("TOPLEFT", appearance, "TOPLEFT", 210, -228)
+	o.sizeText = Text(appearance, 12, 1, 1, 1)
 	o.sizeText:SetPoint("LEFT", smaller, "RIGHT", 0, 0)
-	o.sizeText:SetWidth(80)
+	o.sizeText:SetWidth(92)
 	o.sizeText:SetJustifyH("CENTER")
-	local bigger = MakeButton(o, 26, 22, "+", function()
+	local bigger = MakeButton(appearance, 22, 22, "+", function()
 		C.db.size = AUI.Clamp(math.floor(C.db.size * 10 + 0.5) / 10 + 0.1, 0.6, 1.8)
 		S.RefreshOptions()
 	end)
-	bigger:SetPoint("LEFT", smaller, "RIGHT", 80, 0)
+	bigger:SetPoint("LEFT", smaller, "RIGHT", 92, 0)
 
-	local fontHead = Text(o, 12, 0.85, 0.85, 0.9)
-	fontHead:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -198)
+	local fontHead = Text(appearance, 12, 0.85, 0.85, 0.9)
+	fontHead:SetPoint("TOPLEFT", appearance, "TOPLEFT", 14, -270)
 	C.LText(fontHead, "Font")
-	local previous = MakeButton(o, 26, 22, "<", function()
+	o.fontHead = fontHead
+	local previous = MakeButton(appearance, 22, 22, "<", function()
+		OwnPicks()
 		C.db.font = C.db.font - 1
 		if C.db.font < 1 then
 			C.db.font = table.getn(C.FONTS)
@@ -231,12 +341,13 @@ local function BuildOptions()
 		S.OnSettingChanged("font")
 		S.RefreshOptions()
 	end)
-	previous:SetPoint("TOPLEFT", o, "TOPLEFT", 126, -194)
-	o.fontText = Text(o, 11, 1, 1, 1)
+	previous:SetPoint("TOPLEFT", appearance, "TOPLEFT", 210, -266)
+	o.fontText = Text(appearance, 11, 1, 1, 1)
 	o.fontText:SetPoint("LEFT", previous, "RIGHT", 0, 0)
-	o.fontText:SetWidth(80)
+	o.fontText:SetWidth(92)
 	o.fontText:SetJustifyH("CENTER")
-	local nextFont = MakeButton(o, 26, 22, ">", function()
+	local nextFont = MakeButton(appearance, 22, 22, ">", function()
+		OwnPicks()
 		C.db.font = C.db.font + 1
 		if C.db.font > table.getn(C.FONTS) then
 			C.db.font = 1
@@ -244,54 +355,41 @@ local function BuildOptions()
 		S.OnSettingChanged("font")
 		S.RefreshOptions()
 	end)
-	nextFont:SetPoint("LEFT", previous, "RIGHT", 80, 0)
+	nextFont:SetPoint("LEFT", previous, "RIGHT", 92, 0)
 
-	local backdropHead = Text(o, 12, 0.85, 0.85, 0.9)
-	backdropHead:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -230)
+	local backdropHead = Text(appearance, 12, 0.85, 0.85, 0.9)
+	backdropHead:SetPoint("TOPLEFT", appearance, "TOPLEFT", 14, -308)
 	C.LText(backdropHead, "Critical hit backdrop")
+	o.backdropHead = backdropHead
 	local function ChangeBackdrop(step)
+		OwnPicks()
 		local order = C.CRIT_BACKDROPS.order
+		local count = table.getn(order)
 		local index = 1
-		for i = 1, table.getn(order) do
+		for i = 1, count do
 			if order[i] == C.db.backdrop then index = i; break end
 		end
-		index = math.mod(index - 1 + step, table.getn(order)) + 1
+		-- the count added before the remainder: Lua 5.0's math.mod of a negative stays negative,
+		-- and stepping back from the first went nowhere
+		index = math.mod(index - 1 + step + count, count) + 1
 		C.db.backdrop = order[index]
 		S.RefreshOptions()
 	end
-	local previousBackdrop = MakeButton(o, 26, 22, "<", function() ChangeBackdrop(-1) end)
-	previousBackdrop:SetPoint("TOPLEFT", o, "TOPLEFT", 126, -226)
-	o.backText = Text(o, 11, 1, 1, 1)
+	local previousBackdrop = MakeButton(appearance, 22, 22, "<", function() ChangeBackdrop(-1) end)
+	previousBackdrop:SetPoint("TOPLEFT", appearance, "TOPLEFT", 210, -304)
+	o.backText = Text(appearance, 11, 1, 1, 1)
 	o.backText:SetPoint("LEFT", previousBackdrop, "RIGHT", 0, 0)
-	o.backText:SetWidth(80)
+	o.backText:SetWidth(92)
 	o.backText:SetJustifyH("CENTER")
-	local nextBackdrop = MakeButton(o, 26, 22, ">", function() ChangeBackdrop(1) end)
-	nextBackdrop:SetPoint("LEFT", previousBackdrop, "RIGHT", 80, 0)
+	local nextBackdrop = MakeButton(appearance, 22, 22, ">", function() ChangeBackdrop(1) end)
+	nextBackdrop:SetPoint("LEFT", previousBackdrop, "RIGHT", 92, 0)
 
-	local divider = Fill(o, "ARTWORK", 1, 1, 1, 0.08)
-	divider:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -260)
-	divider:SetWidth(272)
-	divider:SetHeight(1)
-
-	o.checks = {
-		MakeCheck(o, -270, "Skill icons (one number per skill)", "icons"),
-		MakeCheck(o, -294, "DoT totals until the enemy dies", "dotTotals"),
-		MakeCheck(o, -318, "Short numbers (12.3K)", "short"),
-		MakeCheck(o, -342, "One number per group of enemies", "group"),
-		MakeCheck(o, -366, "Move overlapping numbers apart", "spread"),
-		MakeCheck(o, -390, "Show hit count (x5)", "count"),
-		MakeCheck(o, -414, "Color by spell school", "school"),
-		MakeCheck(o, -438, "Show Miss and Immune", "misses"),
-		MakeCheck(o, -462, "Merge a spell on 3+ enemies: one number a second", "crowd"),
-		MakeCheck(o, -486, "Merge every spell: one number a second", "bySpell"),
-	}
-
-	local preview = MakeButton(o, 132, 26, "Preview", function()
+	local preview = MakeButton(o, 160, 26, "Preview", function()
 		N.Preview.StartTest()
 	end)
-	preview:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -520)
+	preview:SetPoint("BOTTOMLEFT", o, "BOTTOMLEFT", 14, 40)
 	C.LText(preview.text, "Preview")
-	local reset = MakeButton(o, 132, 26, "Reset", function()
+	local reset = MakeButton(o, 160, 26, "Reset", function()
 		for key, value in pairs(C.DEFAULTS) do
 			if key ~= "enabled" then
 				C.db[key] = value
@@ -302,28 +400,28 @@ local function BuildOptions()
 		S.RefreshOptions()
 		C.Print(C.L("settings reset."))
 	end)
-	reset:SetPoint("TOPLEFT", o, "TOPLEFT", 154, -520)
+	reset:SetPoint("BOTTOMLEFT", o, "BOTTOMLEFT", 186, 40)
 	C.LText(reset.text, "Reset settings")
 
-	local motionHead = Text(o, 12, 0.85, 0.85, 0.9)
-	motionHead:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -556)
-	C.LText(motionHead, "Motion")
-	o.motions = {}
-	for i = 1, table.getn(C.MOTION_ORDER) do
-		local name = C.MOTION_ORDER[i]
-		local button = MakeButton(o, 66, 24, C.MOTION_NAMES[name], function()
-			C.db.motion = name
-			S.RefreshOptions()
-		end)
-		button.motion = name
-		C.LText(button.text, C.MOTION_NAMES[name])
-		button:SetPoint("TOPLEFT", o, "TOPLEFT", 14 + (i - 1) * 69, -574)
-		o.motions[i] = button
+	-- Hide a whole page, not individual controls; Preview and Reset stay shared.
+	o.ShowPage = function(page)
+		if page == "appearance" then
+			behavior:Hide()
+			appearance:Show()
+			o:SetHeight(432)
+		else
+			behavior:Show()
+			appearance:Hide()
+			o:SetHeight(630)
+			page = "behavior"
+		end
+		o.page = page
+		o.behaviorTab.selected = page == "behavior"
+		o.appearanceTab.selected = page == "appearance"
+		PaintButton(o.behaviorTab)
+		PaintButton(o.appearanceTab)
 	end
-	o.motionNote = Text(o, 10, 0.6, 0.6, 0.65)
-	o.motionNote:SetPoint("TOPLEFT", o, "TOPLEFT", 14, -604)
-	o.motionNote:SetWidth(272)
-	o.motionNote:SetJustifyH("LEFT")
+	o.ShowPage("behavior")
 
 	local footer = Text(o, 10, 0.5, 0.5, 0.55)
 	footer:SetPoint("BOTTOM", o, "BOTTOM", 0, 10)
