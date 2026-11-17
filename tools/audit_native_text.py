@@ -70,9 +70,24 @@ for token in (
 ):
     assert token in STOCK, f"Stock gameplay notification theme is missing {token!r}"
 
+# Both original warning feeds remain fully game-controlled; only their anchors
+# move off the hidden stock error frame and into an independent top-center lane.
+for token in (
+    'local function PositionWarnings()',
+    'getglobal("RaidWarningFrame")',
+    'warning:SetPoint("TOP", UIParent, "TOP", 0, -136)',
+    'getglobal("RaidBossEmoteFrame")',
+    'emote:SetPoint("TOP", warning, "BOTTOM", 0, -12)',
+    "C.OnWorld(PositionWarnings)",
+):
+    assert token in THEME, f"Native warning layout is missing {token!r}"
+assert 'UnregisterEvent(' not in THEME
+assert 'RaidWarningFrame:AddMessage(' not in THEME
+assert 'RaidBossEmoteFrame:AddMessage(' not in THEME
+
 assert "Zone and subzone announcements remain entirely native" in ARCH
 
 print("PASS positive aura/cast and heal text use the known-good Arcane palette mapping")
 print("PASS Blizzard's floating message creation, filtering, movement and fade remain native")
-print("PASS NativeText.lua does not hook, move, recolor or decorate zone announcements")
+print("PASS NativeText.lua leaves zone announcements untouched and spaces native warnings above them")
 print("PASS stock gameplay notices retain the known-good Arcane font and color treatment")

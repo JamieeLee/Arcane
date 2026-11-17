@@ -8,6 +8,27 @@ local HEAL_TYPES = { "HEAL", "HEAL_CRIT", "PERIODIC_HEAL" }
 local themedCombatFonts = false
 local lastPalette = {}
 
+-- The vanilla warning feeds are anchored to UIErrorsFrame. When Arcane hides
+-- that optional stock frame, their default anchor is still tied to it, and
+-- raid/boss messages can coincide with the game's red zone announcements.
+-- Change only the warnings' positions, not message handling, fonts or fades.
+local function PositionWarnings()
+	local warning = getglobal("RaidWarningFrame")
+	if warning and type(warning.ClearAllPoints) == "function" then
+		warning:ClearAllPoints()
+		warning:SetPoint("TOP", UIParent, "TOP", 0, -136)
+	end
+	local emote = getglobal("RaidBossEmoteFrame")
+	if emote and type(emote.ClearAllPoints) == "function" then
+		emote:ClearAllPoints()
+		if warning then
+			emote:SetPoint("TOP", warning, "BOTTOM", 0, -12)
+		else
+			emote:SetPoint("TOP", UIParent, "TOP", 0, -188)
+		end
+	end
+end
+
 local function SetFont(fs, face)
 	if not fs or type(fs.GetFont) ~= "function" then return end
 	local _, size = fs:GetFont()
@@ -69,6 +90,7 @@ local function ApplyTheme()
 end
 
 C.OnInit(function()
+	PositionWarnings()
 	local watch = CreateFrame("Frame", "ArcaneNativeTextTheme")
 	watch:RegisterEvent("ADDON_LOADED")
 	watch:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -89,3 +111,7 @@ C.OnInit(function()
 	ApplyTheme()
 	ApplyCombatText(C.Pal())
 end)
+
+-- The native frame roots can be reset on entering a world; re-anchor once
+-- per transition, not from a polling or per-frame callback.
+C.OnWorld(PositionWarnings)
