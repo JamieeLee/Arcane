@@ -1,8 +1,8 @@
 # Arcane UI
 
-**Current release: v0.8.0-beta.3**
+**Current release: v0.8.0**
 
-*QA beta test build — not yet published as a stable release. Latest stable: v0.7.9. Damage-number rendering is working in initial in-game testing; new visual looks and multiplayer still need validation.*
+*Stable release candidate promoted from the tested v0.8.0-beta series. Publication requires manual approval. Broader live multiplayer and exhaustive visual-look validation are still ongoing.*
 
 A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethus.pl)), the World of Warcraft 1.12 roguelike. Everything is drawn in one look (dark glass, a gold rail, the timer's metal) and steps aside while you pick your cards.
 
@@ -42,11 +42,11 @@ Every optional HUD part can be turned on or off, sized and moved. Arcane Namepla
 
 The addon's load map, `Arcane.toc`, stays at the repository root. Lua modules are grouped by responsibility under `Core/`, `Timer/`, `Numbers/`, `SkillBar/`, `Frames/`, `Minimap/`, `Windows/`, `Nameplates/`, `Loot/` and `Locales/`. `Art/` and `Fonts/` also stay at the addon root so the game's existing asset paths remain unchanged. The repository itself is not the install folder. For a release ZIP, place the root files and all module and asset folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The release asset is named `ArcaneV0.8.0-beta.3.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
+The release asset is named `ArcaneV0.8.0.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
-1. For this QA beta, download the test ZIP from the successful [Arcane QA and Manual Release](../../actions/workflows/arcane-audit.yml) run for PR #58. The workflow artifact contains `ArcaneV0.8.0-beta.3.zip`. The last stable `v0.7.9` remains on [Releases](../../releases).
+1. Download `ArcaneV0.8.0.zip` from [Releases](../../releases) after publication. Before publication, use the verified test ZIP from the successful `Arcane-v0.8.0-test-...` [Actions build](../../actions/workflows/arcane-audit.yml).
 2. Unzip it into your game's `Interface/AddOns` folder. You should end up with `Interface/AddOns/Arcane/Arcane.toc`.
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
@@ -269,6 +269,31 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 For every new beta or release, increment the version beyond the last stable tag; use `-beta.N` for test builds, and do not reuse a published tag. Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
+### v0.8.0 — November 17, 2026
+
+**Stable release — damage-number looks, Nameplates controls and UI polish.**
+
+#### New and improved
+
+- **Five damage-number looks:** Custom, Elemental, Comic, Royal and Grim, with coordinated fonts, colors, critical-hit effects and backdrops. Custom remains the default and preserves existing manual picks.
+- **Damage Numbers settings:** Behavior and Appearance are separate tabs with shared Preview and Reset. The wider window contains long checkbox labels without clipping.
+- **Optional nameplate level badges:** toggle the enemy level squares under Regular plates. Levels stay enabled by default.
+- **Crit backdrops:** Steel, Burst and Gilded were added alongside the existing choices, with original asset attribution preserved.
+
+#### Fixes
+
+- **FPS mover:** matches Arcane's standard glass-and-gold move boxes, with no live FPS readout overlapping the move label.
+- **Arcane menu:** the button now reads **Arcane Nameplate Settings**; its submenu remains unchanged.
+- **Center-screen text:** native raid warnings and boss emotes use independent upper-screen anchors instead of overlapping red zone text. Native zone titles and warning lifecycles remain intact.
+- **Stock error messages:** OFF by default for new profiles; existing On/Off selections are retained and the toggle remains available.
+- **Combat-number presentation:** improved crit backdrop sizing, reverse navigation and translations. Damage calculations are unchanged.
+
+#### Testing and thanks
+
+- In-game QA confirmed damage-number behavior and the latest report found no recurrence of the overlapping announcements. Automated CI covers Lua compilation, module architecture, packaged assets and regression checks.
+- Broader live multiplayer coverage and exhaustive visual tests of all crit/look combinations remain outstanding; player feedback is welcome.
+- Thanks to Creed for the damage-number looks contribution and to the testers who helped polish this release.
+
 ### v0.8.0-beta.3 — November 17, 2026
 
 **QA follow-up beta — keep native location announcements and warning messages legible.**
