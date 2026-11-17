@@ -170,6 +170,28 @@ require("frame.arcaneNameplatesHealthTextValue" in VISUALS
 require("local size = math.max(16, math.min(20, frame.arcaneNameplatesOverlayHeight + 9))" in VISUALS,
         "the level badge must be sized from the visible bar")
 
+# The optional level square is independent of health-bar geometry, defaults ON
+# for existing users, and avoids creating per-plate badge widgets when OFF.
+require('showLevelBadges = true' in CONTROLLER and 'showLevelBadges = true' in OPTIONS,
+        "the level badge setting must default on for old and new saved profiles")
+require('Checkbox(panel, "showLevelBadges", "Show level badges"' in OPTIONS,
+        "the level badge toggle must live in the existing Nameplates options")
+badge_update = VISUALS.split("local function UpdatePlateLevelBadge(frame)", 1)[1].split(
+    "local function ApplyPlateStyle(frame)", 1
+)[0]
+require('if not P.Option("showLevelBadges") then' in badge_update,
+        "badge visibility must honor the saved setting")
+require(badge_update.index('if not P.Option("showLevelBadges") then')
+        < badge_update.index("EnsureLevelBadge(frame)"),
+        "disabled badges must not be created or updated")
+require("frame.arcaneNameplatesLevelBadge" in badge_update
+        and "badge:Hide()" in badge_update,
+        "turning badges OFF must hide previously created badges")
+require(VISUALS.count("UpdatePlateLevelBadge(frame)") == 3,
+        "badge setting must be respected during initial styling and regular value refresh")
+require('if C.ArcaneNameplatesRefresh then C.ArcaneNameplatesRefresh(true) end' in OPTIONS,
+        "the existing options refresh must reapply the badge when toggled ON")
+
 # Keep all existing nameplate compatibility contracts.
 require("bossGuardianNames = {}" in SPECIAL and "bossGuardianUnitsByName = {}" in SPECIAL,
         "boss identity indexes must be rebuilt together")

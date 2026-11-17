@@ -212,6 +212,7 @@ C.OnInit(function()
 	local d = C.DB("nameplates", {
 		showDebuffs = true, hideBossName = false,
 		showShrunkName = false, showHealthText = true,
+		showLevelBadges = true,
 	})
 	-- Arcane Nameplates is always active while Arcane is loaded; remove its retired global toggle.
 	d["enabled"] = nil

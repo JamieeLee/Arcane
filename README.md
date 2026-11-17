@@ -275,6 +275,7 @@ Gives the damage numbers looks: fonts, colors and critical-hit backdrops that go
 
 #### New
 
+- **Optional nameplate levels:** a **Show level badges** checkbox in Arcane Nameplates (under Regular plates) shows or hides the level squares attached to health bars. ON by default to preserve the existing design. Turning it off leaves the bar unchanged and avoids allocating level-badge visuals for new mobs.
 - **Focused number settings:** the Damage Numbers window has **Behavior** (density, motion, grouping, switches) and **Appearance** (looks, fonts, size, critical-hit backdrops) tabs. Both reuse the same settings, Preview, and Reset controls; Custom remains the default.
 - **Number looks:** pick one in the damage-number options (`/Arcane numbers`) with the new **Look** row, or type `/Arcane numbers custom | elemental | comic | royal | grim`.
   - **Custom:** your own font, critical-hit backdrop and switches, exactly as before. It is the default, so nothing changes until a look is picked. Picking a font or a backdrop by hand also goes back to Custom.

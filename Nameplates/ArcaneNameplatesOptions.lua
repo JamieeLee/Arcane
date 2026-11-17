@@ -13,6 +13,7 @@ local DEFAULTS = {
 	hideBossName = false,
 	showShrunkName = false,
 	showHealthText = true,
+	showLevelBadges = true,
 	bossBarColorOn = false,
 	regularBarColorOn = false,
 	bossBarColor = { 0, 0.64, 1 },
@@ -229,6 +230,7 @@ local function BuildPanel(parent)
 
 	PanelText(panel, "Regular plates", 16, -121, 280, 10, { 0.72, 0.68, 0.58 })
 	Checkbox(panel, "showShrunkName", "Show names on nameplates", "Show each regular mob name above its shrunken plate.", 18, -137)
+	Checkbox(panel, "showLevelBadges", "Show level badges", "Show the level square beside nameplate health bars. Turn this off for less clutter when many enemies are nearby.", 18, -163)
 
 	PanelText(panel, "Health display", 16, -198, 280, 10, { 0.72, 0.68, 0.58 })
 	Checkbox(panel, "showHealthText", "Show health numbers", "Show current / maximum health numbers inside each plate. The colored health bars remain visible either way.", 18, -214)
