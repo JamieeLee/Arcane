@@ -173,6 +173,15 @@ for fragment, message in (
     if fragment not in options:
         fail(message)
 
+for fragment, message in (
+    ("local PANEL_WIDTH, PAD = 360, 14", "the options panel must fit long labels"),
+    ("check.label:SetWidth(CHECK_LABEL_WIDTH)", "checkbox descriptions must wrap within their row"),
+    ("check.label:SetHeight(check:GetHeight())", "wrapped checkbox text must use its row height"),
+    ('MakeCheck(behavior, -517, "Merge every spell: one number a second", "bySpell")', "the last merge option must not overlap the previous row"),
+):
+    if fragment not in options:
+        fail(message)
+
 # --- every word a look shows, in every language
 phrases = set(look_names.values()) | set(look_notes.values()) | set(back_names.values())
 phrases |= {"Look", "Behavior", "Appearance", "Critical hit backdrop", "number look: ",

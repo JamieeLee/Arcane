@@ -217,6 +217,8 @@ require('C.DB("nameplates"' in CONTROLLER and 'C.DB("nameplates"' in OPTIONS,
         "the existing ArcaneDB.nameplates saved-variable contract must remain stable")
 require('arg1 ~= "AZSUNITS"' in CONTROLLER and "AZS_UNITS" in SPECIAL,
         "game integration identifiers must remain unchanged")
+require('C.LText(nameplatesButton.text, "Arcane Nameplate Settings")' in CORE_OPTIONS,
+        "the Arcane hub must label the Nameplate Settings button correctly")
 require("C.ArcaneNameplatesToggleOptions" in CORE_OPTIONS,
         "the options hub must call the canonical Arcane entry point")
 

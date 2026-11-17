@@ -22,8 +22,9 @@ for token in (
     'readout = C.Text(frame, C.FONT, 14, "OUTLINE", "CENTER", TEXT_WIDTH)',
     'readout:SetPoint("CENTER", frame, "CENTER", 0, 0)',
     'C.Movable(frame, "fps", "FPS display"',
-    'mover.box:SetBackdropColor(0, 0, 0, 0)',
-    'mover.box.text:Hide()',
+    'mover.box:SetScript("OnShow", function() readout:Hide() end)',
+    'mover.box:SetScript("OnHide", function()',
+    'if C.unlocked then readout:Hide() else readout:Show() end',
     'local fps = GetFramerate()',
     'C.SetText(readout, string.format("FPS: %d", math.floor(fps + 0.5)))',
     'C.RegisterPart({',
@@ -34,6 +35,8 @@ for token in (
 ):
     assert token in CODE, f"FPS display is missing {token!r}"
 
+assert "mover.box:SetBackdropColor(0, 0, 0, 0)" not in CODE, "keep the shared mover glass fill"
+assert "mover.box.text:Hide()" not in CODE, "show the shared mover label"
 assert "SaveBindings" not in CODE, "do not persistently overwrite the player's saved key map"
 assert "SetParent(" not in CODE, "FPS text must be created inside the movable root rather than reparented"
 assert "frame:GetCenter()" not in CODE and "PositionReadout" not in CODE, "use Arcane's normal anchored-child mover, not screen-coordinate chasing"
