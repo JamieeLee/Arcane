@@ -394,6 +394,8 @@ Arcane.AddLanguage("tr", "Türkçe", Arcane.FACE_LETTERS, {
 	["FPS display"] = "FPS göstergesi",
 	["Show or hide the game's FPS readout with this checkbox. Ctrl+R is disabled while Arcane is loaded."] = "Oyunun FPS göstergesini bu kutuyla açıp kapatın. Arcane yüklüyken Ctrl+R devre dışıdır.",
 	-- the damage numbers' looks, and the motion and crit backdrop words
+	["Behavior"] = "Davranış",
+	["Appearance"] = "Görünüm",
 	["Look"] = "Görünüm",
 	["Custom"] = "Özel",
 	["Comic"] = "Çizgi roman",

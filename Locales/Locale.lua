@@ -966,6 +966,8 @@ local ROWS = {
 	{ "FPS display", "Affichage FPS", "FPS-Anzeige", "Mostrar FPS", "Exibição de FPS" },
 	{ "Show or hide the game's FPS readout with this checkbox. Ctrl+R is disabled while Arcane is loaded.", "Affiche ou masque les FPS du jeu avec cette case. Ctrl+R est désactivé tant qu'Arcane est chargé.", "Blende die FPS-Anzeige des Spiels mit diesem Kästchen ein oder aus. Ctrl+R ist deaktiviert, solange Arcane geladen ist.", "Muestra u oculta los FPS del juego con esta casilla. Ctrl+R queda desactivado mientras Arcane está cargado.", "Mostre ou oculte o FPS do jogo com esta caixa. Ctrl+R fica desativado enquanto o Arcane estiver carregado." },
 	-- the damage numbers' looks, and the motion and crit backdrop words
+	{ "Behavior", "Comportement", "Verhalten", "Comportamiento", "Comportamento" },
+	{ "Appearance", "Apparence", "Darstellung", "Apariencia", "Aparência" },
 	{ "Look", "Apparence", "Aussehen", "Aspecto", "Visual" },
 	{ "Custom", "Personnalisé", "Eigenes", "Personalizado", "Personalizado" },
 	{ "Comic", "BD", "Comic", "Cómic", "Quadrinhos" },

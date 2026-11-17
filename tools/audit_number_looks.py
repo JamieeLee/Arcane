@@ -158,9 +158,24 @@ for fragment, message in (
 if "elseif C.LOOKS.names[command] then" not in commands:
     fail("/Arcane numbers <look> must put a look on")
 
+# --- visual controls have their own page, not a longer behavior list
+for fragment, message in (
+    ('local behavior = CreateFrame("Frame", nil, o)', "Behavior page must own combat-number controls"),
+    ('local appearance = CreateFrame("Frame", nil, o)', "Appearance page must own visual controls"),
+    ('C.LText(o.behaviorTab.text, "Behavior")', "Behavior tab needs a translated label"),
+    ('C.LText(o.appearanceTab.text, "Appearance")', "Appearance tab needs a translated label"),
+    ('o.ShowPage = function(page)', "the pages must share a single options window"),
+    ('MakeCheck(behavior,', "number behavior switches must live on Behavior"),
+    ('MakeButton(appearance,', "font, backdrop and looks must live on Appearance"),
+    ('preview:SetPoint("BOTTOMLEFT"', "Preview must be shared by both pages"),
+    ('reset:SetPoint("BOTTOMLEFT"', "Reset must be shared by both pages"),
+):
+    if fragment not in options:
+        fail(message)
+
 # --- every word a look shows, in every language
 phrases = set(look_names.values()) | set(look_notes.values()) | set(back_names.values())
-phrases |= {"Look", "Critical hit backdrop", "number look: ",
+phrases |= {"Look", "Behavior", "Appearance", "Critical hit backdrop", "number look: ",
             "/Arcane numbers custom | elemental | comic | royal | grim - pick a look"}
 english = source("Locales/Locale.lua")
 for phrase in sorted(phrases):
