@@ -87,5 +87,4 @@ Windows/Chat.lua
 Loot/LootSets.lua
 Loot/Loot.lua
 
--- Controller presentation remains isolated from existing theme implementations.
 Themes/Controller/Controller.lua
