@@ -71,7 +71,7 @@ function C.Panel(frame, sigils)
 		for i, side in ipairs({ "LEFT", "RIGHT" }) do
 			local right = side == "RIGHT"
 			local x = right and -C.PANEL_MEDALLION_X or C.PANEL_MEDALLION_X
-			local t = C.Tex(frame, "OVERLAY", C.ART .. "PanelDefaultMedallion.tga")
+			local t = C.Tex(frame, "OVERLAY", C.ART .. "PanelDefaultMedallion")
 			t:SetWidth(C.PANEL_MEDALLION)
 			t:SetHeight(C.PANEL_MEDALLION)
 			t:SetPoint("CENTER", frame, side, x, C.PANEL_MEDALLION_Y)

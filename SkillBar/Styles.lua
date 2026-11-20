@@ -174,9 +174,9 @@ local function EnsureHybridArcane(panel)
 	if panel.hybridArcane then return end
 	local frame = panel.frame
 	-- Canonical high-resolution medallion; class variants alter only the inner enamel.
-	panel.hybridArcane = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcane.tga")
+	panel.hybridArcane = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcane")
 	-- Separate gemstone layer remains independently tinted from the class gem palette.
-	panel.hybridGem = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcaneGem.tga")
+	panel.hybridGem = C.Tex(frame, "OVERLAY", C.ART .. "PanelHybridArcaneGem")
 	for _, texture in ipairs({ panel.hybridArcane, panel.hybridGem }) do
 		texture:SetWidth(HYBRID_SIGIL)
 		texture:SetHeight(HYBRID_SIGIL)
@@ -186,15 +186,15 @@ local function EnsureHybridArcane(panel)
 end
 
 local function HybridArcaneTexture(key)
-	if key == "warrior" then return C.ART .. "PanelHybridArcaneWarrior.tga" end
-	if key == "paladin" then return C.ART .. "PanelHybridArcanePaladin.tga" end
-	if key == "rogue" then return C.ART .. "PanelHybridArcaneRogue.tga" end
-	if key == "priest" then return C.ART .. "PanelHybridArcanePriest.tga" end
-	if key == "shaman" then return C.ART .. "PanelHybridArcaneShaman.tga" end
-	if key == "mage" then return C.ART .. "PanelHybridArcaneMage.tga" end
-	if key == "warlock" then return C.ART .. "PanelHybridArcaneWarlock.tga" end
+	if key == "warrior" then return C.ART .. "PanelHybridArcaneWarrior" end
+	if key == "paladin" then return C.ART .. "PanelHybridArcanePaladin" end
+	if key == "rogue" then return C.ART .. "PanelHybridArcaneRogue" end
+	if key == "priest" then return C.ART .. "PanelHybridArcanePriest" end
+	if key == "shaman" then return C.ART .. "PanelHybridArcaneShaman" end
+	if key == "mage" then return C.ART .. "PanelHybridArcaneMage" end
+	if key == "warlock" then return C.ART .. "PanelHybridArcaneWarlock" end
 	-- Hunter and Druid keep the approved original green Arcane medallion.
-	return C.ART .. "PanelHybridArcane.tga"
+	return C.ART .. "PanelHybridArcane"
 end
 local function RestoreBasePanel(panel)
 	local frame = panel.frame
@@ -216,7 +216,7 @@ local function RestoreBasePanel(panel)
 			local x = right and -DEFAULT_CENTER_X or DEFAULT_CENTER_X
 			local texture = panel.sigils[i]
 			if texture then
-				texture:SetTexture(C.ART .. "PanelDefaultMedallion.tga")
+				texture:SetTexture(C.ART .. "PanelDefaultMedallion")
 				texture:SetWidth(DEFAULT_SIGIL)
 				texture:SetHeight(DEFAULT_SIGIL)
 				texture:ClearAllPoints()

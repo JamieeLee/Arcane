@@ -192,15 +192,17 @@ def main() -> None:
             fail(f"Arcane options hub is missing a mode choice: {contract}")
     if 'C.LText(styleLabel, "UI style")' not in options:
         fail("Options hub must label the full UI style selector")
-    if 'panel.endLeft or {}' not in styles or 'PanelHybridArcane.tga' not in styles:
+    if ".tga" in core or ".tga" in styles:
+        fail("Runtime style artwork must use extensionless paths so BLP can load in browser clients")
+    if 'panel.endLeft or {}' not in styles or 'PanelHybridArcane' not in styles:
         fail("Hybrid must use the approved high-resolution Arcane medallion on the left")
-    if 'PanelHybridArcaneGem.tga' not in styles:
+    if 'PanelHybridArcaneGem' not in styles:
         fail("Hybrid must retain a separate tintable gemstone layer")
     for class_name in ("warrior", "paladin", "rogue", "priest", "shaman", "mage", "warlock"):
         if f'key == "{class_name}"' not in styles:
             fail(f"Hybrid medallion selector is missing the {class_name} class route")
         pretty = class_name[0].upper() + class_name[1:]
-        if f"PanelHybridArcane{pretty}.tga" not in styles:
+        if f"PanelHybridArcane{pretty}" not in styles:
             fail(f"Hybrid medallion selector is missing the {pretty} texture")
     if 'SetPoint("CENTER", frame, "LEFT", HYBRID_CENTER_X, HYBRID_CENTER_Y)' not in styles:
         fail("Hybrid Arcane medallion must be centered on the left panel edge")
@@ -229,8 +231,8 @@ def main() -> None:
             or "C.PANEL_MEDALLION_X = HYBRID_MEDALLION_SIZE * 0.10" not in core
             or "+ (6 * C.PANEL_MEDALLION - 0.5 * HYBRID_MEDALLION_SIZE) / 512" not in core
             or "C.PANEL_MEDALLION_Y = -8" not in core
-            or "PanelDefaultMedallion.tga" not in core
-            or "PanelDefaultMedallion.tga" not in styles
+            or "PanelDefaultMedallion" not in core
+            or "PanelDefaultMedallion" not in styles
             or "p.sigilsGem" in core + styles):
         fail("Classic must use the exact supplied artwork as one untinted texture on each end")
     if 'texture:SetPoint("CENTER", frame, side, x, DEFAULT_CENTER_Y)' not in styles:

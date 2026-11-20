@@ -280,6 +280,7 @@ For every new beta or release, increment the version beyond the last stable tag;
 - Keeps the animated gold book halo, blue magical accents, skill cradles, and pet bridges self-contained inside Controller.
 - Centers the book halo, aura and animated sparks relative to the book artwork rather than the taller interactive frame.
 - Restores the original character portrait when leaving Controller; respects the existing **Your frame** on/off preference.
+- Builds pixel-identical BLP2 mirrors for all 25 TGA artwork assets (Controller, Classic, and Hybrid), using extensionless runtime texture paths with original TGAs retained. The CI installer now includes the Controller art folder. Initial browser rendering test passed; broader four-style regression remains pending.
 
 #### QA and release boundary
 

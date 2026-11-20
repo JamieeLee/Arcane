@@ -15,6 +15,7 @@ on:
       - "**.toc"
       - "**.md"
       - "Art/**"
+      - "Themes/**"
       - "Fonts/**"
       - "ATTRIBUTION.txt"
       - "ArcaneNameplates-LICENSE.txt"
@@ -28,6 +29,7 @@ on:
       - "**.toc"
       - "**.md"
       - "Art/**"
+      - "Themes/**"
       - "Fonts/**"
       - "ATTRIBUTION.txt"
       - "ArcaneNameplates-LICENSE.txt"
@@ -83,6 +85,11 @@ jobs:
 
       - name: Build the single-source Classic medallion texture
         run: python tools/build_default_medallion.py
+
+      - name: Build and verify browser-compatible BLP2 mirrors for TGA artwork
+        run: |
+          python tools/build_browser_blp.py
+          python tools/build_browser_blp.py --check
 
       - name: Audit damage-number module ownership and load order
         run: python tools/audit_numbers.py
@@ -165,6 +172,7 @@ jobs:
             cp "$file" "$addon/$relative"
           done < <(find . -type f \( -name '*.lua' -o -name '*.toc' \) -not -path './.git/*' -print0)
           cp -R Art Fonts "$addon/"
+          if [[ -d Themes ]]; then cp -R Themes "$addon/"; fi
           cp ATTRIBUTION.txt ArcaneNameplates-LICENSE.txt "$addon/"
 
           cd "$stage"
@@ -176,6 +184,10 @@ jobs:
             "Arcane/Arcane.toc" \
             "Arcane/Core.lua" \
             "Arcane/Art/Diamond.blp" \
+            "Arcane/Art/PanelDefaultMedallion.blp" \
+            "Arcane/Themes/Controller/Controller.lua" \
+            "Arcane/Themes/Controller/Art/Tome.blp" \
+            "Arcane/Themes/Controller/Art/BookGoldOrbit.blp" \
             "Arcane/Fonts/Letters.ttf" \
             "Arcane/Fonts/LettersCJK.ttf" \
             "Arcane/Fonts/LICENSE.txt" \
