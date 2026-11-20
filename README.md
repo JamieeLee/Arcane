@@ -279,6 +279,7 @@ For every new beta or release, increment the version beyond the last stable tag;
 - Reuses Arcane's mover and saved-layout systems; no automatic gamepad detection or separate controller-addon dependency.
 - Keeps the animated gold book halo, blue magical accents, skill cradles, and pet bridges self-contained inside Controller.
 - Centers the book halo, aura and animated sparks relative to the book artwork rather than the taller interactive frame.
+- Restores the original character portrait when leaving Controller; respects the existing **Your frame** on/off preference.
 
 #### QA and release boundary
 

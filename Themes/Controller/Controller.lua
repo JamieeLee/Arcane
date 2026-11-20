@@ -177,6 +177,14 @@ local function Unpark(name)
                 f:SetAlpha(1)
             end
         end
+    elseif name == "ArcanePlayer" then
+        -- Arcane's C.Vis caches the desired visibility in frame.mv. Parking
+        -- under a hidden parent doesn't clear it, so a normal Tick may skip
+        -- the Show() needed after restoring the original parent.
+        -- Respect the user's own Your frame toggle while forcing a fresh write.
+        local units = C.DB("units", {player = true})
+        f.mv = nil
+        C.Vis(f, units.player ~= false)
     end
 end
 local function ParkOriginals()
