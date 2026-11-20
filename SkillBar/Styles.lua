@@ -1,8 +1,8 @@
--- Arcane UI: three visual treatments and the shared Full Class palette.
+-- Arcane UI: three stock treatments plus the opt-in controller layout.
 -- Slot logic stays in Bar.lua; this module owns class selection, palette resolution and panel art.
 local C = Arcane
 local THEMES = C.BarStyleData
-local CLASSIC, HYBRID, FULL_CLASS = 1, 2, 3
+local CLASSIC, HYBRID, FULL_CLASS, CONTROLLER = 1, 2, 3, 4
 local EMBLEM_U = 76 / 110 * 0.85
 local EMBLEM_W, EMBLEM_H = 512 * EMBLEM_U, 256 * EMBLEM_U
 local EMBLEM_L, EMBLEM_R, EMBLEM_IN = 220, 292, 24
@@ -25,7 +25,7 @@ local state = {
 
 local M = {}
 C.BarStyles = M
-M.CLASSIC, M.HYBRID, M.FULL_CLASS = CLASSIC, HYBRID, FULL_CLASS
+M.CLASSIC, M.HYBRID, M.FULL_CLASS, M.CONTROLLER = CLASSIC, HYBRID, FULL_CLASS, CONTROLLER
 
 local function DB()
 	if not state.db then state.db = C.DB("bar") end
@@ -35,7 +35,7 @@ end
 
 local function Mode()
 	local mode = tonumber(DB().style) or CLASSIC
-	if mode < CLASSIC or mode > FULL_CLASS then
+	if mode < CLASSIC or mode > CONTROLLER then
 		mode = CLASSIC
 		DB().style = mode
 	end
@@ -85,15 +85,19 @@ end
 
 function M.SetMode(mode)
 	mode = tonumber(mode)
-	if mode ~= CLASSIC and mode ~= HYBRID and mode ~= FULL_CLASS then return false end
+	if mode ~= CLASSIC and mode ~= HYBRID and mode ~= FULL_CLASS and mode ~= CONTROLLER then return false end
 	local db = DB()
 	if db.style == mode then return false end
+	local previous = Mode()
+	local controller = C.ControllerUX
+	if controller and controller.BeforeStyleChange then controller.BeforeStyleChange(previous, mode) end
 	db.style = mode
 	state.stamp = state.stamp + 1
 	state.paletteBase = nil
 	state.readClock = 0
 	C.palStamp = C.palStamp + 1 -- every palette consumer must repaint when the UI style changes
 	if mode ~= CLASSIC then M.Update(0, true) end
+	if controller and controller.AfterStyleChange then controller.AfterStyleChange(previous, mode) end
 	return true
 end
 
@@ -139,7 +143,7 @@ function M.Palette()
 end
 
 function M.PanelMetal(pal)
-	if Mode() == CLASSIC or Mode() == HYBRID then return C.PanelMetal(pal) end
+	if Mode() == CLASSIC or Mode() == HYBRID or Mode() == CONTROLLER then return C.PanelMetal(pal) end
 	local theme = CurrentTheme()
 	return theme.metal[1], theme.metal[2], theme.metal[3]
 end
@@ -242,7 +246,7 @@ function M.Apply(panel)
 	if panel.barStyleMode == mode and panel.barStyleClass == key then return end
 	panel.barStyleMode, panel.barStyleClass = mode, key
 	RestoreBasePanel(panel)
-	if mode == CLASSIC then return end
+	if mode == CLASSIC or mode == CONTROLLER then return end
 	EnsureClassEmblems(panel)
 	if mode == HYBRID then
 		EnsureHybridArcane(panel)
@@ -280,7 +284,7 @@ function M.Theme(panel, pal)
 	if not panel then return end
 	M.Apply(panel)
 	local mode = Mode()
-	if mode == CLASSIC then
+	if mode == CLASSIC or mode == CONTROLLER then
 		C.PanelTheme(panel, pal)
 		return
 	end

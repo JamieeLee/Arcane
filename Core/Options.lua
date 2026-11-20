@@ -267,13 +267,13 @@ local function BuildHub()
 	end)
 	C.LText(langButton.text, "Language")
 	langButton:SetPoint("TOPLEFT", o, "TOPLEFT", 168, y)
-	-- A dedicated row keeps the three skill-bar treatments easy to identify.
+	-- Four UI styles: controller is an explicit choice, not auto-input detection.
 	local styleY = y - 30
 	local styleLabel = HubText(o, 9, 0.62, 0.62, 0.68)
 	styleLabel:SetPoint("BOTTOMLEFT", o, "TOPLEFT", 326, styleY + 4)
 	C.LText(styleLabel, "UI style")
 	local function StyleChoice(mode, label, x)
-		local button = C.Button(o, 96, 24, "", function()
+		local button = C.Button(o, 71, 24, "", function()
 			if C.BarStyles then C.BarStyles.SetMode(mode) end
 			RefreshHub()
 		end)
@@ -284,8 +284,9 @@ local function BuildHub()
 	end
 	o.barStyleButtons = {
 		StyleChoice(C.BarStyles.CLASSIC, "Arcane", 326),
-		StyleChoice(C.BarStyles.HYBRID, "Hybrid", 429),
-		StyleChoice(C.BarStyles.FULL_CLASS, "Full class", 532),
+		StyleChoice(C.BarStyles.HYBRID, "Hybrid", 403),
+		StyleChoice(C.BarStyles.FULL_CLASS, "Full class", 480),
+		StyleChoice(C.BarStyles.CONTROLLER, "Controller", 557),
 	}
 	-- the language: a button that opens the list of them, each in its own words
 	o.lang = langButton
