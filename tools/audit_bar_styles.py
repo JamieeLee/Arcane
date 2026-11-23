@@ -115,10 +115,16 @@ def check_full_class_palette_propagation() -> None:
         if (("C.Pal()" not in code and "C.WindowPal()" not in code) or "C.palStamp" not in code):
             fail(f"{name} must consume and refresh from the shared active UI palette")
 
-    for name in ("Frames/LevelUps.lua", "Windows/Pets.lua"):
-        code = source(name)
-        if "C.Pal()" not in code or "S.stamp ~= C.palStamp" not in code or "Theme(pal)" not in code:
-            fail(f"{name} must refresh its one-time panel construction when the UI palette changes")
+    # The stored-level book uses the class aura, but the DEV pet strip has
+    # deliberately removed its panel, so there is no panel palette to refresh.
+    code = source("Frames/LevelUps.lua")
+    if "C.Pal()" not in code or "S.stamp ~= C.palStamp" not in code or "Theme(pal)" not in code:
+        fail("the stored-level book must update with the active palette")
+    pets = source("Windows/Pets.lua")
+    if "C.Panel(root, false)" in pets or "root.deco" in pets:
+        fail("borderless DEV pet slots must not draw a permanent shared panel")
+    if 'C.Movable(root, "pets", "Pet bar"' not in pets:
+        fail("the invisible shared pet frame must retain the standard mover")
     party = source("Frames/Party.lua")
     if "C.PanelTheme(menu.deco, pal)" not in party:
         fail("The party context menu must refresh its panel accent with the active UI palette")

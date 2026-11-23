@@ -15,5 +15,11 @@ level = source("Frames/LevelUps.lua")
 test(all(x in level for x in ('ART .. "Tome"','ART .. "BookClassOrbit"','AZS_OpenStoredLevels','NativeStoring()')), "stored-level feature lost")
 pets = source("Windows/Pets.lua")
 test(all(x in pets for x in ("CircleTexture", "CircleCooldown", "SkillRim", "SkillEmpty", "TogglePetAutocast", "CastPetAction")), "pet circle or actions lost")
+test('C.Panel(root, false)' not in pets and 'root.deco' not in pets,
+     "the pet strip must have no always-visible outer panel")
+test('C.Movable(root, "pets", "Pet bar"' in pets and 'root:SetScale(db.scale)' in pets,
+     "pet icons must still move and scale together through the regular mover")
+test('f:SetPoint("TOPLEFT", ArcanePlayer, "BOTTOMLEFT", 86, -7)' in pets,
+     "keep pet strip at existing position until player approves a new center")
 test(all("C.WindowPal()" in source(x) for x in ("Windows/Stats.lua","Windows/Meter.lua","Windows/Luck.lua")), "utility accent routing missing")
 print("PASS: one universal DEV UX; all legacy source and active gameplay contracts retained")

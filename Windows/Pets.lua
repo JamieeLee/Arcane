@@ -1,5 +1,5 @@
 -- Arcane UI: the pet bar.
--- Just over the skill bar on its left, a small gold-railed bar for your pets. When the game gives
+-- A borderless group of round icons that shares one mover and scale setting. When the game gives
 -- the pet its own buttons (a hunter's beast, a warlock's demon), they are here: click one to use
 -- it, right-click to switch its autocast, point at it for the game's tooltip, a dark veil while it
 -- cools down. Otherwise each kind of summon you have out (Spirit Wolves, Treants, an Infernal...)
@@ -94,7 +94,7 @@ end
 
 local db
 local root
-local S = { slots = {}, alpha = 0, broken = false, mode = nil, stamp = -1 }
+local S = { slots = {}, alpha = 0, broken = false, mode = nil }
 
 ------------------------------------------------------------------------ what there is
 -- the game's pet buttons: { index, name, icon, active, auto, autoAllowed } each, or nil for none
@@ -289,10 +289,6 @@ local function Cooldown(s)
 	CircleCooldown(s, left > 0 and left / dur or 0)
 end
 
-local function Theme(pal)
-	C.PanelTheme(root.deco, pal)
-end
-
 ------------------------------------------------------------------------ each frame
 local function Step(dt, now)
 	local n, x = 0, K.pad
@@ -365,10 +361,6 @@ local function Step(dt, now)
 	C.Width(root, math.max(x - K.gap + K.pad, K.slot + 2 * K.pad))
 	C.Alpha(root, S.alpha)
 	C.Vis(root, true)
-	if S.stamp ~= C.palStamp then
-		S.stamp = C.palStamp
-		Theme(C.Pal())
-	end
 end
 
 local function Apply()
@@ -385,7 +377,8 @@ C.OnInit(function()
 	root:SetHeight(K.slot + 2 * K.pad + K.under)
 	root:SetFrameStrata("MEDIUM")
 	root:SetScale(db.scale)
-	root.deco = C.Panel(root, false)
+	-- No persistent gold-edged rectangle: the parent remains the one movable,
+	-- scalable frame, and C.Movable supplies its usual guide only in move mode.
 	C.Vis(root, false)
 	C.Movable(root, "pets", "Pet bar", function(f)
 		f:ClearAllPoints()
@@ -416,7 +409,7 @@ end)
 
 C.RegisterPart({
 	key = "pets", name = "Pet bar",
-	note = "Over the skill bar on the left: your pet's own buttons (click to use, right-click for autocast), or each kind of summon you have out with its count, time left and the skills it has used.",
+	note = "Borderless pet and summon icons beneath your frame; drag them together in Move frames, or scale them in Arcane Options. Pet actions, autocast, counts and skill damage remain unchanged.",
 	get = function() return db and db.enabled end,
 	set = function(on)
 		if db then
