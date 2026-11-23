@@ -63,6 +63,13 @@ local function CurrentTheme()
 	return THEMES[key], key
 end
 
+-- Use the same authoritative class selection as the Full Class artwork.
+-- Return the exact class asset suffix (Hunter, Mage, etc.) for the level-up book.
+function M.BookClassSuffix()
+	local theme = CurrentTheme()
+	return theme and theme.emblem or nil
+end
+
 local function ReadRunClass()
 	if type(AZS_GetMeterContext) ~= "function" or type(AZS_GetMeterLoadout) ~= "function" then return end
 	local context = C.Call(AZS_GetMeterContext)

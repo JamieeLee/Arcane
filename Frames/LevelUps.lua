@@ -47,7 +47,12 @@ local function ShowTip()
 end
 
 local function Theme(pal)
-	-- Natural leather-and-gold book; the existing magic and motes stay unchanged.
+	-- The neutral leather/bronze book has nine generated class gemstone skins.
+	-- Only swap textures on palette/class changes, never on every animation frame.
+	local suffix = C.BarStyles and C.BarStyles.BookClassSuffix
+		and C.BarStyles.BookClassSuffix()
+	root.book:SetTexture(ART .. "TomeNatural" .. (suffix or ""))
+	-- Existing class-colored magic, orbit and motes are unchanged.
 	local classPal = C.BarStyles and C.BarStyles.Palette and C.BarStyles.Palette() or pal
 	local glow = classPal.glow or pal.glow
 	local title = pal.title

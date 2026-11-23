@@ -92,6 +92,11 @@ jobs:
           python tools/build_tome_natural.py
           python tools/build_tome_natural.py --check
 
+      - name: Build nine class gemstone and ribbon book variants
+        run: |
+          python tools/build_tome_classes.py
+          python tools/build_tome_classes.py --check
+
       - name: Build and verify browser-compatible BLP2 mirrors for TGA artwork
         run: |
           python tools/build_browser_blp.py
@@ -197,6 +202,15 @@ jobs:
             "Arcane/Themes/Controller/Controller.lua" \
             "Arcane/Themes/Controller/Art/Tome.blp" \
             "Arcane/Themes/Controller/Art/TomeNatural.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalWarrior.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalPaladin.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalHunter.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalRogue.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalPriest.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalShaman.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalMage.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalWarlock.blp" \
+            "Arcane/Themes/Controller/Art/TomeNaturalDruid.blp" \
             "Arcane/Themes/Controller/Art/TomeNatural.tga" \
             "Arcane/Themes/Controller/Art/BookGoldOrbit.blp" \
             "Arcane/Fonts/Letters.ttf" \
