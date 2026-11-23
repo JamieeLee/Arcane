@@ -847,7 +847,7 @@ C.OnLogout(function()
 end)
 
 C.RegisterPart({
-	key = "bar", name = "Skill bar",
+	key = "bar", name = "Skill bar", hideScale = true,
 	note = "Your abilities with their cooldowns, your neck, rings and trinkets (hover for what they give), and your XP. Replaces the game's bar.",
 	get = function() return db and db.enabled end,
 	set = function(on)

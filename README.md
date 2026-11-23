@@ -269,6 +269,17 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 For every new beta or release, increment the version beyond the last stable tag; use `-beta.N` for test builds, and do not reuse a published tag. Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
+### Unreleased development changes — after v0.8.1-beta.1
+
+These changes are on the development branch only and are **not included in the published beta.1 ZIP**.
+
+- **Stats picker bounds:** the stat-selection popup now flips to the opposite side near the viewport edge and stays within available screen bounds.
+- **Minimap movement and scale:** use the existing Move Frames overlay and the Minimap `− / 100% / +` controls. The real map, Arcane ring, icons, chest pins, clock and title move together; turning the Arcane minimap off restores native position and scale.
+- **HUD Size:** replace the Controller HUD checkbox with a size-only control that adjusts the currently selected style. Arcane, Hybrid and Full Class share their keyboard layout and HUD size; Controller keeps its independent layout and size. The minimap size and position are shared across styles.
+- The existing X close buttons remain unchanged.
+
+These changes require live smoke testing before the next beta release.
+
 ### v0.8.1-beta.1 — November 20, 2026
 
 **Controller UX development checkpoint — not a stable release.**

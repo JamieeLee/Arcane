@@ -100,12 +100,19 @@ local function PartRow(parent, x, y, info)
 		row.label:SetTextColor(0.92, 0.92, 0.92)
 		if GameTooltip then GameTooltip:Hide() end
 	end)
-	row:SetScript("OnClick", function()
-		info.set(not info.get())
-		RefreshHub()
-	end)
+	if info.scaleOnly then
+		-- A size-only row is not a theme/feature toggle.
+		edge:Hide(); box:Hide(); row.mark:Hide()
+		row.label:ClearAllPoints()
+		row.label:SetPoint("LEFT", row, "LEFT", 0, 0)
+	else
+		row:SetScript("OnClick", function()
+			info.set(not info.get())
+			RefreshHub()
+		end)
+	end
 	row.info = info
-	if info.getScale then
+	if info.getScale and not info.hideScale then
 		row.less = C.Button(parent, 22, 20, "-", function()
 			info.setScale(C.Clamp(math.floor((info.getScale() - 0.05) * 20 + 0.5) / 20, 0.5, 1.8))
 			RefreshHub()
@@ -128,7 +135,9 @@ RefreshHub = function()
 	if not hub then return end
 	for i = 1, table.getn(hub.rows) do
 		local row = hub.rows[i]
-		if row.info.get() then row.mark:Show() else row.mark:Hide() end
+		if not row.info.scaleOnly then
+			if row.info.get() then row.mark:Show() else row.mark:Hide() end
+		end
 		if row.size then
 			row.size:SetText(string.format("%d%%", math.floor((row.info.getScale() or 1) * 100 + 0.5)))
 		end

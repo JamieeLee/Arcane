@@ -116,6 +116,38 @@ local function HeadButton(text, tip, onClick)
 	return b
 end
 
+-- Position the picker when it opens: prefer right, flip left, then clamp.
+-- Compare physical screen coordinates so UI scaling cannot clip the menu.
+local function PlaceMenu()
+	if not (root and menu) then return end
+	local scale = root:GetEffectiveScale() or 1
+	local uiScale = UIParent:GetEffectiveScale() or 1
+	local l, r, t = root:GetLeft(), root:GetRight(), root:GetTop()
+	local bl, br = UIParent:GetLeft(), UIParent:GetRight()
+	local bb, bt = UIParent:GetBottom(), UIParent:GetTop()
+	if not (l and r and t and bl and br and bb and bt) or scale <= 0 or uiScale <= 0 then
+		menu:ClearAllPoints()
+		menu:SetPoint("TOPLEFT", root, "TOPRIGHT", 4, 0)
+		return
+	end
+	local pad = 4 * uiScale
+	local xMin, xMax = bl * uiScale + pad, br * uiScale - pad
+	local yMin, yMax = bb * uiScale + pad, bt * uiScale - pad
+	local mw, mh = menu:GetWidth() * scale, menu:GetHeight() * scale
+	local gap = 4 * scale
+	local onRight = r * scale + gap
+	local onLeft = l * scale - gap - mw
+	local x = onRight
+	if onRight + mw > xMax and (onLeft >= xMin or l * scale - xMin > xMax - r * scale) then
+		x = onLeft
+	end
+	-- Also handle narrow screens where neither side fits outright.
+	x = math.max(xMin, math.min(x, xMax - mw))
+	local y = math.max(yMin + mh, math.min(t * scale, yMax))
+	menu:ClearAllPoints()
+	menu:SetPoint("TOPLEFT", root, "TOPLEFT", (x - l * scale) / scale, (y - t * scale) / scale)
+end
+
 local function BuildMenu()
 	-- the list of every stat, a tick by each it shows: beside the window, in its glass
 	menu = CreateFrame("Frame", "ArcaneStatsMenu", root)
@@ -209,7 +241,7 @@ local function Build()
 	end)
 	root.close:SetPoint("RIGHT", root, "TOPRIGHT", -4, -HEAD * 0.5)
 	root.pick = HeadButton("+", "Pick the stats to show", function()
-		if menu:IsShown() then menu:Hide() else menu:Show() end
+		if menu:IsShown() then menu:Hide() else PlaceMenu(); menu:Show() end
 	end)
 	root.pick:SetPoint("RIGHT", root.close, "LEFT", -2, 0)
 	root.rows, root.heads = {}, {}
@@ -411,6 +443,7 @@ C.RegisterPart({
 		if db then
 			db.scale = v
 			root:SetScale(v)
+			if menu and menu:IsShown() then PlaceMenu() end
 			for i = 1, table.getn(C.movers) do
 				if C.movers[i].frame == root then C.ApplyPos(C.movers[i]) end
 			end

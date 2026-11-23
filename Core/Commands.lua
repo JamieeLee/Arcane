@@ -45,7 +45,7 @@ local function Slash(msg)
 		local handled = false
 		for i = 1, table.getn(C.parts) do
 			local p = C.parts[i]
-			if p.key == cmd then
+			if p.key == cmd and not p.scaleOnly then
 				local r = string.lower(rest or "")
 				if r == "on" then p.set(true) elseif r == "off" then p.set(false) else p.set(not p.get()) end
 				C.Print(C.F(p.get() and "{1}: on." or "{1}: off.", C.L(p.name)))
@@ -54,7 +54,9 @@ local function Slash(msg)
 		end
 		if not handled then
 			local keys = {}
-			for i = 1, table.getn(C.parts) do table.insert(keys, C.parts[i].key) end
+			for i = 1, table.getn(C.parts) do
+				if not C.parts[i].scaleOnly then table.insert(keys, C.parts[i].key) end
+			end
 			C.Print(C.F("/Arcane (options), move, lock, reset, language, timer ..., numbers ..., or a part on/off: {1}",
 				table.concat(keys, ", ")))
 		end

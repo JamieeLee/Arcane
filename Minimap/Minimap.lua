@@ -4,7 +4,7 @@
 -- buttons go: the mouse wheel zooms. Turning this part off puts the game's minimap back as it was.
 
 local C = Arcane
-local DEFAULTS = { enabled = true, clock = true }
+local DEFAULTS = { enabled = true, clock = true, scale = 1 }
 local RUN_PHASES = { playing = true, choosing = true, paused = true, dead = true, victory = true }
 local LINE = 14 -- the flourish each side of the zone's name
 local HIDE = { "MinimapBorder", "MinimapBorderTop", "MinimapZoomIn", "MinimapZoomOut", "MinimapToggleButton",
@@ -13,7 +13,18 @@ local HIDE = { "MinimapBorder", "MinimapBorderTop", "MinimapZoomIn", "MinimapZoo
 local db
 local W = {}
 local S = { applied = false, hidden = {}, zoneClock = 0, clockClock = 0, zone = nil, clockText = nil,
-	titleA = 0, stamp = -1, hadClock = false }
+	titleA = 0, stamp = -1, hadClock = false, nativePoints = {}, nativeScale = 1 }
+
+-- Save the native anchor before taking control of the actual minimap frame.
+-- Disabling Arcane's minimap restores the game's own placement and scale.
+local function NativeAnchor(frame)
+	if table.getn(S.nativePoints) == 0 then return end
+	frame:ClearAllPoints()
+	for i = 1, table.getn(S.nativePoints) do
+		local p = S.nativePoints[i]
+		frame:SetPoint(p[1], p[2], p[3], p[4], p[5])
+	end
+end
 
 local Call = C.Call -- no stray nil arguments (see Core)
 
@@ -85,6 +96,16 @@ local function Build()
 	end)
 	r:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
 	C.Vis(r, false)
+	-- Move the real map, not only Arcane's ring; all markers and buttons follow.
+	S.nativeScale = tonumber(m:GetScale()) or 1
+	local count = type(m.GetNumPoints) == "function" and m:GetNumPoints() or 1
+	for i = 1, count do
+		local point, relative, relativePoint, x, y = m:GetPoint(i)
+		if point then table.insert(S.nativePoints, {point, relative, relativePoint, x or 0, y or 0}) end
+	end
+	W.mover = C.Movable(m, "minimap", "Minimap", NativeAnchor)
+	W.mover.active = function() return db and db.enabled end
+	if C.unlocked and db and db.enabled then W.mover.box:Show() end
 end
 
 local function Layout()
@@ -176,6 +197,11 @@ local function Apply()
 				Minimap:SetScript("OnMouseWheel", Wheel)
 			end
 		end
+		Minimap:SetScale(S.nativeScale * C.Clamp(tonumber(db.scale) or 1, .5, 1.8))
+		if W.mover then
+			C.ApplyPos(W.mover)
+			if C.unlocked then W.mover.box:Show() end
+		end
 		Layout()
 		W.frame:Show()
 		S.stamp = -1
@@ -193,6 +219,9 @@ local function Apply()
 			end
 		end
 		if W.frame then W.frame:Hide() end
+		if W.mover then W.mover.box:Hide() end
+		Minimap:SetScale(S.nativeScale)
+		NativeAnchor(Minimap)
 		C.ReleaseHud("localClock")
 		S.hadClock = false
 	end
@@ -225,6 +254,7 @@ local function Step(dt)
 			PlaceTitle()
 		end
 		KeepHidden()
+		PlaceTitle() -- adjust zone label after moving the map
 	end
 	-- the clock: the device's time as the game reads it, once a second
 	S.clockClock = S.clockClock - dt
@@ -259,6 +289,7 @@ end
 
 C.OnInit(function()
 	db = C.DB("minimap", DEFAULTS)
+	db.scale = C.Clamp(tonumber(db.scale) or 1, .5, 1.8)
 	local driver = CreateFrame("Frame", "ArcaneMinimapDriver")
 	driver:RegisterEvent("ZONE_CHANGED")
 	driver:RegisterEvent("ZONE_CHANGED_INDOORS")
@@ -291,13 +322,24 @@ C.OnLogout(function()
 end)
 
 C.RegisterPart({
-	key = "minimap", name = "Minimap",
-	note = "A metal ring in the map's colors, the local time on its foot and the zone's name under it. The mouse wheel zooms.",
+	key = "minimap", name = "Minimap", profileIndependent = true,
+	note = "Move and resize the minimap with Arcane's normal controls. The border, zone name, clock, and edge buttons follow the map.",
 	get = function() return db and db.enabled end,
 	set = function(on)
 		if db then
 			db.enabled = on and true or false
 			Apply()
+		end
+	end,
+	getScale = function() return db and db.scale or 1 end,
+	setScale = function(value)
+		if not db then return end
+		db.scale = C.Clamp(tonumber(value) or 1, .5, 1.8)
+		if W.frame and db.enabled then
+			Minimap:SetScale(S.nativeScale * db.scale)
+			if W.mover then C.ApplyPos(W.mover) end
+			Layout()
+			PlaceTitle()
 		end
 	end,
 })

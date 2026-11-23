@@ -236,7 +236,7 @@ local function ReadScales()
     local a = getglobal("Arcane")
     if type(a) ~= "table" or type(a.parts) ~= "table" then return scales end
     for _, part in pairs(a.parts) do
-        if type(part) == "table" and type(part.key) == "string" and
+        if type(part) == "table" and type(part.key) == "string" and not part.profileIndependent and
             type(part.getScale) == "function" and type(part.setScale) == "function" then
             local v = tonumber(Call(part.getScale))
             if v and v > 0 then scales[part.key] = v end
@@ -302,13 +302,19 @@ local function ApplyProfile(which)
     local root, a = ArcaneRoot(), getglobal("Arcane")
     local chosen = profiles[which]
     if not (root and chosen) then return end
+    -- The minimap has one global position across all four UI styles.
+    local sharedMinimap = type(root.pos) == "table" and root.pos.minimap
     root.pos = CopyPositions(chosen.pos)
+    if type(sharedMinimap) == "table" then
+        root.pos.minimap = CopyPositions({ minimap = sharedMinimap }).minimap
+    end
     -- Set scales before positions. Arcane setScale() calls ApplyPos() itself,
     -- so it must see the newly selected profile's positions.
     if type(a) == "table" and type(a.parts) == "table" then
         for _, part in pairs(a.parts) do
             local scale = part and chosen.scales and chosen.scales[part.key]
-            if tonumber(scale) and type(part.setScale) == "function" then
+            if not part.profileIndependent and not (which == "gamepad" and part.key == "bar") and
+                tonumber(scale) and type(part.setScale) == "function" then
                 pcall(part.setScale, scale)
             end
         end
@@ -979,27 +985,33 @@ local function Init()
     end
 end
 
--- This part is visible in Arcane's existing Options list, with the same
--- +/- scaling controls, Move frames overlay and Reset positions behavior.
+-- The HUD Size row adjusts the selected style without toggling the style.
+-- Classic/Hybrid/Full Class share one size; Controller keeps its own.
 C.RegisterPart({
-    key = "controllerHud", name = "Controller HUD",
-    note = "Compact Arcane controller layout. Move and resize it using the normal Arcane controls.",
-    get = function() return C.BarStyles and C.BarStyles.Mode() == C.BarStyles.CONTROLLER end,
-    set = function(on)
-        if C.BarStyles then
-            C.BarStyles.SetMode(on and C.BarStyles.CONTROLLER or C.BarStyles.CLASSIC)
-        end
-    end,
+    key = "hudSize", name = "HUD Size", scaleOnly = true, profileIndependent = true,
+    note = "Resize the selected HUD. The three regular styles share a size; Controller saves a separate size.",
     getScale = function()
-        local db = C.DB("controllerUX", {scale = 1})
-        return db.scale or 1
+        if C.BarStyles and C.BarStyles.Mode() == C.BarStyles.CONTROLLER then
+            return C.DB("controllerUX", {scale = 1}).scale or 1
+        end
+        return C.DB("bar", {scale = 1}).scale or 1
     end,
     setScale = function(value)
-        local db = C.DB("controllerUX", {scale = 1})
-        db.scale = C.Clamp(value, .5, 1.8)
-        if dock then
-            dock:SetScale(db.scale)
-            if controllerMover then C.ApplyPos(controllerMover) end
+        value = C.Clamp(tonumber(value) or 1, .5, 1.8)
+        if C.BarStyles and C.BarStyles.Mode() == C.BarStyles.CONTROLLER then
+            local cfg = C.DB("controllerUX", {scale = 1})
+            cfg.scale = value
+            if dock then
+                dock:SetScale(value)
+                if controllerMover then C.ApplyPos(controllerMover) end
+            end
+        else
+            for _, part in pairs(C.parts) do
+                if part.key == "bar" and type(part.setScale) == "function" then
+                    part.setScale(value)
+                    break
+                end
+            end
         end
     end,
 })

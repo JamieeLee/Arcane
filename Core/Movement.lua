@@ -20,6 +20,10 @@ C.SavePos = function(m) SavePos(m) end
 
 function C.ApplyPos(m)
 	local f = m.frame
+	if m.active and not m.active() then
+		if m.default then m.default(f) end
+		return
+	end
 	local root = C.Root()
 	local p = type(root.pos) == "table" and root.pos[m.key]
 	local s = f:GetScale()
@@ -89,7 +93,7 @@ function C.SetUnlocked(on)
 	C.unlocked = on and true or false
 	for i = 1, table.getn(C.movers) do
 		local m = C.movers[i]
-		if C.unlocked then
+		if C.unlocked and (not m.active or m.active()) then
 			m.box:SetFrameLevel(m.frame:GetFrameLevel() + 20)
 			m.box:Show()
 		else
