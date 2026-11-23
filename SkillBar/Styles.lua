@@ -81,13 +81,16 @@ local function ReadRunClass()
 	end
 end
 
--- One saved side for every class in this DEV phase; per-class later.
+-- One saved position for every class in this DEV phase; per-class later.
+-- OFF restores both Full Class ornaments without changing the rest of the UX.
 function M.MedallionSide()
-	return DB().medallionSide == "RIGHT" and "RIGHT" or "LEFT"
+	local side = DB().medallionSide
+	if side == "RIGHT" or side == "OFF" then return side end
+	return "LEFT"
 end
 
 function M.SetMedallionSide(side)
-	if side ~= "LEFT" and side ~= "RIGHT" then return false end
+	if side ~= "LEFT" and side ~= "RIGHT" and side ~= "OFF" then return false end
 	local db = DB()
 	if M.MedallionSide() == side then return false end
 	db.medallionSide = side
@@ -273,29 +276,38 @@ function M.Apply(panel)
 		panel.hybridArcane:SetTexture(HybridArcaneTexture(key))
 		C.Vis(panel.sigils[1], false)
 		C.Vis(panel.sigils[2], false)
-		C.Vis(panel.hybridArcane, true)
-		C.Vis(panel.hybridGem, true)
-		if mode == UNIVERSAL then
-			-- Arcane A and the class emblem exchange sides. No mirror: the A
-			-- stays readable even when placed on the right.
-			local classSide = medalSide == "LEFT" and "RIGHT" or "LEFT"
-			local anchorX = medalSide == "LEFT" and HYBRID_CENTER_X or -HYBRID_CENTER_X
-			for _, texture in ipairs({ panel.hybridArcane, panel.hybridGem }) do
-				texture:ClearAllPoints()
-				texture:SetPoint("CENTER", panel.frame, medalSide, anchorX, HYBRID_CENTER_Y)
-				texture:SetTexCoord(0, 1, 0, 1)
-			end
-			local ends = medalSide == "LEFT" and panel.endLeft or panel.endRight
-			for i = 1, table.getn(ends or {}) do C.Vis(ends[i], false) end
-			PlaceEmblem(panel.classEmblems[classSide == "LEFT" and 1 or 2],
-				panel.frame, classSide, theme.emblem)
-		else
-			-- Keep the original Hybrid layout unchanged.
-			for i = 1, table.getn(panel.endLeft or {}) do C.Vis(panel.endLeft[i], false) end
+		if mode == UNIVERSAL and medalSide == "OFF" then
+			-- No Arcane A: use the two existing Full Class class emblems.
+			-- Keep Universal's Hybrid bronze palette and engraved rails.
+			C.Vis(panel.hybridArcane, false)
+			C.Vis(panel.hybridGem, false)
+			for i = 1, table.getn(panel.ends) do C.Vis(panel.ends[i], false) end
+			PlaceEmblem(panel.classEmblems[1], panel.frame, "LEFT", theme.emblem)
 			PlaceEmblem(panel.classEmblems[2], panel.frame, "RIGHT", theme.emblem)
+		else
+			C.Vis(panel.hybridArcane, true)
+			C.Vis(panel.hybridGem, true)
+			if mode == UNIVERSAL then
+				-- One A and one class emblem; swap sides without mirroring the A.
+				local classSide = medalSide == "LEFT" and "RIGHT" or "LEFT"
+				local anchorX = medalSide == "LEFT" and HYBRID_CENTER_X or -HYBRID_CENTER_X
+				for _, texture in ipairs({ panel.hybridArcane, panel.hybridGem }) do
+					texture:ClearAllPoints()
+					texture:SetPoint("CENTER", panel.frame, medalSide, anchorX, HYBRID_CENTER_Y)
+					texture:SetTexCoord(0, 1, 0, 1)
+				end
+				local ends = medalSide == "LEFT" and panel.endLeft or panel.endRight
+				for i = 1, table.getn(ends or {}) do C.Vis(ends[i], false) end
+				PlaceEmblem(panel.classEmblems[classSide == "LEFT" and 1 or 2],
+					panel.frame, classSide, theme.emblem)
+			else
+				-- Retain the original Hybrid left-A/right-class composition.
+				for i = 1, table.getn(panel.endLeft or {}) do C.Vis(panel.endLeft[i], false) end
+				PlaceEmblem(panel.classEmblems[2], panel.frame, "RIGHT", theme.emblem)
+			end
 		end
 		if mode == UNIVERSAL then
-			-- Full Class engraved rails, Hybrid gold base and Arcane left medallion.
+			-- Full Class engraved rails with Hybrid bronze and whichever end ornaments are selected.
 			local y = RAIL_H / 2 - BASE_RAIL_H / 2
 			panel.railT:SetTexture(C.ART .. "PanelRail" .. theme.emblem .. "T")
 			panel.railB:SetTexture(C.ART .. "PanelRail" .. theme.emblem .. "B")

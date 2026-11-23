@@ -154,7 +154,8 @@ RefreshHub = function()
 	C.SetText(hub.lang.text, C.F("Language: {1}", C.LangName(C.lang)))
 	if hub.medallionSide and C.BarStyles then
 		local side = C.BarStyles.MedallionSide()
-		C.LText(hub.medallionSide.text, side == "LEFT" and "Arcane A: Left" or "Arcane A: Right")
+		C.LText(hub.medallionSide.text, side == "OFF" and "Arcane A: Off"
+			or (side == "LEFT" and "Arcane A: Left" or "Arcane A: Right"))
 		PaintButton(hub.medallionSide)
 	end
 	if hub.windowAccent then
@@ -303,7 +304,8 @@ local function BuildHub()
 	o.medallionSide = C.Button(o, 154, 24, "", function()
 		if C.BarStyles then
 			local side = C.BarStyles.MedallionSide()
-			C.BarStyles.SetMedallionSide(side == "LEFT" and "RIGHT" or "LEFT")
+			C.BarStyles.SetMedallionSide(side == "LEFT" and "RIGHT"
+				or (side == "RIGHT" and "OFF" or "LEFT"))
 		end
 		RefreshHub()
 	end)

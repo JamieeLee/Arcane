@@ -9,15 +9,22 @@ style, opts, bar = (source(x) for x in ("SkillBar/Styles.lua","Core/Options.lua"
 test("if C.UniversalUX then return UNIVERSAL end" in style, "universal mode not forced")
 test("Universal UX (DEV)" in opts and "StyleChoice(C.BarStyles." not in opts, "old selector still exposed")
 test(all(x in style for x in ("CLASSIC", "HYBRID", "FULL_CLASS", "CONTROLLER")), "legacy renderer lost")
-test('function M.MedallionSide()' in style and 'function M.SetMedallionSide(side)' in style,
-     "medallion must support a saved left/right choice")
+test('function M.MedallionSide()' in style and 'function M.SetMedallionSide(side)' in style
+     and 'side ~= "OFF"' in style,
+     "medallion must support saved left/right/off choices")
 test('db.medallionSide = side' in style and 'panel.barStyleMedallionSide == medalSide' in style,
      "medallion placement must persist and invalidate artwork layout")
 test('medalSide == "LEFT" and panel.endLeft or panel.endRight' in style and
      'classSide == "LEFT" and 1 or 2' in style,
      "moving A must exchange it with the class emblem and underlying endcap")
-test('o.medallionSide = C.Button(' in opts and 'C.BarStyles.SetMedallionSide(' in opts,
-     "arcane left/right selection must be available in the DEV options hub")
+test('o.medallionSide = C.Button(' in opts and 'C.BarStyles.SetMedallionSide(' in opts
+     and '"Arcane A: Off"' in opts and 'side == "RIGHT" and "OFF"' in opts,
+     "arcane left/right/off selection must be available in the DEV options hub")
+test('medalSide == "OFF"' in style and 'C.Vis(panel.hybridArcane, false)' in style
+     and 'C.Vis(panel.hybridGem, false)' in style
+     and 'PlaceEmblem(panel.classEmblems[1], panel.frame, "LEFT", theme.emblem)' in style
+     and 'PlaceEmblem(panel.classEmblems[2], panel.frame, "RIGHT", theme.emblem)' in style,
+     "Off must hide the Arcane medallion and restore two Full Class class ornaments")
 test("C.ControllerUX = Theme" in source("Themes/Controller/Controller.lua"), "controller source lost")
 test(all(x in bar for x in ("NeckSlot","Finger0Slot","Finger1Slot","Trinket0Slot","Trinket1Slot")), "jewelry slot lost")
 level = source("Frames/LevelUps.lua")
