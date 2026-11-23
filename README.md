@@ -275,6 +275,7 @@ These changes are on the development branch only and are **not included in the p
 
 - **Stats picker bounds:** the stat-selection popup now flips to the opposite side near the viewport edge and stays within available screen bounds.
 - **Minimap movement and scale:** use the existing Move Frames overlay and the Minimap `− / 100% / +` controls. The real map, Arcane ring, icons, chest pins, clock and title move together; turning the Arcane minimap off restores native position and scale.
+- **Circular minimap mover:** shade only the map disk under the existing gold ring, and use its centered **Minimap** label to drag the complete map; no square box over Arcane's rim or clock.
 - **HUD Size:** replace the Controller HUD checkbox with a size-only control that adjusts the currently selected style. Arcane, Hybrid and Full Class share their keyboard layout and HUD size; Controller keeps its independent layout and size. The minimap size and position are shared across styles.
 - The existing X close buttons remain unchanged.
 

@@ -7,6 +7,7 @@ local C = Arcane
 local DEFAULTS = { enabled = true, clock = true, scale = 1 }
 local RUN_PHASES = { playing = true, choosing = true, paused = true, dead = true, victory = true }
 local LINE = 14 -- the flourish each side of the zone's name
+local MOVE_BANDS = 40 -- lightweight static strips for a circular Move Frames tint
 local HIDE = { "MinimapBorder", "MinimapBorderTop", "MinimapZoomIn", "MinimapZoomOut", "MinimapToggleButton",
 	"GameTimeFrame", "MinimapZoneTextButton", "MinimapNorthTag" }
 
@@ -105,7 +106,50 @@ local function Build()
 	end
 	W.mover = C.Movable(m, "minimap", "Minimap", NativeAnchor)
 	W.mover.active = function() return db and db.enabled end
-	if C.unlocked and db and db.enabled then W.mover.box:Show() end
+	-- Keep only the centered "Minimap" label as the drag target. The original
+	-- square mover backdrop would cover the map's circular border and buttons.
+	local handle = W.mover.box
+	handle:ClearAllPoints()
+	handle:SetPoint("CENTER", m, "CENTER", 0, 0)
+	handle:SetWidth(108); handle:SetHeight(28)
+	handle:SetBackdropColor(0, 0, 0, 0)
+	handle:SetBackdropBorderColor(0, 0, 0, 0)
+	-- The translucent map tint lives *under* Arcane's existing gold ring
+	-- and rim buttons. Only the label intercepts mouse input for dragging.
+	local shade = CreateFrame("Frame", nil, m)
+	shade:SetAllPoints(m)
+	shade:SetFrameLevel(m:GetFrameLevel() + 5)
+	shade:EnableMouse(false)
+	W.moveShade = shade
+	W.moveBands = {}
+	for i = 1, MOVE_BANDS do
+		local band = C.Tex(shade, "ARTWORK", C.FLAT)
+		band:SetVertexColor(0.015, 0.03, 0.06, 0.45)
+		W.moveBands[i] = band
+	end
+	shade:Hide()
+	handle:SetScript("OnShow", function() shade:Show() end)
+	handle:SetScript("OnHide", function() shade:Hide() end)
+	if C.unlocked and db and db.enabled then handle:Show() end
+end
+
+-- Recompute only when the map's physical dimensions change. The strips
+-- exactly approximate a disk without requiring unsupported texture masking.
+local function LayoutMoveShade()
+	if not W.moveBands then return end
+	local size = Minimap:GetWidth() or 140
+	local radius = size * 0.48
+	local height = (2 * radius) / MOVE_BANDS
+	for i = 1, MOVE_BANDS do
+		local y = -radius + (i - 0.5) * height
+		local halfWidth = math.sqrt(math.max(0, radius * radius - y * y))
+		local band = W.moveBands[i]
+		band:ClearAllPoints()
+		band:SetPoint("CENTER", W.moveShade, "CENTER", 0, y)
+		band:SetWidth(2 * halfWidth)
+		band:SetHeight(height + 0.35) -- slight overlap prevents visible scan lines
+	end
+	W.moveShade:SetFrameLevel(Minimap:GetFrameLevel() + 5)
 end
 
 local function Layout()
@@ -118,6 +162,7 @@ local function Layout()
 	f:SetHeight(ring)
 	f:SetFrameLevel(m:GetFrameLevel() + 6)
 	W.box:SetFrameLevel(m:GetFrameLevel() + 8)
+	LayoutMoveShade()
 	W.north:ClearAllPoints()
 	W.north:SetPoint("CENTER", f, "TOP", 0, -ring * 0.0375 - 0.5)
 	W.title:ClearAllPoints()
