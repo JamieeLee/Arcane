@@ -1,6 +1,6 @@
 # Arcane UI
 
-**Current release: v0.8.1-dev.4**
+**Current release: v0.8.1-dev.5**
 
 *Development-only universal UX experiment. The previous Classic, Hybrid, Full Class and Controller implementations remain in the source; their selector is hidden in this DEV build. Latest stable remains v0.8.0. No merge or publication is authorized.*
 
@@ -42,11 +42,11 @@ Every optional HUD part can be turned on or off, sized and moved. Arcane Namepla
 
 The addon's load map, `Arcane.toc`, stays at the repository root. Lua modules are grouped by responsibility under `Core/`, `Timer/`, `Numbers/`, `SkillBar/`, `Frames/`, `Minimap/`, `Windows/`, `Nameplates/`, `Loot/` and `Locales/`. `Art/` and `Fonts/` also stay at the addon root so the game's existing asset paths remain unchanged. The repository itself is not the install folder. For a release ZIP, place the root files and all module and asset folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The DEV test installer asset is named `ArcaneV0.8.1-dev.4.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
+The DEV test installer asset is named `ArcaneV0.8.1-dev.5.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
-1. Download the latest stable version from [Releases](../../releases). For the **unreleased universal UX DEV build**, obtain the verified `Arcane-v0.8.1-dev.4-test-...` CI artifact from the `dev/universal-ux` branch, extract the inner installer ZIP and install it locally for testing only. Do not mistake it for a published update.
+1. Download the latest stable version from [Releases](../../releases). For the **unreleased universal UX DEV build**, obtain the verified `Arcane-v0.8.1-dev.5-test-...` CI artifact from the `dev/universal-ux` branch, extract the inner installer ZIP and install it locally for testing only. Do not mistake it for a published update.
 2. Unzip it into your game's `Interface/AddOns` folder. You should end up with `Interface/AddOns/Arcane/Arcane.toc`.
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
@@ -269,6 +269,16 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 For every new beta or release, increment the version beyond the last stable tag; use `-beta.N` for test builds, and do not reuse a published tag. Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
+### v0.8.1-dev.5 — November 23, 2026
+
+**UNRELEASED DEV CHECKPOINT — no merge, beta, tag or release.**
+
+- Recolor the existing Controller spellbook's blue leather and cyan gemstone into weathered brown leather and antique amber/gold. Preserve the exact book silhouette, metal engraving, gold edging, transparency and familiar animation.
+- Use a **separate generated TomeNatural texture** in the unified stored-level display. The original blue Controller Tome artwork is unchanged in the repository for later reference or restoration.
+- The gold halo, class-colored magic behind the book, sparkles and motes are intentionally unchanged for now.
+- Generate the warm variant as both TGA and pixel-exact BLP2 for standalone and browser clients during CI packaging. Require both assets in the DEV installer.
+- The existing **Arcane A: Left / Right / Off** control and borderless pet group remain unchanged. No gameplay adjustments.
+
 ### v0.8.1-dev.4 — November 23, 2026
 
 **UNRELEASED DEV CHECKPOINT — no merge, beta, tag or release.**

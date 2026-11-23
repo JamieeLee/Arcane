@@ -87,6 +87,11 @@ jobs:
       - name: Build the single-source Classic medallion texture
         run: python tools/build_default_medallion.py
 
+      - name: Build natural leather and gold DEV spellbook
+        run: |
+          python tools/build_tome_natural.py
+          python tools/build_tome_natural.py --check
+
       - name: Build and verify browser-compatible BLP2 mirrors for TGA artwork
         run: |
           python tools/build_browser_blp.py
@@ -191,6 +196,8 @@ jobs:
             "Arcane/Art/PanelDefaultMedallion.blp" \
             "Arcane/Themes/Controller/Controller.lua" \
             "Arcane/Themes/Controller/Art/Tome.blp" \
+            "Arcane/Themes/Controller/Art/TomeNatural.blp" \
+            "Arcane/Themes/Controller/Art/TomeNatural.tga" \
             "Arcane/Themes/Controller/Art/BookGoldOrbit.blp" \
             "Arcane/Fonts/Letters.ttf" \
             "Arcane/Fonts/LettersCJK.ttf" \

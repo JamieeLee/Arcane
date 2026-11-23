@@ -47,7 +47,7 @@ local function ShowTip()
 end
 
 local function Theme(pal)
-	-- Book metal stays neutral; its glow and motes follow the actual class.
+	-- Natural leather-and-gold book; the existing magic and motes stay unchanged.
 	local classPal = C.BarStyles and C.BarStyles.Palette and C.BarStyles.Palette() or pal
 	local glow = classPal.glow or pal.glow
 	local title = pal.title
@@ -150,7 +150,7 @@ C.OnInit(function()
 	root:SetScale(db.scale)
 	root:EnableMouse(true)
 	-- Existing Controller UX spellbook assets; level-up behavior stays here.
-	root.book = C.Tex(root, "ARTWORK", ART .. "Tome")
+	root.book = C.Tex(root, "ARTWORK", ART .. "TomeNatural")
 	root.book:SetWidth(66); root.book:SetHeight(66)
 	root.book:SetPoint("CENTER", root, "CENTER", 0, 0)
 	root.goldAura = C.Tex(root, "BACKGROUND", ART .. "BookGoldOrbit", "ADD")

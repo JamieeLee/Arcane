@@ -28,7 +28,11 @@ test('medalSide == "OFF"' in style and 'C.Vis(panel.hybridArcane, false)' in sty
 test("C.ControllerUX = Theme" in source("Themes/Controller/Controller.lua"), "controller source lost")
 test(all(x in bar for x in ("NeckSlot","Finger0Slot","Finger1Slot","Trinket0Slot","Trinket1Slot")), "jewelry slot lost")
 level = source("Frames/LevelUps.lua")
-test(all(x in level for x in ('ART .. "Tome"','ART .. "BookClassOrbit"','AZS_OpenStoredLevels','NativeStoring()')), "stored-level feature lost")
+test(all(x in level for x in ('ART .. "TomeNatural"','ART .. "BookClassOrbit"','AZS_OpenStoredLevels','NativeStoring()')), "stored-level feature lost")
+test("build_tome_natural.py" in source(".github/workflows/arcane-audit.yml")
+     and "Tome.tga" in source("tools/build_tome_natural.py")
+     and "TomeNatural.tga" in source("tools/build_tome_natural.py"),
+     "new skin must be generated in CI from the intact original Controller book")
 pets = source("Windows/Pets.lua")
 test(all(x in pets for x in ("CircleTexture", "CircleCooldown", "SkillRim", "SkillEmpty", "TogglePetAutocast", "CastPetAction")), "pet circle or actions lost")
 test('C.Panel(root, false)' not in pets and 'root.deco' not in pets,
