@@ -152,6 +152,11 @@ RefreshHub = function()
 	C.LText(hub.lock.text, locked and "Meter and luck windows: resizing locked" or "Meter and luck windows: resizing enabled")
 	PaintButton(hub.lock)
 	C.SetText(hub.lang.text, C.F("Language: {1}", C.LangName(C.lang)))
+	if hub.medallionSide and C.BarStyles then
+		local side = C.BarStyles.MedallionSide()
+		C.LText(hub.medallionSide.text, side == "LEFT" and "Arcane A: Left" or "Arcane A: Right")
+		PaintButton(hub.medallionSide)
+	end
 	if hub.windowAccent then
 		local root = C.Root()
 		C.LText(hub.windowAccent.text, root.windowClassAccents and "Windows: Class accents" or "Windows: Arcane gold")
@@ -294,6 +299,15 @@ local function BuildHub()
 		RefreshHub()
 	end)
 	o.windowAccent:SetPoint("TOPLEFT", o, "TOPLEFT", 478, styleY)
+	-- Shared side preference; preserve room for future per-class customization.
+	o.medallionSide = C.Button(o, 154, 24, "", function()
+		if C.BarStyles then
+			local side = C.BarStyles.MedallionSide()
+			C.BarStyles.SetMedallionSide(side == "LEFT" and "RIGHT" or "LEFT")
+		end
+		RefreshHub()
+	end)
+	o.medallionSide:SetPoint("TOPLEFT", o, "TOPLEFT", 326, styleY - 30)
 	o.barStyleButtons = nil
 	-- the language: a button that opens the list of them, each in its own words
 	o.lang = langButton
