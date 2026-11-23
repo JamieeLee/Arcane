@@ -152,6 +152,12 @@ RefreshHub = function()
 	C.LText(hub.lock.text, locked and "Meter and luck windows: resizing locked" or "Meter and luck windows: resizing enabled")
 	PaintButton(hub.lock)
 	C.SetText(hub.lang.text, C.F("Language: {1}", C.LangName(C.lang)))
+	if hub.windowAccent then
+		local root = C.Root()
+		C.LText(hub.windowAccent.text, root.windowClassAccents and "Windows: Class accents" or "Windows: Arcane gold")
+		hub.windowAccent.selected = root.windowClassAccents and true or false
+		PaintButton(hub.windowAccent)
+	end
 	hub.lang.selected = hub.langMenu:IsShown()
 	PaintButton(hub.lang)
 	for i = 1, table.getn(hub.langMenu.items) do
@@ -276,27 +282,19 @@ local function BuildHub()
 	end)
 	C.LText(langButton.text, "Language")
 	langButton:SetPoint("TOPLEFT", o, "TOPLEFT", 168, y)
-	-- Four UI styles: controller is an explicit choice, not auto-input detection.
+	-- DEV: one Universal UX; prior style renderers remain in source but are not selectable.
 	local styleY = y - 30
-	local styleLabel = HubText(o, 9, 0.62, 0.62, 0.68)
-	styleLabel:SetPoint("BOTTOMLEFT", o, "TOPLEFT", 326, styleY + 4)
-	C.LText(styleLabel, "UI style")
-	local function StyleChoice(mode, label, x)
-		local button = C.Button(o, 71, 24, "", function()
-			if C.BarStyles then C.BarStyles.SetMode(mode) end
-			RefreshHub()
-		end)
-		C.LText(button.text, label)
-		button.mode = mode
-		button:SetPoint("TOPLEFT", o, "TOPLEFT", x, styleY)
-		return button
-	end
-	o.barStyleButtons = {
-		StyleChoice(C.BarStyles.CLASSIC, "Arcane", 326),
-		StyleChoice(C.BarStyles.HYBRID, "Hybrid", 403),
-		StyleChoice(C.BarStyles.FULL_CLASS, "Full class", 480),
-		StyleChoice(C.BarStyles.CONTROLLER, "Controller", 557),
-	}
+	local styleLabel = HubText(o, 10, 0.82, 0.76, 0.61)
+	styleLabel:SetPoint("TOPLEFT", o, "TOPLEFT", 326, styleY - 4)
+	C.LText(styleLabel, "Universal UX (DEV)")
+	o.windowAccent = C.Button(o, 154, 24, "", function()
+		local root = C.Root()
+		root.windowClassAccents = not root.windowClassAccents
+		C.palStamp = C.palStamp + 1
+		RefreshHub()
+	end)
+	o.windowAccent:SetPoint("TOPLEFT", o, "TOPLEFT", 478, styleY)
+	o.barStyleButtons = nil
 	-- the language: a button that opens the list of them, each in its own words
 	o.lang = langButton
 	local menu = CreateFrame("Frame", "ArcaneLanguageMenu", o)

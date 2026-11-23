@@ -218,7 +218,12 @@ local function Theme(u, pal)
 	if u.res then C.BarTheme(u.res, pal) end
 	local rim = pal.rim
 	u.ring:SetVertexColor(rim[1], rim[2], rim[3])
-	u.badge:SetVertexColor(rim[1], rim[2], rim[3])
+	-- Player-frame metal stays Hybrid bronze; only its level badge follows class.
+	local badge = rim
+	if C.UniversalUX and C.BarStyles and C.BarStyles.Palette then
+		badge = C.BarStyles.Palette().gem or rim
+	end
+	u.badge:SetVertexColor(badge[1], badge[2], badge[3])
 	u.faceBg:SetVertexColor(0.5, 0.5, 0.5)
 end
 

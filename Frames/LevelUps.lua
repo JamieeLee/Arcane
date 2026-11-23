@@ -6,11 +6,13 @@
 
 local C = Arcane
 local DEFAULTS = { enabled = true, scale = 1 }
-local W, H = 180, 30
+local W, H = 82, 82
+local ART = "Interface\\AddOns\\Arcane\\Themes\\Controller\\Art\\"
+local HALO_X, HALO_Y = -1, 3
 
 local db
 local root
-local S = { alpha = 0, n = 0, pop = nil, takeClock = 0, broken = false, stamp = -1 }
+local S = { alpha = 0, n = 0, pop = nil, takeClock = 0, broken = false, stamp = -1, bookClock = 0 }
 
 -- The Arcane switch controls the same preference as the game's own Options page.
 -- nil means this client does not expose the setting API, so keep the saved fallback.
@@ -45,10 +47,17 @@ local function ShowTip()
 end
 
 local function Theme(pal)
-	C.PanelTheme(root.deco, pal)
-	local g, t = pal.glow, pal.title
-	root.glow:SetVertexColor(g[1], g[2], g[3])
-	root.label:SetTextColor(t[1], t[2], t[3])
+	-- Book metal stays neutral; its glow and motes follow the actual class.
+	local classPal = C.BarStyles and C.BarStyles.Palette and C.BarStyles.Palette() or pal
+	local glow = classPal.glow or pal.glow
+	local title = pal.title
+	root.classAura:SetVertexColor(glow[1], glow[2], glow[3], 1)
+	root.goldAura:SetVertexColor(1, .76, .46, 1)
+	root.sparks:SetVertexColor(glow[1], glow[2], glow[3], 1)
+	root.count:SetTextColor(title[1], title[2], title[3])
+	for i = 1, table.getn(root.motes) do
+		root.motes[i]:SetVertexColor(glow[1], glow[2], glow[3], 1)
+	end
 end
 
 local function Step(dt, now)
@@ -68,7 +77,7 @@ local function Step(dt, now)
 		S.stamp = C.palStamp
 		Theme(pal)
 	end
-	C.SetText(root.count, tostring(n))
+	C.SetText(root.count, "x" .. tostring(n))
 	-- a slow breath of light, and a bright pulse when one more comes
 	local pop = 0
 	if S.pop then
@@ -77,9 +86,19 @@ local function Step(dt, now)
 		if age > 0.8 then S.pop = nil end
 	end
 	local breath = 0.5 + 0.5 * math.sin(now * 2.4)
-	C.Alpha(root.glow, 0.35 + 0.25 * breath + 0.4 * pop)
-	C.Size(root.glow, W * (1.35 + 0.25 * pop), H * (2.6 + 0.6 * pop))
-	C.Alpha(root.gemGlow, 0.5 + 0.5 * pop)
+	C.Alpha(root.goldAura, .45 + .25 * breath + .25 * pop)
+	C.Alpha(root.classAura, .42 + .25 * (1 - breath) + .30 * pop)
+	C.Alpha(root.sparks, .30 + .22 * breath + .35 * pop)
+	S.bookClock = S.bookClock + dt
+	for i = 1, table.getn(root.motes) do
+		local mote = root.motes[i]
+		local a = S.bookClock * (i == 2 and -.72 or .88) + (i - 1) * 2.0944
+		mote:ClearAllPoints()
+		mote:SetPoint("CENTER", root.book, "CENTER",
+			(36 + i * 2) * math.cos(a) + HALO_X,
+			(33 + i * 2) * math.sin(a) + HALO_Y)
+		mote:SetAlpha(.4 + .4 * (.5 + .5 * math.sin(S.bookClock * 2.6 + i)))
+	end
 	S.takeClock = S.takeClock - dt
 	if S.takeClock <= 0 then
 		S.takeClock = 2
@@ -130,30 +149,29 @@ C.OnInit(function()
 	root:SetFrameStrata("MEDIUM")
 	root:SetScale(db.scale)
 	root:EnableMouse(true)
-	root.glow = C.Tex(root, "BACKGROUND", C.ART .. "Glow", "ADD")
-	root.glow:SetPoint("CENTER", root, "CENTER", 0, 0)
-	root.glow:SetVertexColor(1, 0.72, 0.22)
-	root.deco = C.Panel(root, false)
-	root.label = C.Text(root, C.FONT, 14, "OUTLINE", "CENTER", W - 40)
-	root.label:SetPoint("CENTER", root, "CENTER", -12, 0)
-	root.label:SetTextColor(0.98, 0.85, 0.52)
-	C.LText(root.label, "Level Up!")
-	-- how many wait, on a red gem at the right end
-	root.gemGlow = C.Tex(root, "ARTWORK", C.ART .. "Glow", "ADD")
-	root.gemGlow:SetWidth(40)
-	root.gemGlow:SetHeight(40)
-	root.gemGlow:SetPoint("CENTER", root, "RIGHT", -18, 0)
-	root.gemGlow:SetVertexColor(1, 0.4, 0.15)
-	root.gem = C.Tex(root, "OVERLAY", C.ART .. "Gem")
-	root.gem:SetWidth(26)
-	root.gem:SetHeight(26)
-	root.gem:SetPoint("CENTER", root, "RIGHT", -18, 0)
-	root.gem:SetVertexColor(1, 0.3, 0.2)
+	-- Existing Controller UX spellbook assets; level-up behavior stays here.
+	root.book = C.Tex(root, "ARTWORK", ART .. "Tome")
+	root.book:SetWidth(66); root.book:SetHeight(66)
+	root.book:SetPoint("CENTER", root, "CENTER", 0, 0)
+	root.goldAura = C.Tex(root, "BACKGROUND", ART .. "BookGoldOrbit", "ADD")
+	root.classAura = C.Tex(root, "BACKGROUND", ART .. "BookClassOrbit", "ADD")
+	root.sparks = C.Tex(root, "BACKGROUND", ART .. "BookSparks", "ADD")
+	for _, t in ipairs({root.goldAura, root.classAura, root.sparks}) do
+		t:SetWidth(108); t:SetHeight(108)
+		t:SetPoint("CENTER", root.book, "CENTER", HALO_X, HALO_Y)
+	end
+	root.motes = {}
+	for i = 1, 3 do
+		local mote = C.Tex(root, "OVERLAY", ART .. "BookSparks", "ADD")
+		mote:SetWidth(15); mote:SetHeight(15)
+		mote:SetPoint("CENTER", root.book, "CENTER", 0, 0)
+		root.motes[i] = mote
+	end
 	local top = CreateFrame("Frame", nil, root)
 	top:SetAllPoints(root)
 	top:SetFrameLevel(root:GetFrameLevel() + 2)
-	root.count = C.Text(top, C.FONT, 12, "OUTLINE", "CENTER", 24)
-	root.count:SetPoint("CENTER", root, "RIGHT", -18, 0)
+	root.count = C.Text(top, C.FONT, 12, "OUTLINE", "CENTER", 38)
+	root.count:SetPoint("TOPRIGHT", root, "TOPRIGHT", 3, -4)
 	root:SetScript("OnClick", Open)
 	root:SetScript("OnEnter", ShowTip)
 	root:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)

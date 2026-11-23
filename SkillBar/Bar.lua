@@ -533,7 +533,7 @@ local function Theme(pal)
 	else
 		C.BarColors(xp, pal.fillA, pal.fillM, pal.fillB)
 	end
-	if Styles.Mode() == Styles.HYBRID then
+	if Styles.Mode() == Styles.HYBRID or Styles.Mode() == Styles.UNIVERSAL then
 		C.BarTheme(xp, C.BRONZE)
 	else
 		C.BarTheme(xp, pal)

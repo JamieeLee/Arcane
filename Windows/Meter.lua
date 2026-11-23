@@ -1412,7 +1412,7 @@ local function Step(dt)
 		for i = 1, table.getn(rows) do rows[i].frame:SetFrameLevel(base + 2) end
 		for _, z in pairs(root.sizers) do z:SetFrameLevel(base + 4) end
 	end
-	local pal = C.Pal()
+	local pal = C.WindowPal()
 	if S.stamp ~= C.palStamp then
 		S.stamp = C.palStamp
 		Theme(pal)

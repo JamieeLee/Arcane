@@ -342,7 +342,7 @@ local function Step(dt)
 	C.Alpha(root, C.Smooth(S.alpha))
 	if S.sizer then S.sizer.step() end
 	if not luck then return end
-	local pal = C.Pal()
+	local pal = C.WindowPal()
 	if S.stamp ~= C.palStamp then
 		S.stamp = C.palStamp
 		Theme(pal)

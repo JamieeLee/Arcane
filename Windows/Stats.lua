@@ -341,7 +341,7 @@ local function Step(dt)
 	if not stats then return end
 	if S.stamp ~= C.palStamp then
 		S.stamp = C.palStamp
-		Theme(C.Pal())
+		Theme(C.WindowPal())
 	end
 	if S.lang ~= C.langStamp then
 		S.lang = C.langStamp

@@ -1,8 +1,8 @@
--- Arcane UI: three stock treatments plus the opt-in controller layout.
+-- Arcane UI: universal DEV treatment; legacy styles are retained in this module.
 -- Slot logic stays in Bar.lua; this module owns class selection, palette resolution and panel art.
 local C = Arcane
 local THEMES = C.BarStyleData
-local CLASSIC, HYBRID, FULL_CLASS, CONTROLLER = 1, 2, 3, 4
+local CLASSIC, HYBRID, FULL_CLASS, CONTROLLER, UNIVERSAL = 1, 2, 3, 4, 5
 local EMBLEM_U = 76 / 110 * 0.85
 local EMBLEM_W, EMBLEM_H = 512 * EMBLEM_U, 256 * EMBLEM_U
 local EMBLEM_L, EMBLEM_R, EMBLEM_IN = 220, 292, 24
@@ -25,7 +25,8 @@ local state = {
 
 local M = {}
 C.BarStyles = M
-M.CLASSIC, M.HYBRID, M.FULL_CLASS, M.CONTROLLER = CLASSIC, HYBRID, FULL_CLASS, CONTROLLER
+M.CLASSIC, M.HYBRID, M.FULL_CLASS, M.CONTROLLER, M.UNIVERSAL = CLASSIC, HYBRID, FULL_CLASS, CONTROLLER, UNIVERSAL
+C.UniversalUX = true -- DEV presentation; do not erase the previous saved style
 
 local function DB()
 	if not state.db then state.db = C.DB("bar") end
@@ -34,6 +35,7 @@ local function DB()
 end
 
 local function Mode()
+	if C.UniversalUX then return UNIVERSAL end
 	local mode = tonumber(DB().style) or CLASSIC
 	if mode < CLASSIC or mode > CONTROLLER then
 		mode = CLASSIC
@@ -75,7 +77,7 @@ local function ReadRunClass()
 		state.class = key
 		DB().heroClass = key
 		state.stamp = state.stamp + 1
-		if Mode() == FULL_CLASS then C.palStamp = C.palStamp + 1 end
+		if Mode() == FULL_CLASS or Mode() == UNIVERSAL then C.palStamp = C.palStamp + 1 end
 	end
 end
 
@@ -84,6 +86,7 @@ function M.Mode()
 end
 
 function M.SetMode(mode)
+	if C.UniversalUX then return false end
 	mode = tonumber(mode)
 	if mode ~= CLASSIC and mode ~= HYBRID and mode ~= FULL_CLASS and mode ~= CONTROLLER then return false end
 	local db = DB()
@@ -143,7 +146,7 @@ function M.Palette()
 end
 
 function M.PanelMetal(pal)
-	if Mode() == CLASSIC or Mode() == HYBRID or Mode() == CONTROLLER then return C.PanelMetal(pal) end
+	if Mode() == CLASSIC or Mode() == HYBRID or Mode() == CONTROLLER or Mode() == UNIVERSAL then return C.PanelMetal(pal) end
 	local theme = CurrentTheme()
 	return theme.metal[1], theme.metal[2], theme.metal[3]
 end
@@ -248,7 +251,7 @@ function M.Apply(panel)
 	RestoreBasePanel(panel)
 	if mode == CLASSIC or mode == CONTROLLER then return end
 	EnsureClassEmblems(panel)
-	if mode == HYBRID then
+	if mode == HYBRID or mode == UNIVERSAL then
 		EnsureHybridArcane(panel)
 		panel.hybridArcane:SetTexture(HybridArcaneTexture(key))
 		C.Vis(panel.sigils[1], false)
@@ -259,6 +262,20 @@ function M.Apply(panel)
 		-- underneath the class crest so Hybrid has a finished box edge like Full Class.
 		for i = 1, table.getn(panel.endLeft or {}) do C.Vis(panel.endLeft[i], false) end
 		PlaceEmblem(panel.classEmblems[2], panel.frame, "RIGHT", theme.emblem)
+		if mode == UNIVERSAL then
+			-- Full Class engraved rails, Hybrid gold base and Arcane left medallion.
+			local y = RAIL_H / 2 - BASE_RAIL_H / 2
+			panel.railT:SetTexture(C.ART .. "PanelRail" .. theme.emblem .. "T")
+			panel.railB:SetTexture(C.ART .. "PanelRail" .. theme.emblem .. "B")
+			panel.railT:SetHeight(RAIL_H)
+			panel.railB:SetHeight(RAIL_H)
+			panel.railT:ClearAllPoints()
+			panel.railT:SetPoint("TOPLEFT", panel.frame, "TOPLEFT", 0, y)
+			panel.railT:SetPoint("TOPRIGHT", panel.frame, "TOPRIGHT", 0, y)
+			panel.railB:ClearAllPoints()
+			panel.railB:SetPoint("BOTTOMLEFT", panel.frame, "BOTTOMLEFT", 0, -y)
+			panel.railB:SetPoint("BOTTOMRIGHT", panel.frame, "BOTTOMRIGHT", 0, -y)
+		end
 		return
 	end
 	for i = 1, table.getn(panel.ends) do C.Vis(panel.ends[i], false) end
@@ -290,7 +307,7 @@ function M.Theme(panel, pal)
 	end
 	local theme = CurrentTheme()
 	local mr, mg, mb
-	if mode == HYBRID then
+	if mode == HYBRID or mode == UNIVERSAL then
 		mr, mg, mb = C.PanelMetal(pal)
 	else
 		mr, mg, mb = theme.metal[1], theme.metal[2], theme.metal[3]
@@ -298,9 +315,13 @@ function M.Theme(panel, pal)
 	for i = 1, table.getn(panel.metal) do
 		panel.metal[i]:SetVertexColor(mr, mg, mb, 1)
 	end
-	if mode == HYBRID then
+	if mode == HYBRID or mode == UNIVERSAL then
 		local fill = theme.fill
 		panel.fill:SetVertexColor(fill[1] * 0.48, fill[2] * 0.48, fill[3] * 0.48, 0.97)
+		if mode == UNIVERSAL then
+			panel.railT:SetVertexColor(1, 1, 1, 1)
+			panel.railB:SetVertexColor(1, 1, 1, 1)
+		end
 		panel.hybridArcane:SetVertexColor(1, 1, 1, 1)
 		panel.hybridGem:SetVertexColor(theme.gem[1], theme.gem[2], theme.gem[3], 1)
 		panel.classEmblems[2]:SetVertexColor(1, 1, 1, 1)

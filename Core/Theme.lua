@@ -34,3 +34,12 @@ function C.Pal()
 	end
 	return C.BasePal()
 end
+
+-- Utility windows may opt into class accents while the main metalwork stays bronze.
+function C.WindowPal()
+	local root = C.Root and C.Root()
+	if root and root.windowClassAccents and C.BarStyles and C.BarStyles.Palette then
+		return C.BarStyles.Palette()
+	end
+	return C.Pal()
+end

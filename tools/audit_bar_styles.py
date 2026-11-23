@@ -99,7 +99,7 @@ def check_full_class_palette_propagation() -> None:
         fail("The class palette must build from BasePal to avoid recursive C.Pal resolution")
     if "C.palStamp = C.palStamp + 1" not in styles:
         fail("Changing the style or active Full Class must refresh shared palette consumers")
-    if "if Mode() == FULL_CLASS then C.palStamp = C.palStamp + 1 end" not in styles:
+    if "if Mode() == FULL_CLASS or Mode() == UNIVERSAL then C.palStamp = C.palStamp + 1 end" not in styles:
         fail("A newly resolved run class must refresh the Full Class UI palette")
     if "return styles.PanelMetal(pal)" not in panels:
         fail("Full Class panels must use the active class's metal accent")
@@ -112,7 +112,7 @@ def check_full_class_palette_propagation() -> None:
     )
     for name in dynamic_consumers:
         code = source(name)
-        if "C.Pal()" not in code or "C.palStamp" not in code:
+        if (("C.Pal()" not in code and "C.WindowPal()" not in code) or "C.palStamp" not in code):
             fail(f"{name} must consume and refresh from the shared active UI palette")
 
     for name in ("Frames/LevelUps.lua", "Windows/Pets.lua"):
@@ -185,13 +185,17 @@ def main() -> None:
                      "endLeft = {}", "endRight = {}", "function C.PanelTheme(p, pal)"):
         if contract not in core:
             fail(f"Core panel API is missing shared style support: {contract}")
-    for contract in ('StyleChoice(C.BarStyles.CLASSIC, "Arcane"',
-                     'StyleChoice(C.BarStyles.HYBRID, "Hybrid"',
-                     'StyleChoice(C.BarStyles.FULL_CLASS, "Full class"'):
-        if contract not in options:
-            fail(f"Arcane options hub is missing a mode choice: {contract}")
-    if 'C.LText(styleLabel, "UI style")' not in options:
-        fail("Options hub must label the full UI style selector")
+    # The universal UX is intentionally the only selectable style in this
+    # DEV branch. Existing Classic/Hybrid/Full Class/Controller implementations
+    # stay present for fallbacks and must not be deleted.
+    if 'C.LText(styleLabel, "Universal UX (DEV)")' not in options:
+        fail("the DEV hub must identify the one universal UX")
+    if "StyleChoice(C.BarStyles." in options or "o.barStyleButtons = nil" not in options:
+        fail("the DEV hub must not expose legacy style selectors")
+    if "if C.UniversalUX then return UNIVERSAL end" not in styles:
+        fail("only the universal mode should render while DEV is active")
+    if 'C.LText(hub.windowAccent.text, root.windowClassAccents' not in options:
+        fail("utility-window class/bronze accents must be a visual toggle")
     if ".tga" in core or ".tga" in styles:
         fail("Runtime style artwork must use extensionless paths so BLP can load in browser clients")
     if 'panel.endLeft or {}' not in styles or 'PanelHybridArcane' not in styles:
@@ -241,7 +245,7 @@ def main() -> None:
         fail("Classic Arcane style must remain the default for existing saved variables")
     if 'C.DB("bar")' not in styles:
         fail("Style selection must persist in ArcaneDB.bar")
-    print("PASS: shared panel seams, one three-mode selector and persistent Classic default")
+    print("PASS: shared seams, one universal DEV selector, and unchanged legacy style implementations")
 
     assets = []
     for class_name in CLASSES:

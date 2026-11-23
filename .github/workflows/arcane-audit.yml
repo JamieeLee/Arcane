@@ -7,6 +7,7 @@ on:
       - "refactor/**"
       - "feature/**"
       - "beta/**"
+      - "dev/**"
       - "release/**"
     tags:
       - "v*"
@@ -96,6 +97,9 @@ jobs:
 
       - name: Audit skill-bar style modules and class artwork
         run: python tools/audit_bar_styles.py
+      - name: Audit universal DEV UX invariants
+        if: startsWith(github.ref, 'refs/heads/dev/')
+        run: python tools/audit_universal_dev.py
 
       - name: Audit current release metadata consistency
         run: python tools/audit_release_metadata.py

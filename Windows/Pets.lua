@@ -11,6 +11,8 @@
 local C = Arcane
 local DEFAULTS = { enabled = true, scale = 1 }
 local K = { slot = 30, skill = 22, gap = 4, pad = 7, under = 9, actions = 10, skills = 4, groups = 4 }
+local ART = "Interface\\AddOns\\Arcane\\Themes\\Controller\\Art\\"
+local ROUND_STEPS = 20 -- same slice geometry as Controller's circular pet slots
 
 -- Each summon's own face, by a word in its name: the first that matches wins (the Spirit Wolf
 -- before the wolf). One the list doesn't know keeps the game's icon.
@@ -159,24 +161,71 @@ local function Compact(n)
 end
 
 ------------------------------------------------------------------------ the slots
+-- Rounded backing, icon and cooldown geometry are static once sized.
+local function CircleSize(slot, size)
+	if slot.circleSize == size then return end
+	slot.circleSize = size
+	local d, margin = size * 44 / 54, size * (1 - 44 / 54) * .5
+	local radius, h = d * .5, d / ROUND_STEPS
+	for i = 1, ROUND_STEPS do
+		local yy = ((i - .5) * h - radius) / radius
+		local dx = math.sqrt(math.max(0, 1 - yy * yy)) * radius
+		local x, width = margin + radius - dx, math.max(.5, 2 * dx)
+		local icon, shade = slot.circleParts[i], slot.coolParts[i]
+		icon:ClearAllPoints()
+		icon:SetPoint("TOPLEFT", slot.button, "TOPLEFT", x, -(margin + (i - 1) * h))
+		icon:SetWidth(width); icon:SetHeight(h + .1)
+		icon:SetTexCoord(.06 + .88 * (radius - dx) / d, .06 + .88 * (radius + dx) / d,
+			.06 + .88 * (i - 1) / ROUND_STEPS, .06 + .88 * i / ROUND_STEPS)
+		shade:ClearAllPoints()
+		shade:SetPoint("TOPLEFT", slot.button, "TOPLEFT", x, -(margin + (i - 1) * h))
+		shade:SetWidth(width); shade:SetHeight(h + .1)
+	end
+end
+
+local function CircleTexture(slot, texture)
+	if slot.currentIcon == texture then return end
+	slot.currentIcon = texture
+	for i = 1, ROUND_STEPS do
+		local icon = slot.circleParts[i]
+		if texture and texture ~= "" then
+			icon:SetTexture(texture)
+			icon:Show()
+		else icon:Hide() end
+	end
+	slot.bg:SetAlpha(texture and .93 or .46)
+	slot.bezel:SetAlpha(texture and 1 or .6)
+end
+
+local function CircleCooldown(slot, fraction)
+	local cutoff = (1 - C.Clamp(fraction or 0, 0, 1)) * ROUND_STEPS
+	local visible = math.floor(cutoff)
+	if slot.lastCutoff == visible then return end
+	slot.lastCutoff = visible
+	for i = 1, ROUND_STEPS do C.Vis(slot.coolParts[i], i > cutoff) end
+end
+
 local function NewSlot(i)
 	local s = { cool = 0 }
 	local b = CreateFrame("Button", nil, root)
 	s.button = b
 	b:EnableMouse(true)
 	b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-	s.bg = C.Tex(b, "BACKGROUND", C.FLAT)
-	s.bg:SetPoint("TOPLEFT", b, "TOPLEFT", 3, -3)
-	s.bg:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", -3, 3)
-	s.bg:SetVertexColor(0.03, 0.03, 0.04, 0.92)
-	s.icon = b:CreateTexture(nil, "BORDER")
-	s.icon:SetPoint("TOPLEFT", b, "TOPLEFT", 3, -3)
-	s.icon:SetPoint("BOTTOMRIGHT", b, "BOTTOMRIGHT", -3, 3)
-	s.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-	s.shade = C.Tex(b, "ARTWORK", C.FLAT)
-	s.shade:SetPoint("TOP", b, "TOP", 0, -3)
-	s.shade:SetVertexColor(0, 0, 0, 0.66)
-	s.bezel = C.Tex(b, "OVERLAY", C.ART .. "Slot")
+	-- The base and rim are the original round Controller assets; the icon
+	-- and cooldown strips never draw black corners outside their gold ring.
+	s.bg = C.Tex(b, "BACKGROUND", ART .. "SkillEmpty")
+	s.bg:SetAllPoints(b)
+	s.circleParts, s.coolParts = {}, {}
+	for j = 1, ROUND_STEPS do
+		local icon = b:CreateTexture(nil, "BORDER")
+		icon:Hide()
+		s.circleParts[j] = icon
+		local shade = C.Tex(b, "ARTWORK", C.FLAT)
+		shade:SetVertexColor(0, 0, 0, .66)
+		shade:Hide()
+		s.coolParts[j] = shade
+	end
+	s.bezel = C.Tex(b, "OVERLAY", ART .. "SkillRim")
 	s.bezel:SetAllPoints(b)
 	s.top = CreateFrame("Frame", nil, b)
 	s.top:SetAllPoints(b)
@@ -190,7 +239,6 @@ local function NewSlot(i)
 	s.time = C.Text(s.top, C.FONT, 9, "OUTLINE", "CENTER", 40)
 	s.time:SetPoint("TOP", b, "BOTTOM", 0, -1)
 	s.time:SetTextColor(1, 0.86, 0.6)
-	C.Vis(s.shade, false)
 	C.Vis(s.glow, false)
 	b:SetScript("OnClick", function()
 		if s.kind ~= "action" then return end
@@ -227,22 +275,18 @@ local function Put(i, x, size, kind)
 	local s = S.slots[i] or NewSlot(i)
 	s.kind = kind
 	C.Size(s.button, size, size)
+	CircleSize(s, size)
 	C.Place(s.button, "BOTTOMLEFT", root, "BOTTOMLEFT", x, K.pad + K.under) -- room under it for its numbers
 	C.Size(s.glow, size * 1.9, size * 1.9)
 	C.Vis(s.button, true)
 	return s
 end
 
-local function Cooldown(s, size)
+local function Cooldown(s)
 	local start, dur, enable = 0, 0, 1
 	if type(GetPetActionCooldown) == "function" then start, dur, enable = GetPetActionCooldown(s.index) end
 	local left = (enable ~= 0 and (dur or 0) > 1.5) and (start + dur - GetTime()) or 0
-	if left > 0 then
-		C.Size(s.shade, size - 6, math.max(1, (size - 6) * left / dur))
-		C.Vis(s.shade, true)
-	else
-		C.Vis(s.shade, false)
-	end
+	CircleCooldown(s, left > 0 and left / dur or 0)
 end
 
 local function Theme(pal)
@@ -259,8 +303,8 @@ local function Step(dt, now)
 			n = n + 1
 			local s = Put(n, x, K.slot, "action")
 			s.index, s.name = a.index, a.name
-			s.icon:SetTexture(a.icon)
-			Cooldown(s, K.slot)
+			CircleTexture(s, a.icon)
+			Cooldown(s)
 			C.Vis(s.glow, (a.auto or a.active) and true or false)
 			C.SetText(s.count, "")
 			C.SetText(s.time, "")
@@ -274,8 +318,8 @@ local function Step(dt, now)
 			n = n + 1
 			local s = Put(n, x, K.slot, "summon")
 			s.name, s.n, s.left = grp.name, tonumber(grp.count) or 1, tonumber(grp.remaining)
-			s.icon:SetTexture(Face(grp))
-			C.Vis(s.shade, false)
+			CircleTexture(s, Face(grp))
+			CircleCooldown(s, 0)
 			C.Vis(s.glow, false)
 			C.SetText(s.count, (s.n > 1) and tostring(s.n) or "")
 			C.SetText(s.time, s.left and tostring(math.ceil(s.left)) or "")
@@ -302,8 +346,8 @@ local function Step(dt, now)
 				local cell = math.max(K.skill, math.ceil((pre.time:GetStringWidth() or 0) + 3))
 				local sk = Put(n, x + math.floor((cell - K.skill) / 2), K.skill, "skill")
 				sk.name, sk.value, sk.hv, sk.does = C.L(list[k].name), hv.last, hv, list[k].does
-				sk.icon:SetTexture(list[k].icon or "Interface\\Icons\\INV_Misc_QuestionMark")
-				C.Vis(sk.shade, false)
+				CircleTexture(sk, list[k].icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+				CircleCooldown(sk, 0)
 				C.Vis(sk.glow, false)
 				C.SetText(sk.count, "")
 				x = x + cell + K.gap
@@ -345,8 +389,10 @@ C.OnInit(function()
 	C.Vis(root, false)
 	C.Movable(root, "pets", "Pet bar", function(f)
 		f:ClearAllPoints()
-		if ArcaneBar then
-			f:SetPoint("BOTTOMLEFT", ArcaneBar, "TOPLEFT", 0, 30) -- over the skill bar, on its left
+		if ArcanePlayer then
+			f:SetPoint("TOPLEFT", ArcanePlayer, "BOTTOMLEFT", 86, -7) -- under player, still independently movable
+		elseif ArcaneBar then
+			f:SetPoint("BOTTOMLEFT", ArcaneBar, "TOPLEFT", 0, 30)
 		else
 			f:SetPoint("BOTTOMLEFT", UIParent, "BOTTOM", -260, 110)
 		end

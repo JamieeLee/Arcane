@@ -1,8 +1,8 @@
 # Arcane UI
 
-**Current release: v0.8.1-beta.2**
+**Current release: v0.8.1-dev.1**
 
-*UI movement and sizing beta candidate, continuing the Controller UX and cross-client artwork work. Latest stable: v0.8.0. Beta changes remain isolated from `main` pending explicit approval.*
+*Development-only universal UX experiment. The previous Classic, Hybrid, Full Class and Controller implementations remain in the source; their selector is hidden in this DEV build. Latest stable remains v0.8.0. No merge or publication is authorized.*
 
 A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethus.pl)), the World of Warcraft 1.12 roguelike. Everything is drawn in one look (dark glass, a gold rail, the timer's metal) and steps aside while you pick your cards.
 
@@ -18,7 +18,7 @@ A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethu
 - **Skulls and cache markers:** a horned skull with red eyes floats over each boss, a plainer one over each awake guardian, and a glowing gold chest marks every cache waiting on the field. Markers scale with distance and fade when their target is gone; cache markers share the Boss skulls toggle.
 - **Party shields:** detected absorbs show as a glass-and-stripe overlay on each party health bar.
 - **Downed friends (co-op):** a warning and a sound when a friend goes down, a glowing mark with their class crest where you can revive them, and an arrow at the screen's edge with the distance while they're off it.
-- **UI style:** choose Classic Arcane, Hybrid, Full Class or Controller in Arcane Options. Classic keeps the bronze Arcane treatment and supplied gold dragon/A artwork; Hybrid adds class treatment to the skill bar only, with the Arcane A medallion on the left and the active class crest on the right; Full Class carries the active class palette across the Arcane UI—including your frame, minimap, Stats, Damage meter, Luck and shared panels—alongside class-specific skill-bar rails and paired emblems. The top and bottom center diamonds are calibrated to the visible gold stripe on each rail, including as the kills/gold/cache dock expands. The level and XP label is optically centered inside its gold progress capsule. Your abilities (with rank-up flashes), jewelry and XP remain in the shared bar renderer.
+- **Universal DEV UI:** one combined Hybrid-metal/Full-Class-art presentation; earlier UI themes remain intact in source but are not selectable in this development build. No input-mode-specific UX. Classic keeps the bronze Arcane treatment and supplied gold dragon/A artwork; Hybrid adds class treatment to the skill bar only, with the Arcane A medallion on the left and the active class crest on the right; Full Class carries the active class palette across the Arcane UI—including your frame, minimap, Stats, Damage meter, Luck and shared panels—alongside class-specific skill-bar rails and paired emblems. The top and bottom center diamonds are calibrated to the visible gold stripe on each rail, including as the kills/gold/cache dock expands. The level and XP label is optically centered inside its gold progress capsule. Your abilities (with rank-up flashes), jewelry and XP remain in the shared bar renderer.
 - **Kills, gold and cache:** in the panel; hover for what each gives.
 - **Loot pop-up:** each drop appears with its icon, name and rarity color; earned marks appear as their own notification. Up to three stack, and the game's own pop-up returns when Loot is turned off.
 - **Stored level-ups:** Arcane's checkbox controls and mirrors the game's actual Store Level-Ups setting. When enabled, a glowing Level Up! button shows how many choices wait; its default position clears the skill bar and XP display.
@@ -42,11 +42,11 @@ Every optional HUD part can be turned on or off, sized and moved. Arcane Namepla
 
 The addon's load map, `Arcane.toc`, stays at the repository root. Lua modules are grouped by responsibility under `Core/`, `Timer/`, `Numbers/`, `SkillBar/`, `Frames/`, `Minimap/`, `Windows/`, `Nameplates/`, `Loot/` and `Locales/`. `Art/` and `Fonts/` also stay at the addon root so the game's existing asset paths remain unchanged. The repository itself is not the install folder. For a release ZIP, place the root files and all module and asset folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The beta installer asset is named `ArcaneV0.8.1-beta.2.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
+The DEV test installer asset is named `ArcaneV0.8.1-dev.1.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
-1. Download the latest stable version from [Releases](../../releases). To test beta.2 before publication, get the `Arcane-v0.8.1-beta.2-test-...` artifact from the successful [beta Actions build](../../actions/workflows/arcane-audit.yml), extract its inner installer ZIP, and install that. Public beta tags are separate from the latest stable release.
+1. Download the latest stable version from [Releases](../../releases). For the **unreleased universal UX DEV build**, obtain the verified `Arcane-v0.8.1-dev.1-test-...` CI artifact from the `dev/universal-ux` branch, extract the inner installer ZIP and install it locally for testing only. Do not mistake it for a published update.
 2. Unzip it into your game's `Interface/AddOns` folder. You should end up with `Interface/AddOns/Arcane/Arcane.toc`.
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
@@ -269,6 +269,26 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 For every new beta or release, increment the version beyond the last stable tag; use `-beta.N` for test builds, and do not reuse a published tag. Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
+### v0.8.1-dev.1 — November 23, 2026
+
+**UNRELEASED DEVELOPMENT CHECKPOINT — not a beta or stable release.**
+
+#### Universal UX prototype
+
+- One active HUD style across keyboard and controller; Classic, Hybrid, Full Class and Controller implementations remain intact in the repository, but their selector is hidden in this DEV build. Previous theme preferences remain saved for reverting to released versions.
+- The main skill HUD preserves the working skills, racial slot, five jewelry slots, XP and resource counters. It combines Hybrid's warm Arcane bronze, Arcane A medallion and class highlights with Full Class's class-engraved rail artwork. This is a first layout prototype, **not yet the final book-shaped action-bar artwork**.
+- Player/party bars keep their bronze treatment; the player's level medallion receives the active class-gem color.
+- The stored Level Up control reuses the Controller UX's animated spellbook and class-colored magical glow, retains its native stored-level behavior and count, and shows no Y prompt. The final neutral leather/silver cover art is still to be developed.
+- The Pet bar uses Controller-derived round icon and cooldown geometry (no square black icon corners), with the original pet actions, autocast, summons, tooltips, and independent Move Frames settings preserved.
+- Stats, Damage Meter and Luck share an Arcane gold/class-accent appearance toggle, without creating separate window implementations.
+- Old UI modules, artwork, configurations, and stable releases are preserved. No feature work is merged or published from this dev branch.
+
+#### DEV smoke checks needed
+
+- Check no unexpected Controller HUD appears; old selected themes stay saved if returning to a release build.
+- Check normal skills, jewelry rarity borders, XP, spellbook click/count, pet summon/action/cooldown and tooltips.
+- Check class accent option, player level badge, UI move/scale persistence and browser-client artwork.
+
 ### v0.8.1-beta.2 — November 22, 2026
 
 **Public beta candidate — minimap movement, HUD sizing and Stats menu improvements.**
