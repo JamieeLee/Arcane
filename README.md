@@ -1,8 +1,8 @@
 # Arcane UI
 
-**Current release: v0.8.1-beta.1**
+**Current release: v0.8.1-beta.2**
 
-*Controller UX development checkpoint for testing only. Latest stable: v0.8.0. This beta stays isolated from `main` until in-game validation and explicit approval.*
+*UI movement and sizing beta candidate, continuing the Controller UX and cross-client artwork work. Latest stable: v0.8.0. Beta changes remain isolated from `main` pending explicit approval.*
 
 A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethus.pl)), the World of Warcraft 1.12 roguelike. Everything is drawn in one look (dark glass, a gold rail, the timer's metal) and steps aside while you pick your cards.
 
@@ -18,7 +18,7 @@ A clean, smooth HUD for **Azeroth Survivors** ([wow.aethus.pl](https://wow.aethu
 - **Skulls and cache markers:** a horned skull with red eyes floats over each boss, a plainer one over each awake guardian, and a glowing gold chest marks every cache waiting on the field. Markers scale with distance and fade when their target is gone; cache markers share the Boss skulls toggle.
 - **Party shields:** detected absorbs show as a glass-and-stripe overlay on each party health bar.
 - **Downed friends (co-op):** a warning and a sound when a friend goes down, a glowing mark with their class crest where you can revive them, and an arrow at the screen's edge with the distance while they're off it.
-- **UI style:** choose Classic Arcane, Hybrid or Full Class in Arcane Options. Classic keeps the bronze Arcane treatment and supplied gold dragon/A artwork; Hybrid adds class treatment to the skill bar only, with the Arcane A medallion on the left and the active class crest on the right; Full Class carries the active class palette across the Arcane UI—including your frame, minimap, Stats, Damage meter, Luck and shared panels—alongside class-specific skill-bar rails and paired emblems. The top and bottom center diamonds are calibrated to the visible gold stripe on each rail, including as the kills/gold/cache dock expands. The level and XP label is optically centered inside its gold progress capsule. Your abilities (with rank-up flashes), jewelry and XP remain in the shared bar renderer.
+- **UI style:** choose Classic Arcane, Hybrid, Full Class or Controller in Arcane Options. Classic keeps the bronze Arcane treatment and supplied gold dragon/A artwork; Hybrid adds class treatment to the skill bar only, with the Arcane A medallion on the left and the active class crest on the right; Full Class carries the active class palette across the Arcane UI—including your frame, minimap, Stats, Damage meter, Luck and shared panels—alongside class-specific skill-bar rails and paired emblems. The top and bottom center diamonds are calibrated to the visible gold stripe on each rail, including as the kills/gold/cache dock expands. The level and XP label is optically centered inside its gold progress capsule. Your abilities (with rank-up flashes), jewelry and XP remain in the shared bar renderer.
 - **Kills, gold and cache:** in the panel; hover for what each gives.
 - **Loot pop-up:** each drop appears with its icon, name and rarity color; earned marks appear as their own notification. Up to three stack, and the game's own pop-up returns when Loot is turned off.
 - **Stored level-ups:** Arcane's checkbox controls and mirrors the game's actual Store Level-Ups setting. When enabled, a glowing Level Up! button shows how many choices wait; its default position clears the skill bar and XP display.
@@ -42,11 +42,11 @@ Every optional HUD part can be turned on or off, sized and moved. Arcane Namepla
 
 The addon's load map, `Arcane.toc`, stays at the repository root. Lua modules are grouped by responsibility under `Core/`, `Timer/`, `Numbers/`, `SkillBar/`, `Frames/`, `Minimap/`, `Windows/`, `Nameplates/`, `Loot/` and `Locales/`. `Art/` and `Fonts/` also stay at the addon root so the game's existing asset paths remain unchanged. The repository itself is not the install folder. For a release ZIP, place the root files and all module and asset folders inside a top-level folder named `Arcane/`, then zip that folder. The ZIP must open to `Arcane/Arcane.toc` — never a branch-named folder such as `Arcane-main/`.
 
-The test asset is named `ArcaneV0.8.1-beta.1.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
+The beta installer asset is named `ArcaneV0.8.1-beta.2.zip`. The complete release history and detailed version notes are embedded below in this README. The tag publisher extracts the matching version section from this document for each GitHub Release. GitHub Actions runs the architecture and regression audits, compiles every Lua chunk with Lua 5.1, and builds an installable test ZIP for pull requests and supported branch pushes. Merging a change into `main` only runs the audits and builds a test installer, without creating a tag or a release page. **Releases require your manual approval after in-game testing:** open GitHub Actions, choose **Arcane QA and Manual Release**, select **Run workflow** on `main`, and click **Run workflow**. That one approval runs the full checks again and, only if they pass, creates the matching version tag, publishes the release notes from this README, and attaches the verified ZIP. A tag already belonging to an older commit cannot be moved; bump the version for the next release. Rerunning the approved workflow can repair a release for the exact same tagged commit. These automated checks do not replace a live test in the client's Lua 5.0 runtime.
 
 ## Install
 
-1. Download the latest stable release from [Releases](../../releases). For the controller development checkpoint, use the verified `Arcane-v0.8.1-beta.1-test-...` [Actions build](../../actions/workflows/arcane-audit.yml) from the beta branch; do not install it as a published stable update.
+1. Download the latest stable version from [Releases](../../releases). To test beta.2 before publication, get the `Arcane-v0.8.1-beta.2-test-...` artifact from the successful [beta Actions build](../../actions/workflows/arcane-audit.yml), extract its inner installer ZIP, and install that. Public beta tags are separate from the latest stable release.
 2. Unzip it into your game's `Interface/AddOns` folder. You should end up with `Interface/AddOns/Arcane/Arcane.toc`.
 3. The folder must stay named `Arcane`: the game loads it by that name, and your settings are kept under it.
 
@@ -269,17 +269,25 @@ The optional critical-hit backdrops reuse six effect textures from the synced Cr
 For every new beta or release, increment the version beyond the last stable tag; use `-beta.N` for test builds, and do not reuse a published tag. Add each new release as a dated section at the top of this embedded history. GitHub Actions extracts the matching versioned section from this README when publishing a tag.
 
 <!-- RELEASE_HISTORY_BEGIN -->
-### Unreleased development changes — after v0.8.1-beta.1
+### v0.8.1-beta.2 — November 22, 2026
 
-These changes are on the development branch only and are **not included in the published beta.1 ZIP**.
+**Public beta candidate — minimap movement, HUD sizing and Stats menu improvements.**
 
-- **Stats picker bounds:** the stat-selection popup now flips to the opposite side near the viewport edge and stays within available screen bounds.
-- **Minimap movement and scale:** use the existing Move Frames overlay and the Minimap `− / 100% / +` controls. The real map, Arcane ring, icons, chest pins, clock and title move together; turning the Arcane minimap off restores native position and scale.
-- **Circular minimap mover:** shade only the map disk under the existing gold ring, and use its centered **Minimap** label to drag the complete map; no square box over Arcane's rim or clock.
-- **HUD Size:** replace the Controller HUD checkbox with a size-only control that adjusts the currently selected style. Arcane, Hybrid and Full Class share their keyboard layout and HUD size; Controller keeps its independent layout and size. The minimap size and position are shared across styles.
-- The existing X close buttons remain unchanged.
+Builds on beta.1's optional Controller UX and browser-compatible BLP artwork. Stable remains v0.8.0.
 
-These changes require live smoke testing before the next beta release.
+#### Changes since beta.1
+
+- **Stats picker:** the **Pick the stats to show** menu prefers opening to the right but flips left when it reaches the screen edge; also clamps to available screen space.
+- **Movable and resizable minimap:** use **Move frames** to relocate the real minimap, and use the Minimap **− / 100% / +** controls to scale it. The game map, Arcane ring, icons, chest/lair markers, clock, zone label and minimap buttons stay together. Turning off the Arcane minimap restores the game's native placement and scale.
+- **Circular minimap mover:** shading stays inside the existing gold ring, with a centered **Minimap** drag label; no square overlay blocking the ring or Arcane buttons.
+- **Shared HUD Size control:** replaces the Controller HUD checkbox. Arcane, Hybrid and Full Class share keyboard/mouse HUD size and position; Controller remembers its own. Minimap size and position remain shared across all styles.
+- Existing X close buttons and manual UI-style selection are unchanged.
+
+#### QA notes
+
+- The circular minimap mover was visually confirmed in-game. Beta.1's BLP artwork and character-portrait restoration were verified on the standalone and browser clients.
+- Wider testing remains welcome for the Stats popup near screen edges, minimap scaling/restoration and saved keyboard/controller layout sizes.
+- This is an optional **pre-release**, not a stable update. Please report the client, selected UX style and reproduction steps for any issue.
 
 ### v0.8.1-beta.1 — November 20, 2026
 
